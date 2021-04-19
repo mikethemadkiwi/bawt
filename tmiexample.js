@@ -4,14 +4,8 @@ const TwitchConf = require('./auth.json');
 
 // Configure options
 let Madkiwi = new MKAuth(TwitchConf);
-
 // Load the server
-Madkiwi.LoadAuthServer(
-        8080, // MUST MATCH CALLBACK PORT
-        false, //show bot token in console
-        false // show scoped token in console
-);
-
+Madkiwi.LoadAuthServer(8080);// MUST MATCH CALLBACK PORT
 
 // Will Fire on Scoped Token Return from AuthServer
 Madkiwi.on('ScopeToken', async function(data){
