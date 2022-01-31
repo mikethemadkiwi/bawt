@@ -28,20 +28,15 @@ html(lang="en")
             div(class="row")
                 div(class="col")
                     h2 Logged in
-                    p You are logged in. Unlike the <a href="https://barrycarlyon.github.io/twitch_misc/authentication/implicit_auth/">Implicit Auth example</a>, we don't show you you own token, thats held securely on the server.
-                    p You can <a href="/logout/">Logout</a> Which will also revoke the stored/server side token.
-
-                    h2 User from session
-                    p We fetched and cached this when you logged in, from the New API <a href="https://dev.twitch.tv/docs/api/reference#get-users">Users</a> Endpoint, so if you reload the page, you'll still be logged in!
-                    p If you selected the <code>user:read:email</code> scope, you'll also get your Email returned, otherwise it'll be omitted.
-
+                    p You are logged in. 
+                    p 1. <a href="http://127.0.0.1:12345" target="_mkIcon">Madkiwi Icon</a>
+                    p 2. <a href="http://127.0.0.1:12345/shoutout.html" target="_mkShout">Shoutouts</a>
+                    p 3. <a href="http://127.0.0.1:12345/bspace.html" target="_mkSpace">Bspace</a>
                     table(class="table table-striped table-hover")
                         for value, key in user
                             tr
                                 td #{key}
                                 td #{value}
-
-                    h2 Token Details from <a href="https://dev.twitch.tv/docs/authentication#validating-requests">Validate</a> endpoint
                     table(class="table table-striped table-hover")
                         for value, key in token
                             tr

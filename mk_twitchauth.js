@@ -199,7 +199,7 @@ class mkTwitch extends EventEmitter {
                     responseType: "json"
                 })
                 .then(resp => {
-                    console.log(`Token Generated using ClientId [${this.Auth.client_id}]`)  
+                    // console.log(`Token Generated using ClientId [${this.Auth.client_id}]`)  
                     this.BotToken = resp.body;
                     resolve(true)
                 })

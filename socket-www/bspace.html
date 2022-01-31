@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Bspace</title>
+    <style>
+        body {
+            font-family: 'Acme', sans-serif;
+            font-size: 12px;
+            padding:0px;
+            margin:0px;            
+        }
+        #mainCanvas{
+            position:absolute;
+            top:0px;
+            left:0px;
+            bottom:0px;
+            right:0px;
+            padding:0px;
+            margin:0px;
+            background-color: rgba(0,0,0,0.65);
+        }
+    </style>
+  </head>
+  <body>
+    <canvas id="mainCanvas" class="canvasClass" width="854" height="480"></canvas>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="./bspace.js"></script>
+  </body>
+</html>

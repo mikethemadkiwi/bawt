@@ -1,0 +1,36 @@
+{   
+    "PlayerSchema":{
+        "playerPoints":{
+            "total":0        
+        },
+        "playerStats":{
+            "str":0,
+            "def":0,
+            "agi":0,
+            "specialType": 0
+        },
+        "playerLocation":{
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "bubble": 0
+        },
+        "shipStats":{
+            "engineType": 0,
+            "weaponType": 0,
+            "shieldType": 0,
+            "miningType": 0,
+            "specialType": 0
+        },
+        "planetStats":{
+            "str":0,
+            "def":0,
+            "production":0,
+            "specialType": 0
+        },
+        "Inventory":[]
+    },
+    "UniverseObjectSchema":{
+
+    }
+}
