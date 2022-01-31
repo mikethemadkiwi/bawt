@@ -175,8 +175,7 @@ class MKUtils {
                         console.log('HOST',`onHosted: ${username} for ${viewers}`)
                 })
                 MKClient['twitchchat'].on('message', async (target, context, msg, self)=>{
-                        // if (self) { return; } // Ignore messages from the yuse4r if it is self
-                        console.log(context.username, msg)
+                        // if (self) { return; } // Ignore messages from the yuse4r if it is self                    
                         if(msg.substr(0, 1) == "`"){
                                 let stringsplit = msg.split(" ");
                                 switch (stringsplit[0]) {
@@ -186,9 +185,11 @@ class MKUtils {
                                         MKClient['twitchchat'].say('#mikethemadkiwi', `Look @${context.username} I'm a Dragon!!`)  
                                     break;
                                     case'`weather':
+                                        console.log('weather')
                                         let weatherurl = `http://api.openweathermap.org/data/2.5/weather?id=${weatherConf.wCityId}&units=${weatherConf.wDegreeKey}&APPID=${weatherConf.wAppKey}`
-                                        if(weathertimeout[context.username]==null){
+                                   
                                             if(stringsplit[1]){
+                                                console.log('city defined', stringsplit[1])
                                                 let citycode = typeof stringsplit[1]
                                                 if(citycode != Number){
                                                     MKClient['twitchchat'].say('#mikethemadkiwi', 'That is not a CITYID from https://openweathermap.org/city/').catch(function(err){
@@ -196,7 +197,7 @@ class MKUtils {
                                                     });
                                                     return; 
                                                 }
-                                                else{                                                
+                                                else{
                                                         weatherurl =`http://api.openweathermap.org/data/2.5/weather?id=${stringsplit[1]}&units=${weatherConf.wDegreeKey}&APPID=${weatherConf.wAppKey}`
                                                         fetchUrl(weatherurl, function(error, meta, body){
                                                             let wNetwork = JSON.parse(body);
@@ -231,50 +232,13 @@ class MKUtils {
                                                         })
                                                 }
                                             }
-                                        }
-                                        else{
-                                            let diff = (weathertimeout[context.username] - Date.now())
-                                            if(diff<0){
-                                                return
-                                            }else{
-                                                
-                                                    fetchUrl(weatherurl, function(error, meta, body){
-                                                        let wNetwork = JSON.parse(body);
-                                                        let currentweather;
-                                                        if (wNetwork.Code == 'ServiceUnavailable'){
-                                                            wNetwork.WeatherText = json.Message;
-                                                        }
-                                                        if (wNetwork.weather) {
-                                                            if(stringsplit[1]){
-                                                                currentweather = `Hey @${context.username}, Weather for ${stringsplit[1]}: `
-                                                            }else{
-                                                                currentweather = `Hey @${context.username}, Weather for London, On: `
-                                                            }
-                                                            for (let i=0;i<wNetwork.weather.length;i++){
-                                                                currentweather += `${wNetwork.weather[i].main} (${wNetwork.weather[i].description}) `
-                                                            }
-                                                        }
-                                                        if (wNetwork.main){
-                                                            currentweather += `Temp: ${wNetwork.main.temp}°c (High: ${wNetwork.main.temp_max} °c) Humidity: ${wNetwork.main.humidity}% `
-                                                        }
-                                                        if(wNetwork.wind){
-                                                            currentweather += `Wind: ${wNetwork.wind.speed}m/s (dir: ${Math.floor(wNetwork.wind.deg)}°) `
-                                                        }
-                                                        else{console.log(wNetwork)}
-                                                        MKClient['twitchchat'].say('#mikethemadkiwi', currentweather).catch(function(err){
-                                                            console.log(err)
-                                                        });
-                                                        MKClient['twitchchat'].say('#mikethemadkiwi', 'Find your weather code at https://openweathermap.org/city/ and use it  like this || `weather CITYID').catch(function(err){
-                                                            console.log(err)
-                                                        });
-                                                        weathertimeout[context.username] = (Date.now+10000)                                      
-                                                    })
-                                            }
-                                        }
                                     break;
                                     default:
                                         // do nothing if the default fires  
                                 }         
+                        }
+                        else {
+                            console.log(context.username, msg)
                         }
                 })
         }
