@@ -179,6 +179,9 @@ class MKUtils {
                         if(msg.substr(0, 1) == "`"){
                                 let stringsplit = msg.split(" ");
                                 switch (stringsplit[0]) {
+                                    case'`gw2':
+                                        MKClient['twitchchat'].say('#mikethemadkiwi', `|| mikethemadkiwi.6058 || plays on || Henge of Denravi - US ||`)
+                                    break;
                                     case'`lookma':
                                         console.log('look ma i am a dragon')
                                         io.emit('LookMa', context.username)  
