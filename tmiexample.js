@@ -203,7 +203,7 @@ class MKUtils {
                                                         }
                                                         else{console.log(wNetwork)};
                                                         if (wNetwork.weather) {
-                                                            currentweather = `Hey @${context.username}, Weather for ${wNetwork.main.name}}: `                                                            
+                                                            currentweather = `Hey @${context.username}, Weather for ${wNetwork.name}}: `                                                            
                                                             for (let i=0;i<wNetwork.weather.length;i++){
                                                                 currentweather += `${wNetwork.weather[i].main} (${wNetwork.weather[i].description}) `
                                                             }
@@ -242,7 +242,7 @@ class MKUtils {
                                                     }
                                                     else{console.log(wNetwork)};
                                                     if (wNetwork.weather) {
-                                                            currentweather = `Hey @${context.username}, Weather for ${wNetwork.main.name}: `                                                            
+                                                            currentweather = `Hey @${context.username}, Weather for ${wNetwork.name}: `                                                            
                                                         for (let i=0;i<wNetwork.weather.length;i++){
                                                             currentweather += `${wNetwork.weather[i].main} (${wNetwork.weather[i].description}) `
                                                         }
