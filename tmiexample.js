@@ -151,9 +151,14 @@ class MKUtils {
 
                                                 }
                                                 else {
+
+                                                    // do name check instead of digit check
+
+                                                    // instead of below.
                                                     MKClient['twitchchat'].say('#mikethemadkiwi', 'That CITYID did not return information please confirm your cityID @ https://openweathermap.org/city/').catch(function(err){
                                                         console.log(err)
                                                     });
+                                                    
                                                 }
                                             }
                                             else{
