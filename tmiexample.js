@@ -223,7 +223,7 @@ class MKUtils {
                                                             });
                                                         }
                                                         else{
-                                                            MKClient['twitchchat'].say('#mikethemadkiwi', 'That is not a CITYID from https://openweathermap.org/city/').catch(function(err){
+                                                            MKClient['twitchchat'].say('#mikethemadkiwi', 'That CITYID did not return information please confirm your cityID @ https://openweathermap.org/city/').catch(function(err){
                                                                 console.log(err)
                                                             });
                                                         }                                                                                      
@@ -231,7 +231,7 @@ class MKUtils {
 
                                                 }
                                                 else {
-                                                    MKClient['twitchchat'].say('#mikethemadkiwi', 'That is not a CITYID from https://openweathermap.org/city/').catch(function(err){
+                                                    MKClient['twitchchat'].say('#mikethemadkiwi', 'That CITYID did not return information please confirm your cityID @ https://openweathermap.org/city/').catch(function(err){
                                                         console.log(err)
                                                     });
                                                 }
