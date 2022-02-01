@@ -194,27 +194,20 @@ class MKUtils {
                                             if(stringsplit[1]){
                                                 let isnum = /^\d+$/.test(stringsplit[1]);
                                                 if (isnum){
-                                                    console.log('isnum', stringsplit[1])
+                                                    weatherurl =`http://api.openweathermap.org/data/2.5/weather?id=${stringsplit[1]}&units=${weatherConf.wDegreeKey}&APPID=${weatherConf.wAppKey}`
                                                 }
                                                 else {
-                                                    console.log('isnotnum', stringsplit[1])
+                                                    MKClient['twitchchat'].say('#mikethemadkiwi', 'That is not a CITYID from https://openweathermap.org/city/').catch(function(err){
+                                                        console.log(err)
+                                                    });
+                                                    return; 
                                                 }
-                                                // let citycode = typeof stringsplit[1]
-                                                // if(citycode != Number){
-                                                //     MKClient['twitchchat'].say('#mikethemadkiwi', 'That is not a CITYID from https://openweathermap.org/city/').catch(function(err){
-                                                //         console.log(err)
-                                                //     });
-                                                //     return; 
-                                                // }
-                                                // else{
-                                                        weatherurl =`http://api.openweathermap.org/data/2.5/weather?id=${stringsplit[1]}&units=${weatherConf.wDegreeKey}&APPID=${weatherConf.wAppKey}`
-                                                        
-                                                // }
                                             }
 
                                             fetchUrl(weatherurl, function(error, meta, body){
                                                 if(error){console.log('error', error)}
                                                 let wNetwork = JSON.parse(body);
+                                                console.log(wNetwork)
                                                 let currentweather;
                                                 if (wNetwork.Code == 'ServiceUnavailable'){
                                                     wNetwork.WeatherText = json.Message;
