@@ -23,95 +23,6 @@ const sockets = [];
 const MKClient = [];
 const weathertimeout = [];
 //
-let gameTick;
-let frameTick;
-let currentweather;
-const playerBase = [];
-const bSpaceObjs = [];
-class PlayerObj {
-    constructor(twitchuser) {
-        this.id = twitchuser.id;
-        this.player = {
-            exp: 0,
-            user: twitchuser,
-            stats: {
-                att:0, //scissors
-                def:0, //rock
-                agi:0, //paper
-                special: 0
-            },
-            actpos: {
-                x:0,
-                y:0,
-                z:0,
-                bubble:0
-            },
-            tarpos: {
-                x:0,
-                y:0,
-                z:0,
-                bubble:0
-            },
-            ship: {},
-            planet: {},
-            inventory: []
-        }        
-        this.UpdateTick = async function() {
-            // this.player.actpos.y++;
-        } 
-        this.EmitUser = async function() {
-            io.emit('playerUpdate', this.player)
-            // console.log(this.id, this.player.exp, this.player.actpos, this.player.tarpos)
-        }
-    }
-}
-class UniverseObj {
-    constructor(ObjName, type, imgsrc, size, x, y, z, bub, resources) {
-        this.id = ObjName
-        this.uObj = {
-            id: ObjName,
-            name: ObjName,
-            type: type,
-            imgsrc: imgsrc,
-            size: size,
-            actpos: {
-                x:x,
-                y:y,
-                z:z,
-                bubble: bub
-            },
-            tarpos: {
-                x:x,
-                y:y,
-                z:z,
-                bubble: bub
-            },
-            resources: resources,
-            availableResources: []
-        }
-        this.emitObject = async function() {
-            io.emit('uObjUpdate', this.uObj)
-            // console.log('Object:', this.id,)
-            // this.uObj.resources.forEach(Rtype => {
-                // console.log(Rtype, this.uObj.availableResources[Rtype])
-            // })
-            // console.log('\n')
-        }
-        this.UpdateTick = function(){
-            // movement logic
-            
-            // resource updates
-            this.uObj.resources.forEach(Rtype => {
-               if(this.uObj.availableResources[Rtype]!=null){
-                this.uObj.availableResources[Rtype]++;
-               }
-               else(
-                this.uObj.availableResources[Rtype] = 1  
-               )
-            });
-        } 
-    }
-}
 class MKGame {
     checkPlayer = (twitchUser) => {
         return new Promise((resolve, reject) => {
@@ -429,8 +340,6 @@ class PubLib {
                             let reward = msg.data.redemption.reward;
                             let tUser = await _mk.fetchUserByName(redeemer.login)
                             let rewardData = {redeemer: redeemer, reward: reward, user: tUser}  
-                            //
-                            let _mg = new MKGame;
                             switch(reward.title){
                                 case 'kiwisdebugbutton':
                                     // 
@@ -443,30 +352,6 @@ class PubLib {
                                     io.emit('ShoutOut', rewardData)  
                                     MKClient['twitchchat'].say('#mikethemadkiwi', `You should all go follow ${redeemer.display_name} @ twitch.tv/${redeemer.display_name} because i fuggin said so. They are amazing. I'm a bot, i'm totally capable of making that observation.`)
 
-                                break;
-                                case'Destination: Sol':
-                                    let npl2 = await _mg.checkPlayer(tUser)
-                                    let newpos2 = {x:0, y:0, z:0, bubble: 0}
-                                    playerBase[npl2].player.tarpos = newpos2
-                                    let moveto2 = [playerBase[npl2], newpos2]
-                                    io.emit('Dest-Sol', moveto2)
-                                    MKClient['twitchchat'].say('#mikethemadkiwi', `Moving @${redeemer.display_name} to ${reward.title}`)       
-                                break;
-                                case'Destination: Earth':
-                                    let npl3 = await _mg.checkPlayer(tUser)
-                                    let newpos3 = {x:75, y:0, z:0, bubble: 0}
-                                    playerBase[npl3].player.tarpos = newpos3
-                                    let moveto3 = [playerBase[npl3], newpos3]
-                                    io.emit('Dest-Earth', moveto3)  
-                                    MKClient['twitchchat'].say('#mikethemadkiwi', `Moving @${redeemer.display_name} to ${reward.title}`)          
-                                break;
-                                case'Destination: Luna':
-                                    let npl4 = await _mg.checkPlayer(tUser)
-                                    let newpos4 = {x:100, y:-25, z:0, bubble: 0}
-                                    playerBase[npl4].player.tarpos = newpos4
-                                    let moveto4 = [playerBase[npl4], newpos4]
-                                    io.emit('Dest-Luna', moveto4)   
-                                    MKClient['twitchchat'].say('#mikethemadkiwi', `Moving @${redeemer.display_name} to ${reward.title}`)       
                                 break;
                                 default:
                                     console.log('UNREGISTERED CHANNEL POINT REDEEM', `${reward.title} [${redeemer.display_name}]`, reward)                
@@ -504,9 +389,6 @@ Madkiwi.on('ScopeToken', async function(data){
         //// It's only a few lines of code.....        
         server.listen(port, () => {
             console.log(`listening on *:${port}`);
-            // bSpaceObjs.push(new UniverseObj('Sol', 0, './img/sun2.png', 200, 0, 0, 0, 0 , [1,2]))
-            // bSpaceObjs.push(new UniverseObj('Earth', 1, './img/planet.png', 50, 75, 0, 0, 0 , [6,8]))
-            // bSpaceObjs.push(new UniverseObj('Luna', 2, './img/gray_planet.png', 20, 100, -25, 0, 0 , [1,2]))
         });
 })
 //// It's only a few lines of code.....
@@ -514,29 +396,6 @@ io.on('connection', (socket) => {
   socket.name = socket.id;
   console.log('SOCKETIO',`${socket.name} connected from : ${socket.handshake.address}`); 
   sockets[socket.id] = socket;
-  ///
-//   gameTick = setInterval(() => {
-//         bSpaceObjs.forEach(bObj => {
-//             bObj.UpdateTick();
-//         });
-//         playerBase.forEach(pObj => {
-//             pObj.UpdateTick();
-//         });
-//   }, 10);
-// //   ///
-//   frameTick = setInterval(() => {
-//     // console.clear()
-//     // console.log('Universe Entities: \n')
-//     bSpaceObjs.forEach(bObj => {
-//         bObj.emitObject();
-//     });    
-//     // console.log('\nPlayer Entities:', playerBase.length, '\n')    
-//     playerBase.forEach(pObj => {
-//         pObj.EmitUser();
-//     });    
-//   }, 1000);
-  //make a planet for each id in chat or that logs in via socket.  
-  //
   socket.on('disconnect', function () {
     console.log('SOCKETIO',`${socket.name} disconnected`); 
   });
