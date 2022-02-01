@@ -192,7 +192,13 @@ class MKUtils {
                                             let weatherurl = `http://api.openweathermap.org/data/2.5/weather?id=${weatherConf.wCityId}&units=${weatherConf.wDegreeKey}&APPID=${weatherConf.wAppKey}`
                                    
                                             if(stringsplit[1]){
-                                                console.log('city defined', stringsplit[1])
+                                                let isnum = /^\d+$/.test(stringsplit[1]);
+                                                if (isnum){
+                                                    console.log('isnum', stringsplit[1])
+                                                }
+                                                else {
+                                                    console.log('isnotnum', stringsplit[1])
+                                                }
                                                 // let citycode = typeof stringsplit[1]
                                                 // if(citycode != Number){
                                                 //     MKClient['twitchchat'].say('#mikethemadkiwi', 'That is not a CITYID from https://openweathermap.org/city/').catch(function(err){
