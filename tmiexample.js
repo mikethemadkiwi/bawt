@@ -93,6 +93,15 @@ class MKUtils {
                                     case'`gw2':
                                         MKClient['twitchchat'].say('#mikethemadkiwi', `|| mikethemadkiwi.6058 || plays on || Henge of Denravi - US ||`)
                                     break;
+                                    case'`eml':
+                                        if (!self) { return; } else{
+                                            let _mk = new MKUtils;
+                                            let uObj = await _mk.fetchUserByName(context.username)
+                                            console.log('uObj',uObj)
+
+                                            MKClient['twitchchat'].say('#mikethemadkiwi', `|| mikethemadkiwi.6058 || plays on || Henge of Denravi - US ||`)
+                                        }
+                                    break;
                                     case'`lookma':
                                         console.log('look ma i am a dragon')
                                         io.emit('LookMa', context.username)  
