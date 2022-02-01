@@ -188,54 +188,79 @@ class MKUtils {
                                         MKClient['twitchchat'].say('#mikethemadkiwi', `Look @${context.username} I'm a Dragon!!`)  
                                     break;
                                     case'`weather':
-                                        console.log('weather')
-                                            let weatherurl = `http://api.openweathermap.org/data/2.5/weather?id=${weatherConf.wCityId}&units=${weatherConf.wDegreeKey}&APPID=${weatherConf.wAppKey}`
-                                   
                                             if(stringsplit[1]){
                                                 let isnum = /^\d+$/.test(stringsplit[1]);
                                                 if (isnum){
-                                                    weatherurl =`http://api.openweathermap.org/data/2.5/weather?id=${stringsplit[1]}&units=${weatherConf.wDegreeKey}&APPID=${weatherConf.wAppKey}`
+
+                                                    let weatherurl =`http://api.openweathermap.org/data/2.5/weather?id=${stringsplit[1]}&units=${weatherConf.wDegreeKey}&APPID=${weatherConf.wAppKey}`                                                    
+                                                    fetchUrl(weatherurl, function(error, meta, body){
+                                                        if(error){console.log('error', error)}
+                                                        let wNetwork = JSON.parse(body);
+                                                        console.log(wNetwork)
+                                                        let currentweather;
+                                                        if (wNetwork.Code == 'ServiceUnavailable'){
+                                                            wNetwork.WeatherText = json.Message;
+                                                        }
+                                                        else{console.log(wNetwork)};
+                                                        if (wNetwork.weather) {
+                                                            currentweather = `Hey @${context.username}, Weather for ${stringsplit[1]}: `                                                            
+                                                            for (let i=0;i<wNetwork.weather.length;i++){
+                                                                currentweather += `${wNetwork.weather[i].main} (${wNetwork.weather[i].description}) `
+                                                            }
+                                                        }
+                                                        if (wNetwork.main){
+                                                            currentweather += `Temp: ${wNetwork.main.temp}°c (High: ${wNetwork.main.temp_max} °c) Humidity: ${wNetwork.main.humidity}% `
+                                                        }
+                                                        if(wNetwork.wind){
+                                                            currentweather += `Wind: ${wNetwork.wind.speed}m/s (dir: ${Math.floor(wNetwork.wind.deg)}°) `
+                                                        }
+                                                        MKClient['twitchchat'].say('#mikethemadkiwi', currentweather).catch(function(err){
+                                                            console.log(err)
+                                                        });
+                                                        MKClient['twitchchat'].say('#mikethemadkiwi', 'Find your weather code at https://openweathermap.org/city/ and use it  like this || `weather CITYID').catch(function(err){
+                                                            console.log(err)
+                                                        });                              
+                                                    })
+
                                                 }
                                                 else {
                                                     MKClient['twitchchat'].say('#mikethemadkiwi', 'That is not a CITYID from https://openweathermap.org/city/').catch(function(err){
                                                         console.log(err)
                                                     });
-                                                    return; 
                                                 }
                                             }
-
-                                            fetchUrl(weatherurl, function(error, meta, body){
-                                                if(error){console.log('error', error)}
-                                                let wNetwork = JSON.parse(body);
-                                                console.log(wNetwork)
-                                                let currentweather;
-                                                if (wNetwork.Code == 'ServiceUnavailable'){
-                                                    wNetwork.WeatherText = json.Message;
-                                                }
-                                                if (wNetwork.weather) {
-                                                    if(stringsplit[1]){
-                                                        currentweather = `Hey @${context.username}, Weather for ${stringsplit[1]}: `
-                                                    }else{
-                                                        currentweather = `Hey @${context.username}, Weather for London, On: `
+                                            else{
+                                                
+                                            let weatherurl = `http://api.openweathermap.org/data/2.5/weather?id=${weatherConf.wCityId}&units=${weatherConf.wDegreeKey}&APPID=${weatherConf.wAppKey}`
+                                                fetchUrl(weatherurl, function(error, meta, body){
+                                                    if(error){console.log('error', error)}
+                                                    let wNetwork = JSON.parse(body);
+                                                    console.log(wNetwork)
+                                                    let currentweather;
+                                                    if (wNetwork.Code == 'ServiceUnavailable'){
+                                                        wNetwork.WeatherText = json.Message;
                                                     }
-                                                    for (let i=0;i<wNetwork.weather.length;i++){
-                                                        currentweather += `${wNetwork.weather[i].main} (${wNetwork.weather[i].description}) `
+                                                    else{console.log(wNetwork)};
+                                                    if (wNetwork.weather) {
+                                                            currentweather = `Hey @${context.username}, Weather for ${weatherConf.wCityId}: `                                                            
+                                                        for (let i=0;i<wNetwork.weather.length;i++){
+                                                            currentweather += `${wNetwork.weather[i].main} (${wNetwork.weather[i].description}) `
+                                                        }
                                                     }
-                                                }
-                                                if (wNetwork.main){
-                                                    currentweather += `Temp: ${wNetwork.main.temp}°c (High: ${wNetwork.main.temp_max} °c) Humidity: ${wNetwork.main.humidity}% `
-                                                }
-                                                if(wNetwork.wind){
-                                                    currentweather += `Wind: ${wNetwork.wind.speed}m/s (dir: ${Math.floor(wNetwork.wind.deg)}°) `
-                                                }
-                                                else{console.log(wNetwork)}
-                                                MKClient['twitchchat'].say('#mikethemadkiwi', currentweather).catch(function(err){
-                                                    console.log(err)
-                                                });
-                                                MKClient['twitchchat'].say('#mikethemadkiwi', 'Find your weather code at https://openweathermap.org/city/ and use it  like this || `weather CITYID').catch(function(err){
-                                                    console.log(err)
-                                                });                              
-                                            })
+                                                    if (wNetwork.main){
+                                                        currentweather += `Temp: ${wNetwork.main.temp}°c (High: ${wNetwork.main.temp_max} °c) Humidity: ${wNetwork.main.humidity}% `
+                                                    }
+                                                    if(wNetwork.wind){
+                                                        currentweather += `Wind: ${wNetwork.wind.speed}m/s (dir: ${Math.floor(wNetwork.wind.deg)}°) `
+                                                    }
+                                                    MKClient['twitchchat'].say('#mikethemadkiwi', currentweather).catch(function(err){
+                                                        console.log(err)
+                                                    });
+                                                    MKClient['twitchchat'].say('#mikethemadkiwi', 'Find your weather code at https://openweathermap.org/city/ and use it  like this || `weather CITYID').catch(function(err){
+                                                        console.log(err)
+                                                    });                              
+                                                })
+                                            }
                                     break;
                                     default:
                                         // do nothing if the default fires  
