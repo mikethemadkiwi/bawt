@@ -196,30 +196,37 @@ class MKUtils {
                                                     fetchUrl(weatherurl, function(error, meta, body){
                                                         if(error){console.log('error', error)}
                                                         let wNetwork = JSON.parse(body);
-                                                        console.log(wNetwork)
-                                                        let currentweather;
-                                                        if (wNetwork.Code == 'ServiceUnavailable'){
-                                                            wNetwork.WeatherText = json.Message;
-                                                        }
-                                                        else{console.log(wNetwork)};
-                                                        if (wNetwork.weather) {
-                                                            currentweather = `Hey @${context.username}, Weather for ${wNetwork.name}, ${wNetwork.sys.country}}: `                                                            
-                                                            for (let i=0;i<wNetwork.weather.length;i++){
-                                                                currentweather += `${wNetwork.weather[i].main} (${wNetwork.weather[i].description}) `
+                                                        // console.log(wNetwork)
+                                                        if(wNetwork.cod!=404){
+                                                            console.log('city found')
+                                                            let currentweather;
+                                                            if (wNetwork.Code == 'ServiceUnavailable'){
+                                                                wNetwork.WeatherText = json.Message;
                                                             }
+                                                            if (wNetwork.weather) {
+                                                                currentweather = `Hey @${context.username}, Weather for ${wNetwork.name}, ${wNetwork.sys.country}}: `                                                            
+                                                                for (let i=0;i<wNetwork.weather.length;i++){
+                                                                    currentweather += `${wNetwork.weather[i].main} (${wNetwork.weather[i].description}) `
+                                                                }
+                                                            }
+                                                            if (wNetwork.main){
+                                                                currentweather += `Temp: ${wNetwork.main.temp}°c (High: ${wNetwork.main.temp_max} °c) Humidity: ${wNetwork.main.humidity}% `
+                                                            }
+                                                            if(wNetwork.wind){
+                                                                currentweather += `Wind: ${wNetwork.wind.speed}m/s (dir: ${Math.floor(wNetwork.wind.deg)}°) `
+                                                            }
+                                                            MKClient['twitchchat'].say('#mikethemadkiwi', currentweather).catch(function(err){
+                                                                console.log(err)
+                                                            });
+                                                            MKClient['twitchchat'].say('#mikethemadkiwi', 'Find your weather code at https://openweathermap.org/city/ and use it  like this || `weather CITYID').catch(function(err){
+                                                                console.log(err)
+                                                            });
                                                         }
-                                                        if (wNetwork.main){
-                                                            currentweather += `Temp: ${wNetwork.main.temp}°c (High: ${wNetwork.main.temp_max} °c) Humidity: ${wNetwork.main.humidity}% `
-                                                        }
-                                                        if(wNetwork.wind){
-                                                            currentweather += `Wind: ${wNetwork.wind.speed}m/s (dir: ${Math.floor(wNetwork.wind.deg)}°) `
-                                                        }
-                                                        MKClient['twitchchat'].say('#mikethemadkiwi', currentweather).catch(function(err){
-                                                            console.log(err)
-                                                        });
-                                                        MKClient['twitchchat'].say('#mikethemadkiwi', 'Find your weather code at https://openweathermap.org/city/ and use it  like this || `weather CITYID').catch(function(err){
-                                                            console.log(err)
-                                                        });                              
+                                                        else{
+                                                            MKClient['twitchchat'].say('#mikethemadkiwi', 'That is not a CITYID from https://openweathermap.org/city/').catch(function(err){
+                                                                console.log(err)
+                                                            });
+                                                        }                                                                                      
                                                     })
 
                                                 }
