@@ -84,12 +84,8 @@ class MKUtils {
                         console.log('hosted')
                         if(autohost){console.log('Autohost','Autohost')}
                         console.log('HOST',`onHosted: ${username} for ${viewers}`)
-                        //make sound file here
-                        let audSrc = 'https://mad.kiwi/purplemonkeydishwasher/media/sounds/Jellybunz%20Blueberry%20Sounds/pullsout.mp3'
-                        let audio = new Audio(audSrc);
-                        audio.addEventListener('loadeddata', () => {
-                            audio.play();
-                        })
+                        //emit host to net socket/
+                        io.emit('hosted', {channel, username, viewers, autohost}) 
                         // 
                 })
                 MKClient['twitchchat'].on('message', async (target, context, msg, self)=>{

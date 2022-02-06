@@ -73,3 +73,12 @@ socket.on('LookMa', function(msgData) {
         dragonflame.style.display = 'none';
     }, 2500)
 });
+
+socket.on('hosted', function(msgData) {
+    console.log('hosted',msgData)     
+    let audSrc = 'https://mad.kiwi/purplemonkeydishwasher/media/sounds/Jellybunz%20Blueberry%20Sounds/pullsout.mp3'
+    let audio = new Audio(audSrc);
+    audio.addEventListener('loadeddata', () => {
+        audio.play();
+    })
+});
