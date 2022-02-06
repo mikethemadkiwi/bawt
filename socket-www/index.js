@@ -80,4 +80,7 @@ socket.on('hosted', function(msgData) {
     document.getElementById('shoutout').innerHTML = `<audio id="audio-player" controls="controls" src="${audSrc}" type="audio/mpeg" autoplay="true">`;
     document.getElementById('audio-player').style.display = 'none';
     document.getElementById('audio-player').setAttribute("autoplay","autoplay");
+    let _css = new CSSAnim;
+    _css.raiseEyeLeft(2500);
+    _css.makeRedEyes(2500);
 });
