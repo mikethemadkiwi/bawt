@@ -84,6 +84,13 @@ class MKUtils {
                         console.log('hosted')
                         if(autohost){console.log('Autohost','Autohost')}
                         console.log('HOST',`onHosted: ${username} for ${viewers}`)
+                        //make sound file here
+                        let audSrc = 'https://mad.kiwi/purplemonkeydishwasher/media/sounds/Jellybunz%20Blueberry%20Sounds/pullsout.mp3'
+                        let audio = new Audio(audSrc);
+                        audio.addEventListener('loadeddata', () => {
+                            audio.play();
+                        })
+                        // 
                 })
                 MKClient['twitchchat'].on('message', async (target, context, msg, self)=>{
                         // if (self) { return; } // Ignore messages from the yuse4r if it is self                    
@@ -151,14 +158,13 @@ class MKUtils {
 
                                                 }
                                                 else {
-
                                                     // do name check instead of digit check
 
                                                     // instead of below.
-                                                    MKClient['twitchchat'].say('#mikethemadkiwi', 'That CITYID did not return information please confirm your cityID @ https://openweathermap.org/city/').catch(function(err){
+                                                    MKClient['twitchchat'].say('#mikethemadkiwi', 'That CITYID is NOT a Number. please confirm your cityID @ https://openweathermap.org/city/').catch(function(err){
                                                         console.log(err)
                                                     });
-                                                    
+
                                                 }
                                             }
                                             else{
