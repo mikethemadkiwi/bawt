@@ -77,5 +77,5 @@ socket.on('LookMa', function(msgData) {
 socket.on('hosted', function(msgData) {
     console.log('hosted',msgData)
     let audSrc = 'https://mad.kiwi/purplemonkeydishwasher/media/sounds/Jellybunz%20Blueberry%20Sounds/pullsout.mp3'
-    document.getElementById('shoutout').innerHTML = `<audio id="audio-player" controls="controls" src="${audSrc}" type="audio/mpeg" autoplay="true">`;
-});
+    document.getElementById('shoutout').innerHTML = `<audio id="audio-player" controls="controls" src="${audSrc}" type="audio/mpeg">`});
+    document.getElementById('audio-player').setAttribute("autoplay","autoplay");
