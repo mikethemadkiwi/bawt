@@ -11,7 +11,7 @@ let ts3 = TeamSpeak.connect({
         nickname: authfile.nickname
 }).then(async teamspeak => {
         teamspeak.whoami().then(whoami => {
-                teamspeak.clientMove(whoami.clientId, 2, '', false)
+                // teamspeak.clientMove(whoami.clientId, 2, '', false)
         })        
         teamspeak.on("textmessage", ev => {
                 console.log(`||TS|| Client [${ev.invoker.propcache.clientNickname}] ${ev.msg}`)
