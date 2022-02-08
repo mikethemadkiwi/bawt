@@ -1,7 +1,7 @@
 //
 const { TeamSpeak, QueryProtocol } = require("ts3-nodejs-library")
 const authfile = require('../auths/teamspeak/yggylogin.json')
-TeamSpeak.connect({
+let ts3 = TeamSpeak.connect({
         host: authfile.host,
         protocol: QueryProtocol.RAW, //optional
         queryport: authfile.queryport, //optional
