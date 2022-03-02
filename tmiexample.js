@@ -397,6 +397,10 @@ class PubLib {
                         switch(msg.context){
                             case'sub':
                                 console.log('subpacket', msg)
+                                let sUser = msg.display_name;
+                                let sPlan = msg.sub_plan;
+                                let sCumMonths = msg.cumulative_months;
+                                let subscriberStr = `[${sUser}] has subbed for [${sCumMonths}] months! Thanks [${sUser}] for the [${sPlan}] tier Subscription!`
                             break;
                             default:
                                 console.log(`unhandled msg.context pubsub`, msg.context, msg);
