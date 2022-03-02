@@ -320,25 +320,26 @@ class PubLib {
                 } else if (data.type == 'MESSAGE') {
                     var msg = JSON.parse(data.data.message);
                     let pTopic = data.data.topic;
-                    console.log('pubsub', pTopic, msg)
+                    // console.log('pubsub', pTopic, msg)
                     //
                     //     'channel-bits-events-v2.',
                     // 'channel-bits-badge-unlocks.userId',
                     // 'channel-points-channel-v1.',
                     // 'channel-subscribe-events-v1.'
                     // 
+                    let chanpoints = `channel-points-channel-v1.${userId}`;
                     switch(pTopic){
                         case `channel-bits-events-v2.${userId}`:
                             // console.log()
                         break;
-                        case `channel-points-channel-v1.${userId}`:
+                        case chanpoints:
                             console.log('BoopyMcBooperton', pTopic, msg)
                         break;
                         case `channel-subscribe-events-v1.${userId}`:
 
                         break;
                         default:
-                            console.log('unhandled topic', pTopic, msg)
+                            // console.log('unhandled topic', pTopic, msg)
                     }
 
 
