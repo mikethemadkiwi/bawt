@@ -318,9 +318,8 @@ class PubLib {
                     // console.log(data);
                     console.log('PUBSUB','RESPONSE: ' + (data.error ? data.error : 'OK'));
                 } else if (data.type == 'MESSAGE') {
-                    let topic = JSON.parse(data.data.topic);
                     var msg = JSON.parse(data.data.message);
-                    console.log('pubsub', topic)
+                    console.log('pubsub', data.data.topic)
                     ///
                     if(msg.hasOwnProperty('message_type')){
                        switch(msg.message_type){
