@@ -321,7 +321,6 @@ class PubLib {
                     var msg = JSON.parse(data.data.message);
                     ///
                     if(msg.hasOwnProperty('message_type')){
-                        // console.log('pubsub event', msg.message_type)
                        switch(msg.message_type){
                             case'bits_event':
                                 console.log('BITS EVENT', `[${msg.data.user_name}] cheered ${msg.data.bits_used} bitties! Total[${msg.data.total_bits_used}]`)
@@ -394,7 +393,13 @@ class PubLib {
                        }
                     }
                     else {
-                        console.log(`unhandled pubsub`, msg.type, msg);
+                        switch(msg.context){
+                            case'sub':
+
+                            break;
+                            default:
+                                console.log(`unhandled pubsub`, msg.context, msg);
+                        }
                     };
       
                     ///
