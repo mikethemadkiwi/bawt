@@ -104,11 +104,11 @@ class MKUtils {
                                             MKClient['twitchchat'].say('#mikethemadkiwi', `|| mikethemadkiwi.6058 || plays on || Henge of Denravi - US ||`)
                                         }
                                     break;
-                                    case'`lookma':
-                                        console.log('look ma i am a dragon')
-                                        io.emit('LookMa', context.username)  
-                                        MKClient['twitchchat'].say('#mikethemadkiwi', `Look @${context.username} I'm a Dragon!!`)  
-                                    break;
+                                    // case'`lookma':
+                                    //     console.log('look ma i am a dragon')
+                                    //     io.emit('LookMa', context.username)  
+                                    //     MKClient['twitchchat'].say('#mikethemadkiwi', `Look @${context.username} I'm a Dragon!!`)  
+                                    // break;
                                     case'`weather':
                                             if(stringsplit[1]){
                                                 let isnum = /^\d+$/.test(stringsplit[1]);
