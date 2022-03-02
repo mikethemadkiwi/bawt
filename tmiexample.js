@@ -315,28 +315,37 @@ class PubLib {
                     ping.gotPong();
         
                 } else if (data.type == 'RESPONSE') {
-                    // console.log(data);
                     console.log('PUBSUB','RESPONSE: ' + (data.error ? data.error : 'OK'));
                 } else if (data.type == 'MESSAGE') {
                     var msg = JSON.parse(data.data.message);
                     let pTopic = data.data.topic;
                     console.log('pubsub', pTopic)
-                    //
-                    //     'channel-bits-events-v2.',
-                    // 'channel-bits-badge-unlocks.userId',
-                    // 'channel-points-channel-v1.',
-                    // 'channel-subscribe-events-v1.'
-                    // 
-                    let chanpoints = `channel-points-channel-v1.${userId}`;
                     switch(pTopic){
+                        case 'channel-bits-events-v2.22703261':
+                            console.log('Bits Event', msg)
+
+
+                        break;
+                        case 'channel-bits-badge-unlocks.22703261':
+                            console.log('Bits Badge Unlock Event', msg)
+
+
+                        break;
                         case 'channel-points-channel-v1.22703261':
-                            console.log('BoopyMcBooperton', pTopic, msg)
+                            console.log('Channel Points Event', msg)
+
+
+                        break;
+                        case 'channel-subscribe-events-v1.22703261':
+                            console.log('Channel Subscription Event', msg)
+
+
                         break;
                         default:
                             // console.log('unhandled topic', pTopic, msg)
                     }
 
-
+                    // move this shit up into the respective topics... rather than this shitshow
                     if(msg.hasOwnProperty('message_type')){
                        switch(msg.message_type){
                             case'bits_event':
@@ -426,7 +435,6 @@ class PubLib {
                                 console.log('gift sub', msg)
                                 let sUser2 = msg.display_name;
                                 let sPlan2 = msg.sub_plan;
-                                let sCumMonths2 = msg.cumulative_months;
                                 let sRecipName2 = msg.recipient_display_name;
                                 let subscriberStr2 = `[${sUser}] has given [${sRecipName2}] a Gift Sub! Thanks [${sUser2}] for the tier [${sPlan2}] Subscription!`
                                 MKClient['twitchchat'].say('#mikethemadkiwi', subscriberStr2).catch(function(err){
