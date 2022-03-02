@@ -337,6 +337,7 @@ class PubLib {
                             let reward = msg.data.redemption.reward;
                             let tUser = await _mk.fetchUserByName(redeemer.login)
                             let rewardData = {redeemer: redeemer, reward: reward, user: tUser}  
+                            /////////////
                             switch(reward.title){
                                 case 'kiwisdebugbutton':
                                     // 
@@ -386,25 +387,25 @@ class PubLib {
                                 default:
                                     console.log('UNREGISTERED CHANNEL POINT REDEEM', `${reward.title} [${redeemer.display_name}]`, reward)                
                             }
-                            //
-                            break;
-                            default:
-                                // console.log('pubsub type', msg.data)
+                            /////////////
+                        break;
+                        default:
+                            // console.log('bottomofrewardredeemerswitchcase', msg)
                        }
                     }
                     else {
                         switch(msg.context){
                             case'sub':
-
+                                console.log('subpacket', msg)
                             break;
                             default:
-                                console.log(`unhandled pubsub`, msg.context, msg);
+                                console.log(`unhandled msg.context pubsub`, msg.context, msg);
                         }
                     };
       
                     ///
                 } else {
-                    console.log('wotpubsub', data);
+                    console.log('bottomofpubsubmsgneverfired', data);
                 }
             });
         }
