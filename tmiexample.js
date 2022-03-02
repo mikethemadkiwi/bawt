@@ -407,12 +407,12 @@ class PubLib {
                             break;
                             case'subgift':
                                 console.log('gift sub', msg)
-                                let sUser = msg.display_name;
-                                let sPlan = msg.sub_plan;
-                                let sCumMonths = msg.cumulative_months;
-                                let sRecipName = msg.recipient_display_name;
-                                let subscriberStr = `[${sUser}] has given [${sRecipName}] a Gift Sub! Thanks [${sUser}] for the tier [${sPlan}] Subscription!`
-                                MKClient['twitchchat'].say('#mikethemadkiwi', subscriberStr).catch(function(err){
+                                let sUser2 = msg.display_name;
+                                let sPlan2 = msg.sub_plan;
+                                let sCumMonths2 = msg.cumulative_months;
+                                let sRecipName2 = msg.recipient_display_name;
+                                let subscriberStr2 = `[${sUser}] has given [${sRecipName2}] a Gift Sub! Thanks [${sUser2}] for the tier [${sPlan2}] Subscription!`
+                                MKClient['twitchchat'].say('#mikethemadkiwi', subscriberStr2).catch(function(err){
                                     console.log(err)
                                 });                        
                             break;
