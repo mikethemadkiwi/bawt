@@ -293,7 +293,7 @@ ping.gotPong = function() {
 // PUBSUB
 ///////////////////////////////////////
 class PubLib {
-        async startPub(Ptopics){
+        async startPub(Ptopics, userId){
             MKClient['pubsub'] = new ws('wss://pubsub-edge.twitch.tv');
             MKClient['pubsub'].on('close', function() {
                 console.log('PUBSUB','disconnected. Restarting Services');
@@ -319,8 +319,29 @@ class PubLib {
                     console.log('PUBSUB','RESPONSE: ' + (data.error ? data.error : 'OK'));
                 } else if (data.type == 'MESSAGE') {
                     var msg = JSON.parse(data.data.message);
-                    console.log('pubsub', data.data.topic)
-                    ///
+                    let pTopic = data.data.topic;
+                    console.log('pubsub', pTopic, msg)
+                    //
+                    //     'channel-bits-events-v2.',
+                    // 'channel-bits-badge-unlocks.userId',
+                    // 'channel-points-channel-v1.',
+                    // 'channel-subscribe-events-v1.'
+                    // 
+                    switch(pTopic){
+                        case `channel-bits-events-v2.${userId}`:
+                            // console.log()
+                        break;
+                        case `channel-points-channel-v1.${userId}`:
+                            console.log('BoopyMcBooperton', pTopic, msg)
+                        break;
+                        case `channel-subscribe-events-v1.${userId}`:
+
+                        break;
+                        default:
+                            console.log('unhandled topic', pTopic, msg)
+                    }
+
+
                     if(msg.hasOwnProperty('message_type')){
                        switch(msg.message_type){
                             case'bits_event':
@@ -441,7 +462,7 @@ Madkiwi.on('ScopeToken', async function(data){
         let _user = await _mk.fetchUserByName(Madkiwi.Auth.username)
         _mk.CreateChat()
         let topics = _mk.CreatePubsubTopics(_user[0].id)
-        _mk.RestartPub(topics)
+        _mk.RestartPub(topics, _user[0].id)
         //// It's only a few lines of code.....        
         server.listen(port, () => {
             console.log(`listening on *:${port}`);
