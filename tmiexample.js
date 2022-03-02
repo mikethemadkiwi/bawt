@@ -1,5 +1,4 @@
 let MKAuth = require('./mk_twitchauth.js');
-// let MKTeamSpeak = require('./mk_teamspeak.js');
 const tmi = require('tmi.js');
 const ws = require('ws');
 const fetchUrl = require("fetch").fetchUrl
@@ -379,7 +378,7 @@ class PubLib {
                        }
                     }
                     else {
-                        console.log(`unhandled pubsub`, msg);
+                        console.log(`unhandled pubsub`, msg.type, msg);
                     };
       
                     ///
