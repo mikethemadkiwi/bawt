@@ -368,6 +368,37 @@ class PubLib {
                                     MKClient['twitchchat'].say('#mikethemadkiwi', `You should all go follow ${redeemer.display_name} @ twitch.tv/${redeemer.display_name} because i fuggin said so. They are amazing. I'm a bot, i'm totally capable of making that observation.`)
 
                                 break;
+                                case 'KiwisWeather':
+                                    let weatherurl = `http://api.openweathermap.org/data/2.5/weather?id=${weatherConf.wCityId}&units=${weatherConf.wDegreeKey}&APPID=${weatherConf.wAppKey}`
+                                    fetchUrl(weatherurl, function(error, meta, body){
+                                        if(error){console.log('error', error)}
+                                        let wNetwork = JSON.parse(body);
+                                        console.log(wNetwork)
+                                        let currentweather;
+                                        if (wNetwork.Code == 'ServiceUnavailable'){
+                                            wNetwork.WeatherText = json.Message;
+                                        }
+                                        else{console.log(wNetwork)};
+                                        if (wNetwork.weather) {
+                                                currentweather = `Weather for ${wNetwork.name}, ${wNetwork.sys.country}: `                                                            
+                                            for (let i=0;i<wNetwork.weather.length;i++){
+                                                currentweather += `${wNetwork.weather[i].main} (${wNetwork.weather[i].description}) `
+                                            }
+                                        }
+                                        if (wNetwork.main){
+                                            currentweather += `Temp: ${wNetwork.main.temp}°c (High: ${wNetwork.main.temp_max} °c) Humidity: ${wNetwork.main.humidity}% `
+                                        }
+                                        if(wNetwork.wind){
+                                            currentweather += `Wind: ${wNetwork.wind.speed}m/s (dir: ${Math.floor(wNetwork.wind.deg)}°) `
+                                        }
+                                        MKClient['twitchchat'].say('#mikethemadkiwi', currentweather).catch(function(err){
+                                            console.log(err)
+                                        });
+                                        MKClient['twitchchat'].say('#mikethemadkiwi', 'Find your weather code at https://openweathermap.org/city/ and use it  like this || `weather CITYID').catch(function(err){
+                                            console.log(err)
+                                        });                              
+                                    })
+                                break;
                                 default:
                                     console.log('UNREGISTERED CHANNEL POINT REDEEM', `${reward.title} [${redeemer.display_name}]`, reward)                
                             }
