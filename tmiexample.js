@@ -64,7 +64,7 @@ class MKUtils {
                         if(!self){console.log('PART', channel, username)}
                         let _mk = new MKUtils;
                         let apiuser = await _mk.fetchUserByName(username)
-                        io.emit('userJoin', apiuser)
+                        io.emit('userPart', apiuser)
                 });        
                 MKClient['twitchchat'].on('clearchat', (channel, username)=>{
                         console.log('Chat Cleared:', channel, username)
