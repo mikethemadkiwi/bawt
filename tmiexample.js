@@ -400,7 +400,7 @@ class PubLib {
                                 let sUser = msg.display_name;
                                 let sPlan = msg.sub_plan;
                                 let sCumMonths = msg.cumulative_months;
-                                let subscriberStr = `[${sUser}] has subbed for [${sCumMonths}] months! Thanks [${sUser}] for the [${sPlan}] tier Subscription!`
+                                let subscriberStr = `[${sUser}] has subbed for [${sCumMonths}] months! Thanks [${sUser}] for the tier [${sPlan}] Subscription!`
                                 MKClient['twitchchat'].say('#mikethemadkiwi', subscriberStr).catch(function(err){
                                     console.log(err)
                                 });                        
@@ -411,7 +411,7 @@ class PubLib {
                                 let sPlan = msg.sub_plan;
                                 let sCumMonths = msg.cumulative_months;
                                 let sRecipName = msg.recipient_display_name;
-                                let subscriberStr = `[${sUser}] has given [${sRecipName}] a Gift Sub! Thanks [${sUser}] for the [${sPlan}] tier Subscription!`
+                                let subscriberStr = `[${sUser}] has given [${sRecipName}] a Gift Sub! Thanks [${sUser}] for the tier [${sPlan}] Subscription!`
                                 MKClient['twitchchat'].say('#mikethemadkiwi', subscriberStr).catch(function(err){
                                     console.log(err)
                                 });                        
