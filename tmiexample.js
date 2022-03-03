@@ -261,7 +261,12 @@ class MKUtils {
                 },
                 function(error, meta, body){
                         let bs = JSON.parse(body);
-                        resolve(bs.data)
+                        if(bs.data){
+                            resolve(bs.data)
+                        }
+                        else{
+                            resolve({})
+                        }
                 })
             })
         } 
@@ -417,19 +422,50 @@ class PubLib {
                                     console.log('sub', msg)
                                     let sUser = msg.display_name;
                                     let sPlan = msg.sub_plan;
+                                    if(sPlan!='Prime'){
+                                        sPlan = (sPlan/1000)
+                                    }
                                     let sCumMonths = msg.cumulative_months;
                                     let subscriberStr = `[${sUser}] has subbed for [${sCumMonths}] months! Thanks [${sUser}] for the tier [${sPlan}] Subscription!`
                                     MKClient['twitchchat'].say('#mikethemadkiwi', subscriberStr).catch(function(err){
                                         console.log(err)
                                     });                        
                                 break;
-                                case'subgift':
-                                    console.log('gift sub', msg)
+                                case'resub':
+                                    console.log('sub', msg)
                                     let sUser2 = msg.display_name;
                                     let sPlan2 = msg.sub_plan;
-                                    let sRecipName2 = msg.recipient_display_name;
-                                    let subscriberStr2 = `[${sUser}] has given [${sRecipName2}] a Gift Sub! Thanks [${sUser2}] for the tier [${sPlan2}] Subscription!`
+                                    if(sPlan2!='Prime'){
+                                        sPlan2 = (sPlan2/1000)
+                                    }
+                                    let sCumMonths2 = msg.cumulative_months;
+                                    let subscriberStr2 = `[${sUser2}] has subbed for [${sCumMonths2}] months! Thanks [${sUser2}] for the tier [${sPlan2}] Subscription!`
                                     MKClient['twitchchat'].say('#mikethemadkiwi', subscriberStr2).catch(function(err){
+                                        console.log(err)
+                                    });                        
+                                break;
+                                case'subgift':
+                                    console.log('gift sub', msg)
+                                    let sUser3 = msg.display_name;
+                                    let sPlan3 = msg.sub_plan;
+                                    if(sPlan3!='Prime'){
+                                        sPlan3 = (sPlan3/1000)
+                                    }
+                                    let sRecipName3 = msg.recipient_display_name;
+                                    let subscriberStr3 = `[${sUser3}] has given [${sRecipName3}] a Gift Sub! Thanks [${sUser3}] for the tier [${sPlan3}] Subscription!`
+                                    MKClient['twitchchat'].say('#mikethemadkiwi', subscriberStr3).catch(function(err){
+                                        console.log(err)
+                                    });                        
+                                break;
+                                case'anonsubgift':
+                                    console.log('gift sub', msg)
+                                    let sPlan4 = msg.sub_plan;
+                                    if(sPlan4!='Prime'){
+                                        sPlan4 = (sPlan4/1000)
+                                    }
+                                    let sRecipName4 = msg.recipient_display_name;
+                                    let subscriberStr4 = `[ANONYMOUS] has given [${sRecipName4}] a Gift Sub! Thanks [ANONYMOUS] for the tier [${sPlan4}] Subscription!`
+                                    MKClient['twitchchat'].say('#mikethemadkiwi', subscriberStr4).catch(function(err){
                                         console.log(err)
                                     });                        
                                 break;
