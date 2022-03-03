@@ -84,7 +84,6 @@ class MKUtils {
                         console.log('hosted')
                         if(autohost){console.log('Autohost','Autohost')}
                         console.log('HOST',`onHosted: ${username} for ${viewers}`)
-                        //emit host to net socket/
                         io.emit('hosted', {channel, username, viewers, autohost}) 
                         // 
                 })
@@ -152,7 +151,7 @@ class MKUtils {
                                                 fetchUrl(weatherurl, function(error, meta, body){
                                                     if(error){console.log('error', error)}
                                                     let wNetwork = JSON.parse(body);
-                                                    console.log(wNetwork)
+                                                    // console.log(wNetwork)
                                                     let currentweather;
                                                     if (wNetwork.Code == 'ServiceUnavailable'){
                                                         wNetwork.WeatherText = json.Message;
@@ -384,7 +383,7 @@ class PubLib {
                                     fetchUrl(weatherurl, function(error, meta, body){
                                         if(error){console.log('error', error)}
                                         let wNetwork = JSON.parse(body);
-                                        console.log(wNetwork)
+                                        // console.log(wNetwork)
                                         let currentweather;
                                         if (wNetwork.Code == 'ServiceUnavailable'){
                                             wNetwork.WeatherText = json.Message;
@@ -432,7 +431,7 @@ class PubLib {
                                     });                        
                                 break;
                                 case'resub':
-                                    console.log('sub', msg)
+                                    console.log('resub', msg)
                                     let sUser2 = msg.display_name;
                                     let sPlan2 = msg.sub_plan;
                                     if(sPlan2!='Prime'){
@@ -458,7 +457,7 @@ class PubLib {
                                     });                        
                                 break;
                                 case'anonsubgift':
-                                    console.log('gift sub', msg)
+                                    console.log('anon gift sub', msg)
                                     let sPlan4 = msg.sub_plan;
                                     if(sPlan4!='Prime'){
                                         sPlan4 = (sPlan4/1000)
