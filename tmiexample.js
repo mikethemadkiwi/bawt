@@ -339,7 +339,6 @@ class PubLib {
                 } else if (data.type == 'MESSAGE') {
                     var msg = JSON.parse(data.data.message);
                     let pTopic = data.data.topic;
-                    console.log('pubsub', pTopic)
                     switch(pTopic){
 
                         case 'channel-bits-events-v2.22703261': // BITTIES
