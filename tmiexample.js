@@ -354,16 +354,14 @@ class PubLib {
                         break;
 
                         case 'channel-points-channel-v1.22703261': // CHANNEL POINTS
-                            console.log('Channel Points Event', msg)
                             let _mk = new MKUtils;
                             let redeemer = msg.data.redemption.user;
                             let reward = msg.data.redemption.reward;
                             let tUser = await _mk.fetchUserByName(redeemer.login)
-                            let rewardData = {redeemer: redeemer, reward: reward, user: tUser}  
+                            let rewardData = {redeemer: redeemer, reward: reward, user: tUser}
+                            console.log('Channel Points Event', reward.title, redeemer.display_name) 
                             switch(reward.title){
                                 case 'kiwisdebugbutton':
-                                    //
-                                    // console.log('',tUser)
                                     let issubbed = await _mk.isUserSubscribed(redeemer.id);
                                     console.log('issubbed?', issubbed)
                                 break;
@@ -383,7 +381,6 @@ class PubLib {
                                     fetchUrl(weatherurl, function(error, meta, body){
                                         if(error){console.log('error', error)}
                                         let wNetwork = JSON.parse(body);
-                                        // console.log(wNetwork)
                                         let currentweather;
                                         if (wNetwork.Code == 'ServiceUnavailable'){
                                             wNetwork.WeatherText = json.Message;
@@ -486,9 +483,7 @@ class PubLib {
 // START ENGINE
 ///////////////////////////////////////
 let Madkiwi = new MKAuth(TwitchConf);
-// Load the server
-Madkiwi.LoadAuthServer(8080);// MUST MATCH CALLBACK PORT
-// Will Fire on Scoped Token Return from AuthServer
+Madkiwi.LoadAuthServer(8080);
 Madkiwi.on('ScopeToken', async function(data){
         let _mk = new MKUtils;
         mKiwi = await _mk.fetchUserByName(Madkiwi.Auth.username)
@@ -499,7 +494,6 @@ Madkiwi.on('ScopeToken', async function(data){
             console.log(`listening on *:${port}`);
         });
 })
-//// It's only a few lines of code.....
 io.on('connection', (socket) => {
   socket.name = socket.id;
   console.log('SOCKETIO',`${socket.name} connected from : ${socket.handshake.address}`); 
