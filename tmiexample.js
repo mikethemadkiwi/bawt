@@ -293,7 +293,7 @@ ping.gotPong = function() {
 // PUBSUB
 ///////////////////////////////////////
 class PubLib {
-        async startPub(Ptopics, userId){
+        async startPub(Ptopics){
             MKClient['pubsub'] = new ws('wss://pubsub-edge.twitch.tv');
             MKClient['pubsub'].on('close', function() {
                 console.log('PUBSUB','disconnected. Restarting Services');
@@ -321,49 +321,23 @@ class PubLib {
                     let pTopic = data.data.topic;
                     console.log('pubsub', pTopic)
                     switch(pTopic){
-                        case 'channel-bits-events-v2.22703261':
+                        case 'channel-bits-events-v2.22703261': // BITTIES
                             console.log('Bits Event', msg)
-
+                            console.log('BITS EVENT', `[${msg.data.user_name}] cheered ${msg.data.bits_used} bitties! Total[${msg.data.total_bits_used}]`)
 
                         break;
-                        case 'channel-bits-badge-unlocks.22703261':
+                        case 'channel-bits-badge-unlocks.22703261': // BITS BADGE UNLOCK
                             console.log('Bits Badge Unlock Event', msg)
 
 
                         break;
-                        case 'channel-points-channel-v1.22703261':
+                        case 'channel-points-channel-v1.22703261': // CHANNEL POINTS
                             console.log('Channel Points Event', msg)
-
-
-                        break;
-                        case 'channel-subscribe-events-v1.22703261':
-                            console.log('Channel Subscription Event', msg)
-
-
-                        break;
-                        default:
-                            // console.log('unhandled topic', pTopic, msg)
-                    }
-
-                    // move this shit up into the respective topics... rather than this shitshow
-                    if(msg.hasOwnProperty('message_type')){
-                       switch(msg.message_type){
-                            case'bits_event':
-                                console.log('BITS EVENT', `[${msg.data.user_name}] cheered ${msg.data.bits_used} bitties! Total[${msg.data.total_bits_used}]`)
-                            break;
-                            default:
-                                console.log('pubsub message_type', msg.message_type, msg.data)
-                       }
-                    }                
-                    else if(msg.hasOwnProperty('type')){
-                        switch(msg.type){
-                            case'reward-redeemed':
                             let _mk = new MKUtils;
                             let redeemer = msg.data.redemption.user;
                             let reward = msg.data.redemption.reward;
                             let tUser = await _mk.fetchUserByName(redeemer.login)
                             let rewardData = {redeemer: redeemer, reward: reward, user: tUser}  
-                            /////////////
                             switch(reward.title){
                                 case 'kiwisdebugbutton':
                                     // 
@@ -413,39 +387,138 @@ class PubLib {
                                 default:
                                     console.log('UNREGISTERED CHANNEL POINT REDEEM', `${reward.title} [${redeemer.display_name}]`, reward)                
                             }
-                            /////////////
+                        break;
+                        case 'channel-subscribe-events-v1.22703261': // CHANNEL SUB
+                            console.log('Channel Subscription Event', msg)
+                            switch(msg.context){
+                                case'sub':
+                                    console.log('sub', msg)
+                                    let sUser = msg.display_name;
+                                    let sPlan = msg.sub_plan;
+                                    let sCumMonths = msg.cumulative_months;
+                                    let subscriberStr = `[${sUser}] has subbed for [${sCumMonths}] months! Thanks [${sUser}] for the tier [${sPlan}] Subscription!`
+                                    MKClient['twitchchat'].say('#mikethemadkiwi', subscriberStr).catch(function(err){
+                                        console.log(err)
+                                    });                        
+                                break;
+                                case'subgift':
+                                    console.log('gift sub', msg)
+                                    let sUser2 = msg.display_name;
+                                    let sPlan2 = msg.sub_plan;
+                                    let sRecipName2 = msg.recipient_display_name;
+                                    let subscriberStr2 = `[${sUser}] has given [${sRecipName2}] a Gift Sub! Thanks [${sUser2}] for the tier [${sPlan2}] Subscription!`
+                                    MKClient['twitchchat'].say('#mikethemadkiwi', subscriberStr2).catch(function(err){
+                                        console.log(err)
+                                    });                        
+                                break;
+                                default:
+                                    console.log(`unhandled msg.context pubsub`, msg.context, msg);
+                            }
                         break;
                         default:
-                            // console.log('bottomofrewardredeemerswitchcase', msg)
-                       }
+                            // console.log('unhandled topic', pTopic, msg)
+                    }
+
+                    // move this shit up into the respective topics... rather than this shitshow
+                    if(msg.hasOwnProperty('message_type')){
+                    //    switch(msg.message_type){
+                    //         case'bits_event':
+                    //             // console.log('BITS EVENT', `[${msg.data.user_name}] cheered ${msg.data.bits_used} bitties! Total[${msg.data.total_bits_used}]`)
+                    //         break;
+                    //         default:
+                    //             // console.log('pubsub message_type', msg.message_type, msg.data)
+                    //    }
+                    }                
+                    else if(msg.hasOwnProperty('type')){
+                    //     switch(msg.type){
+                    //         case'reward-redeemed':
+                    //         let _mk = new MKUtils;
+                    //         let redeemer = msg.data.redemption.user;
+                    //         let reward = msg.data.redemption.reward;
+                    //         let tUser = await _mk.fetchUserByName(redeemer.login)
+                    //         let rewardData = {redeemer: redeemer, reward: reward, user: tUser}  
+                    //         /////////////
+                    //         switch(reward.title){
+                    //             case 'kiwisdebugbutton':
+                    //                 // 
+                    //             break;
+                    //             case'LookMa':
+                    //                 io.emit('LookMa', rewardData)  
+                    //                 MKClient['twitchchat'].say('#mikethemadkiwi', `Look @${redeemer.display_name} I'm a Dragon!!`)  
+                    //             break;
+                    //             case'Guildwars2':
+                    //                 MKClient['twitchchat'].say('#mikethemadkiwi', `|| mikethemadkiwi.6058 || plays on || Henge of Denravi - US ||`)
+                    //             break;   
+                    //             case'ShoutOut':
+                    //                 io.emit('ShoutOut', rewardData)  
+                    //                 MKClient['twitchchat'].say('#mikethemadkiwi', `You should all go follow ${redeemer.display_name} @ twitch.tv/${redeemer.display_name} because i fuggin said so. They are amazing. I'm a bot, i'm totally capable of making that observation.`)
+                    //             break;
+                    //             case 'KiwisWeather':
+                    //                 let weatherurl = `http://api.openweathermap.org/data/2.5/weather?id=${weatherConf.wCityId}&units=${weatherConf.wDegreeKey}&APPID=${weatherConf.wAppKey}`
+                    //                 fetchUrl(weatherurl, function(error, meta, body){
+                    //                     if(error){console.log('error', error)}
+                    //                     let wNetwork = JSON.parse(body);
+                    //                     console.log(wNetwork)
+                    //                     let currentweather;
+                    //                     if (wNetwork.Code == 'ServiceUnavailable'){
+                    //                         wNetwork.WeatherText = json.Message;
+                    //                     }
+                    //                     else{console.log(wNetwork)};
+                    //                     if (wNetwork.weather) {
+                    //                             currentweather = `Weather for ${wNetwork.name}, ${wNetwork.sys.country}: `                                                            
+                    //                         for (let i=0;i<wNetwork.weather.length;i++){
+                    //                             currentweather += `${wNetwork.weather[i].main} (${wNetwork.weather[i].description}) `
+                    //                         }
+                    //                     }
+                    //                     if (wNetwork.main){
+                    //                         currentweather += `Temp: ${wNetwork.main.temp}°c (High: ${wNetwork.main.temp_max} °c) Humidity: ${wNetwork.main.humidity}% `
+                    //                     }
+                    //                     if(wNetwork.wind){
+                    //                         currentweather += `Wind: ${wNetwork.wind.speed}m/s (dir: ${Math.floor(wNetwork.wind.deg)}°) `
+                    //                     }
+                    //                     MKClient['twitchchat'].say('#mikethemadkiwi', currentweather).catch(function(err){
+                    //                         console.log(err)
+                    //                     });
+                    //                     MKClient['twitchchat'].say('#mikethemadkiwi', 'Find your weather code at https://openweathermap.org/city/ and use it  like this || `weather CITYID').catch(function(err){
+                    //                         console.log(err)
+                    //                     });                              
+                    //                 })
+                    //             break;
+                    //             default:
+                    //                 console.log('UNREGISTERED CHANNEL POINT REDEEM', `${reward.title} [${redeemer.display_name}]`, reward)                
+                    //         }
+                    //         /////////////
+                    //     break;
+                    //     default:
+                    //         // console.log('bottomofrewardredeemerswitchcase', msg)
+                    //    }
                     }
                     else {
-                        switch(msg.context){
-                            case'sub':
-                                console.log('sub', msg)
-                                let sUser = msg.display_name;
-                                let sPlan = msg.sub_plan;
-                                let sCumMonths = msg.cumulative_months;
-                                let subscriberStr = `[${sUser}] has subbed for [${sCumMonths}] months! Thanks [${sUser}] for the tier [${sPlan}] Subscription!`
-                                MKClient['twitchchat'].say('#mikethemadkiwi', subscriberStr).catch(function(err){
-                                    console.log(err)
-                                });                        
-                            break;
-                            case'subgift':
-                                console.log('gift sub', msg)
-                                let sUser2 = msg.display_name;
-                                let sPlan2 = msg.sub_plan;
-                                let sRecipName2 = msg.recipient_display_name;
-                                let subscriberStr2 = `[${sUser}] has given [${sRecipName2}] a Gift Sub! Thanks [${sUser2}] for the tier [${sPlan2}] Subscription!`
-                                MKClient['twitchchat'].say('#mikethemadkiwi', subscriberStr2).catch(function(err){
-                                    console.log(err)
-                                });                        
-                            break;
-                            default:
-                                console.log(`unhandled msg.context pubsub`, msg.context, msg);
-                        }
-                    };
-      
+                        // switch(msg.context){
+                        //     case'sub':
+                        //         console.log('sub', msg)
+                        //         let sUser = msg.display_name;
+                        //         let sPlan = msg.sub_plan;
+                        //         let sCumMonths = msg.cumulative_months;
+                        //         let subscriberStr = `[${sUser}] has subbed for [${sCumMonths}] months! Thanks [${sUser}] for the tier [${sPlan}] Subscription!`
+                        //         MKClient['twitchchat'].say('#mikethemadkiwi', subscriberStr).catch(function(err){
+                        //             console.log(err)
+                        //         });                        
+                        //     break;
+                        //     case'subgift':
+                        //         console.log('gift sub', msg)
+                        //         let sUser2 = msg.display_name;
+                        //         let sPlan2 = msg.sub_plan;
+                        //         let sRecipName2 = msg.recipient_display_name;
+                        //         let subscriberStr2 = `[${sUser}] has given [${sRecipName2}] a Gift Sub! Thanks [${sUser2}] for the tier [${sPlan2}] Subscription!`
+                        //         MKClient['twitchchat'].say('#mikethemadkiwi', subscriberStr2).catch(function(err){
+                        //             console.log(err)
+                        //         });                        
+                        //     break;
+                        //     default:
+                        //         console.log(`unhandled msg.context pubsub`, msg.context, msg);
+                        // }
+                    };      
                     ///
                 } else {
                     console.log('bottomofpubsubmsgneverfired', data);
