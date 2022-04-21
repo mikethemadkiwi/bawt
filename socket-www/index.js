@@ -74,6 +74,22 @@ socket.on('LookMa', function(msgData) {
     }, 2500)
 });
 
+socket.on('effyou', function(msgData) {
+    console.log('effyou',msgData)
+    var fs = require('fs');
+    var files = fs.readdirSync('./sounds/host/');
+    var rFile = Math.random(0, (files.length() - 1));
+    console.log(files[rFile]);
+    // let _css = new CSSAnim;
+    // let dragonflame = document.getElementById('dragonflame')
+    // let dragonname =  document.getElementById('dragonname')
+    // dragonflame.style.display = 'block';
+    // _css.makeRedEyes(2500);
+    // let flametimer = setTimeout(()=>{
+    //     dragonflame.style.display = 'none';
+    // }, 2500)
+});
+
 socket.on('hosted', function(msgData) {
     console.log('hosted',msgData)
     let audSrc = 'https://mad.kiwi/purplemonkeydishwasher/media/sounds/Jellybunz%20Blueberry%20Sounds/pullsout.mp3'

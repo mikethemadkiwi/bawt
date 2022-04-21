@@ -340,18 +340,13 @@ class PubLib {
                     var msg = JSON.parse(data.data.message);
                     let pTopic = data.data.topic;
                     switch(pTopic){
-
                         case 'channel-bits-events-v2.22703261': // BITTIES
                             console.log('Bits Event', msg)
                             MKClient['twitchchat'].say('#mikethemadkiwi', `[${msg.data.user_name}] cheered ${msg.data.bits_used} bitties! Total[${msg.data.total_bits_used}]`)
                         break;
-
                         case 'channel-bits-badge-unlocks.22703261': // BITS BADGE UNLOCK
                             console.log('Bits Badge Unlock Event', msg)
-
-
                         break;
-
                         case 'channel-points-channel-v1.22703261': // CHANNEL POINTS
                             let _mk = new MKUtils;
                             let redeemer = msg.data.redemption.user;
@@ -367,6 +362,10 @@ class PubLib {
                                 case'LookMa':
                                     io.emit('LookMa', rewardData)  
                                     MKClient['twitchchat'].say('#mikethemadkiwi', `Look @${redeemer.display_name} I'm a Dragon!!`)  
+                                break;
+                                case'effyou':
+                                    io.emit('effyou', rewardData)  
+                                    // MKClient['twitchchat'].say('#mikethemadkiwi', `Look @${redeemer.display_name} I'm a Dragon!!`)  
                                 break;
                                 case'Guildwars2':
                                     MKClient['twitchchat'].say('#mikethemadkiwi', `|| mikethemadkiwi.6058 || plays on || Henge of Denravi - US ||`)
@@ -409,7 +408,6 @@ class PubLib {
                                     console.log('UNREGISTERED CHANNEL POINT REDEEM', `${reward.title} [${redeemer.display_name}]`, reward)                
                             }
                         break;
-
                         case 'channel-subscribe-events-v1.22703261': // CHANNEL SUB
                             console.log('Channel Subscription Event', msg)
                             switch(msg.context){
@@ -468,7 +466,6 @@ class PubLib {
                                     console.log(`unhandled msg.context pubsub`, msg.context, msg);
                             }
                         break;
-
                         default:
                             // console.log('unhandled topic', pTopic, msg)
                     }
