@@ -76,10 +76,6 @@ socket.on('LookMa', function(msgData) {
 
 socket.on('effyou', function(msgData) {
     console.log('effyou',msgData)
-    var fs = require('fs');
-    var files = fs.readdirSync('./sounds/host/');
-    var rFile = Math.random(0, (files.length() - 1));
-    console.log(files[rFile]);
     // let _css = new CSSAnim;
     // let dragonflame = document.getElementById('dragonflame')
     // let dragonname =  document.getElementById('dragonname')
