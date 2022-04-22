@@ -88,7 +88,7 @@ class MKUtils {
                             var fs = require('fs');
                             var files = fs.readdirSync('socket-www/sounds/host/');
                             var rFile = Math.floor(Math.random() * files.length);
-                            let fileSTR = `sounds/host/${files[rFile]}`;
+                            let fileSTR = `${files[rFile]}`;
                             console.log('file picked', fileSTR);
                         //
                         io.emit('hosted', [channel, username, viewers, autohost, fileSTR]) 
