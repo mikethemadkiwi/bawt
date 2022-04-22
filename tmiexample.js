@@ -83,11 +83,15 @@ class MKUtils {
                 MKClient['twitchchat'].on('hosted', async (channel, username, viewers, autohost)=>{ 
                         console.log('hosted')
                         if(autohost){console.log('Autohost','Autohost')}
-                        console.log('HOST',`onHosted: ${username} for ${viewers}`)
+                        console.log('HOST',`onHosted: ${username} for ${viewers}`)                        
                         //
-                        
-                        
-                        io.emit('hosted', {channel, username, viewers, autohost}) 
+                            var fs = require('fs');
+                            var files = fs.readdirSync('socket-www/sounds/host/');
+                            var rFile = Math.floor(Math.random() * files.length);
+                            let fileSTR = `sounds/host/${files[rFile]}`;
+                            console.log('file picked', fileSTR);
+                        //
+                        io.emit('hosted', {channel, username, viewers, autohost, fileSTR}) 
                         // 
                 })
                 MKClient['twitchchat'].on('message', async (target, context, msg, self)=>{
@@ -361,16 +365,6 @@ class PubLib {
                                 case 'kiwisdebugbutton':
                                     let issubbed = await _mk.isUserSubscribed(redeemer.id);
                                     console.log('issubbed?', issubbed)
-                                    //
-                                        var fs = require('fs');
-                                        var files = fs.readdirSync('socket-www/sounds/host/');
-                                        var rFile = Math.floor(Math.random() * files.length);
-                                        for (const [key, value] of Object.entries(files)) {
-                                            console.log(key, value);
-                                        }
-                                        let fileSTR = `sounds/host/${files[rFile]}`;
-                                        console.log('file picked', fileSTR);
-                                    //    
                                 break;
                                 case'LookMa':
                                     io.emit('LookMa', rewardData)  
