@@ -91,7 +91,7 @@ class MKUtils {
                             let fileSTR = `sounds/host/${files[rFile]}`;
                             console.log('file picked', fileSTR);
                         //
-                        io.emit('hosted', {channel, username, viewers, autohost, fileSTR}) 
+                        io.emit('hosted', [channel, username, viewers, autohost, fileSTR]) 
                         // 
                 })
                 MKClient['twitchchat'].on('message', async (target, context, msg, self)=>{
