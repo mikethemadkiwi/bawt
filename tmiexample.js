@@ -366,8 +366,10 @@ class PubLib {
                                 case'effyou':
                                 var fs = require('fs');
                                 var files = fs.readdirSync('./socket-www/sounds/host/');
-                                var rFile = Math.random(0, (files.length - 1));
-                                console.log(files[rFile]);
+                                // var rFile = Math.random(0, (files.length - 1));
+                                for (const [key, value] of Object.entries(files)) {
+                                    console.log(key, value);
+                                }
                                     io.emit('effyou', rewardData)  
                                     // MKClient['twitchchat'].say('#mikethemadkiwi', `Look @${redeemer.display_name} I'm a Dragon!!`)  
                                 break;
