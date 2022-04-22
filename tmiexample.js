@@ -365,7 +365,7 @@ class PubLib {
                                 break;
                                 case'effyou':
                                 var fs = require('fs');
-                                var files = fs.readdirSync('./socket-www/sounds/host/');
+                                var files = fs.readdirSync('socket-www/sounds/host/');
                                 // var rFile = Math.random(0, (files.length - 1));
                                 for (const [key, value] of Object.entries(files)) {
                                     console.log(key, value);
