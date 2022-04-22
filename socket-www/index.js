@@ -76,14 +76,13 @@ socket.on('LookMa', function(msgData) {
 
 socket.on('effyou', function(msgData) {
     console.log('effyou',msgData)
-    // let _css = new CSSAnim;
-    // let dragonflame = document.getElementById('dragonflame')
-    // let dragonname =  document.getElementById('dragonname')
-    // dragonflame.style.display = 'block';
-    // _css.makeRedEyes(2500);
-    // let flametimer = setTimeout(()=>{
-    //     dragonflame.style.display = 'none';
-    // }, 2500)
+    let video = document.createElement('video');
+    video.src = './video/finger.mp4';
+    video.autoplay = true;
+    video.addEventListener("ended", function(){
+        console.log('videoended');
+        video = null;
+    }); 
 });
 
 socket.on('hosted', function(msgData) {
