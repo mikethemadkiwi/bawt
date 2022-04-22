@@ -84,6 +84,9 @@ class MKUtils {
                         console.log('hosted')
                         if(autohost){console.log('Autohost','Autohost')}
                         console.log('HOST',`onHosted: ${username} for ${viewers}`)
+                        //
+                        
+                        
                         io.emit('hosted', {channel, username, viewers, autohost}) 
                         // 
                 })
@@ -364,14 +367,17 @@ class PubLib {
                                     MKClient['twitchchat'].say('#mikethemadkiwi', `Look @${redeemer.display_name} I'm a Dragon!!`)  
                                 break;
                                 case'effyou':
-                                var fs = require('fs');
-                                var files = fs.readdirSync('socket-www/sounds/host/');
-                                var rFile = Math.floor(Math.random() * files.length);
-                                for (const [key, value] of Object.entries(files)) {
-                                    console.log(key, value);
-                                }
-                                console.log('file picked', files[rFile]);
                                     io.emit('effyou', rewardData)  
+
+                                    var fs = require('fs');
+                                    var files = fs.readdirSync('socket-www/sounds/host/');
+                                    var rFile = Math.floor(Math.random() * files.length);
+                                    for (const [key, value] of Object.entries(files)) {
+                                        console.log(key, value);
+                                    }
+                                    let fileSTR = `sounds/host/${files[rFile]}`;
+                                    console.log('file picked', fileSTR);
+
                                     // MKClient['twitchchat'].say('#mikethemadkiwi', `Look @${redeemer.display_name} I'm a Dragon!!`)  
                                 break;
                                 case'Guildwars2':
