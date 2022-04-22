@@ -87,9 +87,9 @@ socket.on('effyou', function(msgData) {
 });
 
 socket.on('hosted', function(msgData) {
-    console.log('hosted',msgData)
+    // console.log('hosted',msgData)
     let audSrc = `./sounds/host/${msgData[4]}`;
-    console.log(audSrc)
+    // console.log(audSrc)
     // let audSrc = 'https://mad.kiwi/purplemonkeydishwasher/media/sounds/Jellybunz%20Blueberry%20Sounds/pullsout.mp3';
     document.getElementById('shoutout').innerHTML = `<audio id="audio-player" controls="controls" src="${audSrc}" type="audio/mpeg" autoplay="true">`;
     document.getElementById('audio-player').style.display = 'none';

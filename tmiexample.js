@@ -81,18 +81,13 @@ class MKUtils {
                 MKClient['twitchchat'].on('usernotice', (chan, data)=>{ console.log('usernotice') })
                 MKClient['twitchchat'].on('userstate', (chan, data)=>{ console.log('userstate') })
                 MKClient['twitchchat'].on('hosted', async (channel, username, viewers, autohost)=>{ 
-                        console.log('hosted')
-                        if(autohost){console.log('Autohost','Autohost')}
-                        console.log('HOST',`onHosted: ${username} for ${viewers}`)                        
-                        //
-                            var fs = require('fs');
-                            var files = fs.readdirSync('socket-www/sounds/host/');
-                            var rFile = Math.floor(Math.random() * files.length);
-                            let fileSTR = `${files[rFile]}`;
-                            console.log('file picked', fileSTR);
-                        //
-                        io.emit('hosted', [channel, username, viewers, autohost, fileSTR]) 
-                        // 
+                        if(autohost){console.log('Autohost','Autohost')} 
+                        var fs = require('fs');
+                        var files = fs.readdirSync('socket-www/sounds/host/');
+                        var rFile = Math.floor(Math.random() * files.length);
+                        let fileSTR = `${files[rFile]}`;
+                        console.log('HOST',`onHosted: ${username} for ${viewers} | ${fileSTR} |`);
+                        io.emit('hosted', [channel, username, viewers, autohost, fileSTR]);
                 })
                 MKClient['twitchchat'].on('message', async (target, context, msg, self)=>{
                         // if (self) { return; } // Ignore messages from the yuse4r if it is self                    
