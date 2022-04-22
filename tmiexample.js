@@ -87,7 +87,7 @@ class MKUtils {
                         var rFile = Math.floor(Math.random() * files.length);
                         let fileSTR = `${files[rFile]}`;
                         console.log('HOST',`onHosted: ${username} for ${viewers} | ${fileSTR} |`);
-                        MKClient['twitchchat'].say('#mikethemadkiwi', `Hosted: ${username} for ${viewers} | ${fileSTR} |`).catch(function(err){
+                        MKClient['twitchchat'].say('#mikethemadkiwi', `Hosted: ${username} | ${fileSTR} |`).catch(function(err){
                             console.log(err)
                         });
                         io.emit('hosted', [channel, username, viewers, autohost, fileSTR]);
