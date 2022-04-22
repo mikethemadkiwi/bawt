@@ -361,23 +361,23 @@ class PubLib {
                                 case 'kiwisdebugbutton':
                                     let issubbed = await _mk.isUserSubscribed(redeemer.id);
                                     console.log('issubbed?', issubbed)
+                                    //
+                                        var fs = require('fs');
+                                        var files = fs.readdirSync('socket-www/sounds/host/');
+                                        var rFile = Math.floor(Math.random() * files.length);
+                                        for (const [key, value] of Object.entries(files)) {
+                                            console.log(key, value);
+                                        }
+                                        let fileSTR = `sounds/host/${files[rFile]}`;
+                                        console.log('file picked', fileSTR);
+                                    //    
                                 break;
                                 case'LookMa':
                                     io.emit('LookMa', rewardData)  
                                     MKClient['twitchchat'].say('#mikethemadkiwi', `Look @${redeemer.display_name} I'm a Dragon!!`)  
                                 break;
                                 case'effyou':
-                                    io.emit('effyou', rewardData)  
-
-                                    var fs = require('fs');
-                                    var files = fs.readdirSync('socket-www/sounds/host/');
-                                    var rFile = Math.floor(Math.random() * files.length);
-                                    for (const [key, value] of Object.entries(files)) {
-                                        console.log(key, value);
-                                    }
-                                    let fileSTR = `sounds/host/${files[rFile]}`;
-                                    console.log('file picked', fileSTR);
-
+                                    io.emit('effyou', rewardData)
                                     // MKClient['twitchchat'].say('#mikethemadkiwi', `Look @${redeemer.display_name} I'm a Dragon!!`)  
                                 break;
                                 case'Guildwars2':
