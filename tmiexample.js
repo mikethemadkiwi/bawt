@@ -370,7 +370,7 @@ class PubLib {
                                     MKClient['twitchchat'].say('#mikethemadkiwi', `Look @${redeemer.display_name} I'm a Dragon!!`)  
                                 break;
                                 case'Teamspeak':
-                                    MKClient['twitchchat'].say('#mikethemadkiwi', `Teamspeak Deets: ts3://mad.kiw:9987`)  
+                                    MKClient['twitchchat'].say('#mikethemadkiwi', `Teamspeak Deets: ts3://mad.kiwi:9987`)  
                                 break;
                                 case'effyou':
                                     io.emit('effyou', rewardData)
