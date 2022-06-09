@@ -87,7 +87,7 @@ class MKUtils {
                         var rFile = Math.floor(Math.random() * files.length);
                         let fileSTR = `${files[rFile]}`;
                         console.log('HOST',`onHosted: ${username} for ${viewers} | ${fileSTR} |`);
-                        MKClient['twitchchat'].say('#mikethemadkiwi', `Hosted: ${username} | ${fileSTR} |`).catch(function(err){
+                        MKClient['twitchchat'].say('#mikethemadkiwi', `Hosted: ${username}! thanks for calling in the weirdos!`).catch(function(err){
                             console.log(err)
                         });
                         io.emit('hosted', [channel, username, viewers, autohost, fileSTR]);
@@ -265,6 +265,7 @@ class MKUtils {
                 },
                 function(error, meta, body){
                         let bs = JSON.parse(body);
+                        console.log(bs)
                         if(bs.data){
                             resolve(bs.data)
                         }
@@ -367,6 +368,9 @@ class PubLib {
                                 case'LookMa':
                                     io.emit('LookMa', rewardData)  
                                     MKClient['twitchchat'].say('#mikethemadkiwi', `Look @${redeemer.display_name} I'm a Dragon!!`)  
+                                break;
+                                case'Teamspeak':
+                                    MKClient['twitchchat'].say('#mikethemadkiwi', `Teamspeak Deets: ts3://mad.kiw:9987`)  
                                 break;
                                 case'effyou':
                                     io.emit('effyou', rewardData)
