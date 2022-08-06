@@ -7,6 +7,7 @@
     "express-session": "^1.17.1",
     "fetch": "^1.1.0",
     "got": "^11.8.2",
+    "irc": "^0.5.2",
     "node-fetch": "^2.6.7",
     "paypal-rest-sdk": "^1.8.1",
     "pug": "^3.0.2",
