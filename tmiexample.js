@@ -184,7 +184,7 @@ class MKUtils {
                                             }
                                     break;
                                     case '`ts3':
-                                        MKClient['twitchchat'].say('#mikethemadkiwi', `Teamspeak Server : mad.kiwi:9987`).catch(function(err){
+                                        MKClient['twitchchat'].say('#mikethemadkiwi', `We Use Teamspeak for voice Chat! Join us by downloading teamspeak at 'https://www.teamspeak3.com/teamspeak-download.php' and use server address: 'mad.kiwi'`).catch(function(err){
                                             console.log(err)
                                         }); 
                                     break;
