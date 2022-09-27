@@ -493,7 +493,7 @@ class PubLib {
 // START ENGINE
 ///////////////////////////////////////
 let Madkiwi = new MKAuth(TwitchConf);
-Madkiwi.LoadAuthServer(8080);
+Madkiwi.LoadAuthServer(8081);
 Madkiwi.on('ScopeToken', async function(data){
         let _mk = new MKUtils;
         mKiwi = await _mk.fetchUserByName(Madkiwi.Auth.username)
