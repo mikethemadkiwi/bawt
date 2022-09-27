@@ -183,6 +183,11 @@ class MKUtils {
                                                 })
                                             }
                                     break;
+                                    case '`ts3':
+                                        MKClient['twitchchat'].say('#mikethemadkiwi', `Teamspeak Server : mad.kiwi:9987`).catch(function(err){
+                                            console.log(err)
+                                        }); 
+                                    break;
                                     default:
                                         // do nothing if the default fires  
                                 }         
