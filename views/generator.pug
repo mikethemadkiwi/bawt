@@ -1,7 +1,7 @@
 doctype html
 html(lang="en")
     head
-        title Twitch User Access Generator Example
+        title Madkiwi's Twitch Auth Generator 
 
         meta(charset="utf-8")
         meta(name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no")
@@ -27,9 +27,9 @@ html(lang="en")
 
             div(class="row")
                 div(class="col")
-                    h2 Construct a custom auth
+                    h2 Select scopes to remove first
                     p or
-                    a(href="" id="auth_url") Go Auth
+                    a(href="" id="auth_url") Authenticate Selected Scopes
 
                     table(class="table table-striped table-hover")
                         for grouped, group in scopes
