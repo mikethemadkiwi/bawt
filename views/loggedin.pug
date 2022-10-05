@@ -27,7 +27,7 @@ html(lang="en")
 
             div(class="row")
                 div(class="col")
-                    h2 Logged in as: #{user.login}
+                    h2 Logged in as: img(src='#{user.profile_image_url}' width='50px') #{user.display_name}
                     p 1. <a href="http://127.0.0.1:12345" target="_mkIcon">Madkiwi Icon</a>
                     p 2. <a href="http://127.0.0.1:12345/shoutout.html" target="_mkShout">Shoutouts</a>
                     p 3. <a href="http://127.0.0.1:12345/bspace.html" target="_mkSpace">Bspace</a>
