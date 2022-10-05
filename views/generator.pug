@@ -50,11 +50,11 @@ html(lang="en")
                             td
                                 input(type="checkbox" name="force_verify")
 
-                    h3 And Go
-                    ul
-                        li Client: #{client_id}
-                        li Redirect: #{redirect_uri}
-                    textarea(style={width:'100%'} rows="5" id="auth_url_preview")
+                    //- h3 And Go
+                    //- ul
+                        //- li Client: #{client_id}
+                        //- li Redirect: #{redirect_uri}
+                    //- textarea(style={width:'100%'} rows="5" id="auth_url_preview")
 
         script(type="text/javascript") var client_id = "#{client_id}"; var redirect_uri = encodeURIComponent("#{redirect_uri}"); var state = encodeURIComponent("#{state}");
         script(type="text/javascript" src="../script.js")

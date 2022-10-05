@@ -31,7 +31,7 @@ function generate() {
 
     url += scopes.join('+');
 
-    document.getElementById('auth_url_preview').textContent = url;
+    // document.getElementById('auth_url_preview').textContent = url;
     document.getElementById('auth_url').setAttribute('href', url);
 }
 generate();
