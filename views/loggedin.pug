@@ -27,18 +27,17 @@ html(lang="en")
 
             div(class="row")
                 div(class="col")
-                    h2 Logged in
-                    p You are logged in.     
+                    h2 Logged in as: #{user.login}
                     p 1. <a href="http://127.0.0.1:12345" target="_mkIcon">Madkiwi Icon</a>
                     p 2. <a href="http://127.0.0.1:12345/shoutout.html" target="_mkShout">Shoutouts</a>
                     p 3. <a href="http://127.0.0.1:12345/bspace.html" target="_mkSpace">Bspace</a>
-                    table(class="table table-striped table-hover")
-                        for value, key in user
-                            tr
-                                td #{key}
-                                td #{value}
-                    table(class="table table-striped table-hover")
-                        for value, key in token
-                            tr
-                                td #{key}
-                                td #{value}
+                    //- table(class="table table-striped table-hover")
+                    //-     for value, key in user
+                    //-         tr
+                    //-             td #{key}
+                    //-             td #{value}
+                    //- table(class="table table-striped table-hover")
+                    //-     for value, key in token
+                    //-         tr
+                    //-             td #{key}
+                    //-             td #{value}
