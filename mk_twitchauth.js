@@ -154,11 +154,11 @@ class mkTwitch extends EventEmitter {
         .post((req, res) => {
             res.redirect('/twitchauth/');
         });
-        this.app.route('/logout/').get((req, res) => {
-            this.RevokeToken(this.Auth.client_id, req.session.token.access_token);
-            req.session.destroy();
-            res.redirect('/');
-        });
+        // this.app.route('/logout/').get((req, res) => {
+        //     this.RevokeToken(this.Auth.client_id, req.session.token.access_token);
+        //     req.session.destroy();
+        //     res.redirect('/');
+        // });
         this.ValidateToken = function(){
             return new Promise((resolve, reject)=>{
                 got({
