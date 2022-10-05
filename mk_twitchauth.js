@@ -55,6 +55,9 @@ class mkTwitch extends EventEmitter {
             next();
         });
         this.app.route('/').get((req, res) => {
+            res.render('rootpage');
+        })
+        this.app.route('/twitchauth/').get((req, res) => {
             if (req.session.token) {
                 got({
                     url: 'https://id.twitch.tv/oauth2/validate',
@@ -75,7 +78,7 @@ class mkTwitch extends EventEmitter {
                 .catch(err => {
                     console.error('Error body:', err.response.body);
                     req.session.error = 'An Error occured: ' + ((err.response && err.response.body.message) ? err.response.body.message : 'Unknown');
-                    res.redirect('/');
+                    res.redirect('/twitchauth/');
                 });
 
                 return
@@ -85,7 +88,7 @@ class mkTwitch extends EventEmitter {
                 state = decodeURIComponent(state);
                 if (req.session.state != state) {
                     req.session.error = 'State does not match. Please try again!';
-                    res.redirect('/');
+                    res.redirect('/twitchauth/');
                     return;
                 }
                 delete req.session.state;
@@ -125,12 +128,12 @@ class mkTwitch extends EventEmitter {
                     } else {
                         req.session.warning = 'We got a Token but failed to get your Twitch profile from Helix';
                     }
-                    res.redirect('/');
+                    res.redirect('/twitchauth/');
                 })
                 .catch(err => {
                     console.error('Error body:', err.response.body);
                     req.session.error = 'An Error occured: ' + ((err.response && err.response.body.message) ? err.response.body.message : 'Unknown');
-                    res.redirect('/');
+                    res.redirect('/twitchauth/');
                 });
 
                 return;
@@ -149,7 +152,7 @@ class mkTwitch extends EventEmitter {
             });
         })
         .post((req, res) => {
-            res.redirect('/');
+            res.redirect('/twitchauth/');
         });
         this.app.route('/logout/').get((req, res) => {
             this.RevokeToken(this.Auth.client_id, req.session.token.access_token);
@@ -240,6 +243,7 @@ class mkTwitch extends EventEmitter {
                 this.server.listen(port, function () {
                     console.log('Server listening at port :' + port);
                 });
+                // possibly add the webhook auth code here?
                 resolve(true);
             })
 
