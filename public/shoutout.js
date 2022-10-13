@@ -78,7 +78,7 @@ socket.on('ShoutOut', function(msgData) {
 const TickLoop = setInterval(() => {
     if(shoutList[0]!=null){
         shoutList.forEach(shoutOut => {
-            console.log('shoutout', shoutOut)
+            shoutOut.Tick();
         });
         // shoutList[0].Tick();
     }
