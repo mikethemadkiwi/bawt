@@ -36,7 +36,7 @@ class mkTwitch extends EventEmitter {
         this.app.set('view engine', 'pug');
         this.app.locals.basedir = path.join(__dirname, 'views');
         this.app.set('view options', {
-            debug: false,
+            debug: true,
             compileDebug: false
         });
         this.app.use(express.static(path.join(__dirname, 'public')));
