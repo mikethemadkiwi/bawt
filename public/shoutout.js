@@ -15,7 +15,28 @@ const windowSize = {
     hh: 0
 }
 let imgSize = 50;
-
+function resizelayout() {
+    windowSize.w = window.innerWidth;
+    windowSize.h = window.innerHeight;
+    windowSize.hw = (windowSize.w / 2);
+    windowSize.hh = (windowSize.h / 2);
+    sCanvas.width = windowSize.w;
+    sCanvas.height = windowSize.h;
+    console.log(`h:${windowSize.h} w:${windowSize.w} hh:${windowSize.hh} hw: ${windowSize.hw}`)
+};
+//
+window.onload = function () {
+    resizelayout();
+};
+//
+window.onresize = function () {
+    resizelayout();
+};
+function newImage(src){
+    let tmp = new Image();
+    tmp.src = src;
+    return tmp
+}
 class shoutPacket {
     constructor(id, redeemer, reward, user) {
         this.id = id
@@ -23,7 +44,7 @@ class shoutPacket {
         this.reward = reward;
         this.user = user[0]; // note this excludes the user array for the first object.
         this.lastShoutTrigger = (Date.now()+10000);
-        this.img = new Image();
+        this.img = new Image;
         this.img.src = user[0]['profile_image_url'];
         this.GPS = {
             current:{x:0,y:0,z:0},
@@ -55,10 +76,6 @@ socket.on('ShoutOut', function(msgData) {
 });
 
 const TickLoop = setInterval(() => {
-    windowSize.w = window.innerWidth;
-    windowSize.h = window.innerHeight;
-    windowSize.hw = (windowSize.w / 2);
-    windowSize.hh = (windowSize.h / 2);
     if(shoutList[0]!=null){
         shoutList[0].Tick();
     }
