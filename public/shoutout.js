@@ -69,6 +69,12 @@ class shoutPacket {
                 if(this.GPS.current.x <= -(windowSize.hw)){
                     this.GPS.target.x = -(this.GPS.target.x)
                 }
+                if(this.GPS.current.y >= windowSize.hh){
+                    this.GPS.target.y = -(this.GPS.target.y)
+                }
+                if(this.GPS.current.y <= -(windowSize.hh)){
+                    this.GPS.target.y = -(this.GPS.target.y)
+                }
                 let nDate = (this.lastShoutTrigger - Date.now())
                 console.log(`shoutout from ${this.id} @ [${nDate}]`)
             }
