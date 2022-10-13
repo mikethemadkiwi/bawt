@@ -71,8 +71,8 @@ class shoutPacket {
             }
         }
         this.Draw = function(){
-            ctx.font = '18px Lucida Console';
-            ctx.fillStyle = '#222222';
+            ctx.font = '24px Lucida Console';
+            ctx.fillStyle = '#bada55';
             let offsetx = windowSize.hw + this.GPS.current.x;
             let offsety = windowSize.hh + this.GPS.current.y;
             ctx.fillText(this.redeemer.display_name, offsetx - (imgSize/2), offsety + (imgSize/2) + 10);
