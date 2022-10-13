@@ -14,8 +14,7 @@ class shoutPacket {
         this.redeemer = redeemer;
         this.reward = reward;
         this.user = user[0]; // note this excludes the user array for the first object.
-        this.tmpDate = (Date.now()+10000);
-        this.lastShoutTrigger = this.tmpDate;
+        this.lastShoutTrigger = (Date.now()+10000);
         this.img = new Image();
         this.img.src = user[0]['profile_image_url'];
         this.GPS = {
@@ -59,15 +58,6 @@ socket.on('ShoutOut', function(msgData) {
     console.log(`ShoutOut`, msgData)
     let sP = new shoutPacket(msgData.redeemer.id, msgData.redeemer,msgData.reward, msgData.user)
     shoutList.push(sP)
-    console.log(shoutList)
-    // let shoutout = document.getElementById('shoutout');
-    // shoutout.style.display = 'block';//${msgData.user["profile_image_url"]}
-    // shoutout.innerHTML = `<img src="${msgData.user[0]['profile_image_url']}" width="250px" /><br /><p id="shoutout">ShoutOut: ${msgData.redeemer.display_name}!</p>`
-    // // shoutout.innerText += ``;
-    // let shoutouttimer = setTimeout(()=>{
-    //     shoutout.style.display = 'none';
-    //     shoutout.innerText = ``;
-    // }, 5000)
 });
 
 const TickLoop = setInterval(() => {
