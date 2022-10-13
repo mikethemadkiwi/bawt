@@ -3,7 +3,7 @@ const shoutList = [];
 const sCanvas = document.getElementById('shoutCanvas');
 const ctx = sCanvas.getContext("2d");
 const Loop = {
-    tick: 10,
+    tick: 1,
     draw: (1000/60)
 }
 const windowSize = {
