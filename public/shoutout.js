@@ -29,7 +29,8 @@ class shoutPacket {
                 shoutList.splice(slUser, 1);
             }
             else{
-                console.log(`shoutout from ${this.id}`)
+                let nDate = (this.lastShoutTrigger - Date.now())
+                console.log(`shoutout from ${this.id} @ [${nDate}]`)
             }
         }
         this.Draw = function(){
@@ -76,7 +77,7 @@ const TickLoop = setInterval(() => {
     }
 }, Loop.tick);
 const DrawLoop = setInterval(() => {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.clearRect(0, 0, sCanvas.width, sCanvas.height);
     if(shoutList[0]!=null){
         shoutList.forEach(shout => {
             shout.Tick();            
