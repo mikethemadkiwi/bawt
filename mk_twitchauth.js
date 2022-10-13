@@ -6,6 +6,7 @@ const crypto = require('crypto');
 const esess = require('express-session');
 const http = require('http');
 const https = require('https');
+const { Server } = require("socket.io");
 const { EventEmitter } = require("events");
 //
 class mkTwitch extends EventEmitter {
@@ -21,6 +22,7 @@ class mkTwitch extends EventEmitter {
         this.userInfo = [];
         this.app = express();
         this.server = require('http').createServer(this.app);
+        this.io = new Server(this.server);
         this.session = esess({
             secret: crypto.randomBytes(4).toString('base64'),
             resave: true,
@@ -251,6 +253,14 @@ class mkTwitch extends EventEmitter {
             })
 
         };
+        this.io.on('connection', (socket) => {
+            socket.name = socket.id;
+            console.log('SOCKETIO',`${socket.name} connected from : ${socket.handshake.address}`); 
+            sockets[socket.id] = socket;
+            socket.on('disconnect', function () {
+                console.log('SOCKETIO',`${socket.name} disconnected`); 
+            });
+        });
     }
 };
 //
