@@ -22,13 +22,6 @@ class mkTwitch extends EventEmitter {
         this.userInfo = [];
         this.app = express();
         this.server = require('http').createServer(this.app);
-        this.io.on('connection', (socket) => {
-            socket.name = socket.id;
-            console.log('AUTHSOCKET',`${socket.name} connected from : ${socket.handshake.address}`);            
-            socket.on('disconnect', function () {
-                console.log('AUTHSOCKET',`${socket.name} disconnected`); 
-            });
-        });
         this.session = esess({
             secret: crypto.randomBytes(4).toString('base64'),
             resave: true,
@@ -252,6 +245,13 @@ class mkTwitch extends EventEmitter {
                 this.GetToken(this.Auth);
                 this.server = require('http').createServer(this.app)                
                 this.io = new Server(this.server);
+                this.io.on('connection', (socket) => {
+                    socket.name = socket.id;
+                    console.log('AUTHSOCKET',`${socket.name} connected from : ${socket.handshake.address}`);            
+                    socket.on('disconnect', function () {
+                        console.log('AUTHSOCKET',`${socket.name} disconnected`); 
+                    });
+                });
                 this.server.listen(port, function () {
                     console.log('Server listening at port :' + port);
                 });
