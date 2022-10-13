@@ -6,8 +6,6 @@ const Loop = {
     tick: 10,
     draw: (1000/60)
 }
-var tarFps = 1000 / 60; // 1 second divided by how many frames per second.
-var tps = 10; // 2 descisions to each frame
 const windowSize = {
     w: 0,
     h: 0,
@@ -15,6 +13,7 @@ const windowSize = {
     hh: 0
 }
 let imgSize = 100;
+//
 function resizelayout() {
     windowSize.w = window.innerWidth;
     windowSize.h = window.innerHeight;
@@ -31,15 +30,10 @@ function randoFromTo(from, to){
 window.onload = function () {
     resizelayout();
 };
-//
 window.onresize = function () {
     resizelayout();
 };
-function newImage(src){
-    let tmp = new Image();
-    tmp.src = src;
-    return tmp
-}
+//
 class shoutPacket {
     constructor(id, redeemer, reward, user, tarGPS) {
         this.id = id
@@ -55,7 +49,6 @@ class shoutPacket {
         }
         this.Tick = function(){
             if(this.lastShoutTrigger<=Date.now()){
-                console.log('i should go')
                 let slUser = shoutList.map(function(sPUser) { return sPUser.id; }).indexOf(this.id);
                 shoutList.splice(slUser, 1);
             }
@@ -75,8 +68,6 @@ class shoutPacket {
                 if(this.GPS.current.y <= -(windowSize.hh)){
                     this.GPS.target.y = -(this.GPS.target.y)
                 }
-                let nDate = (this.lastShoutTrigger - Date.now())
-                console.log(`shoutout from ${this.id} @ [${nDate}]`)
             }
         }
         this.Draw = function(){
@@ -89,14 +80,7 @@ class shoutPacket {
         }
     }
 }
-
-socket.on('ShoutOut', function(msgData) {
-    console.log(`ShoutOut`, msgData)
-    let tmpGPS = {x:randoFromTo(-3, 3), y:randoFromTo(-3, 3), z:randoFromTo(-3, 3)} 
-    let sP = new shoutPacket(msgData.redeemer.id, msgData.redeemer,msgData.reward, msgData.user, tmpGPS)
-    shoutList.push(sP)
-});
-
+//
 const TickLoop = setInterval(() => {
     if(shoutList[0]!=null){
         shoutList.forEach(shoutOut => {
@@ -112,3 +96,10 @@ const DrawLoop = setInterval(() => {
         });
     }
 }, Loop.draw);
+//
+socket.on('ShoutOut', function(msgData) {
+    let tmpGPS = {x:randoFromTo(-3, 3), y:randoFromTo(-3, 3), z:randoFromTo(-3, 3)} 
+    let sP = new shoutPacket(msgData.redeemer.id, msgData.redeemer,msgData.reward, msgData.user, tmpGPS)
+    console.log(`ShoutOut`, sP)
+    shoutList.push(sP)
+});
