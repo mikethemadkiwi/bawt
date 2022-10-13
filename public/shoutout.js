@@ -72,13 +72,12 @@ socket.on('ShoutOut', function(msgData) {
 
 const TickLoop = setInterval(() => {
     if(shoutList[0]!=null){
-
+        shoutList[0].Tick();
     }
 }, Loop.tick);
 const DrawLoop = setInterval(() => {
     ctx.clearRect(0, 0, sCanvas.width, sCanvas.height);
     if(shoutList[0]!=null){
-    //     // shoutList[0].Draw();
-        console.log(shoutList[0])
+        shoutList[0].Draw();
     }
 }, Loop.draw);
