@@ -8,6 +8,14 @@ const Loop = {
 }
 var tarFps = 1000 / 60; // 1 second divided by how many frames per second.
 var tps = 10; // 2 descisions to each frame
+const windowSize = {
+    w: 0,
+    h: 0,
+    hw: 0,
+    hh: 0
+}
+let imgSize = 50;
+
 class shoutPacket {
     constructor(id, redeemer, reward, user) {
         this.id = id
@@ -33,24 +41,10 @@ class shoutPacket {
             }
         }
         this.Draw = function(){
-
+            let offsetx = windowSize.hw + this.GPS.current.x;
+            let offsety = windowSize.hh + this.GPS.current.y;
+            ctx.drawImage(this.img, offsetx - (imgSize/2), offsety - (imgSize/2), imgSize, imgSize);
         }
-        // this.canShout = function() {
-        //     return new Promise((resolve, reject) => {                
-        //         let slUser = shoutList.map(function(sPUser) { return sPUser.id; }).indexOf(this.id); 
-        //         console.log('sluser', slUser)
-        //         if(shoutList[slUser].lastShoutTrigger<=Date.now()){
-        //             console.log('canrun')
-        //             let nDate = (Date.now()+)
-        //             shoutList[slUser].lastShoutTrigger = ;
-        //             return shoutList[slUser]
-        //         }
-        //         else{
-        //             console.log('cantrun')                    
-        //         }
-        // // OnlineIdentities.splice(removeIndex, 1);
-        //     })
-        // }
     }
 }
 
@@ -61,6 +55,10 @@ socket.on('ShoutOut', function(msgData) {
 });
 
 const TickLoop = setInterval(() => {
+    windowSize.w = window.innerWidth;
+    windowSize.h = window.innerHeight;
+    windowSize.hw = (windowSize.w / 2);
+    windowSize.hh = (windowSize.h / 2);
     if(shoutList[0]!=null){
         shoutList[0].Tick();
     }
