@@ -13,6 +13,7 @@ const server = http.createServer(socketapp);
 const { Server } = require("socket.io");
 const path = require('path')
 const io = new Server(server);
+const Madkiwi = new MKAuth(TwitchConf);
 socketapp.use(bodyParser.json());
 socketapp.use(bodyParser.urlencoded({ extended: false }));
 socketapp.use(cookieParser());
@@ -492,7 +493,6 @@ class PubLib {
 ///////////////////////////////////////
 // START ENGINE
 ///////////////////////////////////////
-let Madkiwi = new MKAuth(TwitchConf);
 Madkiwi.LoadAuthServer(8081);
 Madkiwi.on('ScopeToken', async function(data){
         let _mk = new MKUtils;
