@@ -159,6 +159,9 @@ class mkTwitch extends EventEmitter {
         //     req.session.destroy();
         //     res.redirect('/');
         // });
+        this.app.route('/shoutout/').get((req, res) => {
+            res.render('shoutout');
+        });
         this.ValidateToken = function(){
             return new Promise((resolve, reject)=>{
                 got({
