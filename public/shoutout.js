@@ -75,7 +75,7 @@ class shoutPacket {
             ctx.fillStyle = '#bada55';
             let offsetx = windowSize.hw + this.GPS.current.x;
             let offsety = windowSize.hh + this.GPS.current.y;
-            ctx.fillText(this.redeemer.display_name, offsetx - (imgSize/2), offsety + (imgSize/2) + 10);
+            ctx.fillText(this.redeemer.display_name, offsetx - (imgSize/2), offsety + (imgSize/2) + 20);
             ctx.drawImage(this.img, offsetx - (imgSize/2), offsety - (imgSize/2), imgSize, imgSize);
         }
     }
