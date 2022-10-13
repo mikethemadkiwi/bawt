@@ -14,7 +14,7 @@ const windowSize = {
     hw: 0,
     hh: 0
 }
-let imgSize = 50;
+let imgSize = 100;
 function resizelayout() {
     windowSize.w = window.innerWidth;
     windowSize.h = window.innerHeight;
