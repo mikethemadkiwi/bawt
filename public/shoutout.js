@@ -24,6 +24,9 @@ function resizelayout() {
     sCanvas.height = windowSize.h;
     console.log(`h:${windowSize.h} w:${windowSize.w} hh:${windowSize.hh} hw: ${windowSize.hw}`)
 };
+function randoFromTo(from, to){    
+    return Math.floor(Math.random() * to) + from;
+}
 //
 window.onload = function () {
     resizelayout();
@@ -38,7 +41,7 @@ function newImage(src){
     return tmp
 }
 class shoutPacket {
-    constructor(id, redeemer, reward, user) {
+    constructor(id, redeemer, reward, user, tarGPS) {
         this.id = id
         this.redeemer = redeemer;
         this.reward = reward;
@@ -48,7 +51,7 @@ class shoutPacket {
         this.img.src = user[0]['profile_image_url'];
         this.GPS = {
             current:{x:0,y:0,z:0},
-            target:{x:0,y:0,z:0}
+            target:{x:tarGPS.x,y:tarGPS.y,z:tarGPS.z}
         }
         this.Tick = function(){
             if(this.lastShoutTrigger<=Date.now()){
@@ -57,6 +60,9 @@ class shoutPacket {
                 shoutList.splice(slUser, 1);
             }
             else{
+                this.GPS.current.x = (this.GPS.current.x + this.GPS.target.x)
+                this.GPS.current.y = (this.GPS.current.y + this.GPS.target.y)
+                this.GPS.current.z = (this.GPS.current.z + this.GPS.target.z)
                 let nDate = (this.lastShoutTrigger - Date.now())
                 console.log(`shoutout from ${this.id} @ [${nDate}]`)
             }
@@ -71,7 +77,8 @@ class shoutPacket {
 
 socket.on('ShoutOut', function(msgData) {
     console.log(`ShoutOut`, msgData)
-    let sP = new shoutPacket(msgData.redeemer.id, msgData.redeemer,msgData.reward, msgData.user)
+    let tmpGPS = {x:randoFromTo(-3, 3), y:randoFromTo(-3, 3), z:randoFromTo(-3, 3)} 
+    let sP = new shoutPacket(msgData.redeemer.id, msgData.redeemer,msgData.reward, msgData.user, tmpGPS)
     shoutList.push(sP)
 });
 
