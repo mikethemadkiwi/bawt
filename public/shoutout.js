@@ -59,6 +59,7 @@ socket.on('ShoutOut', function(msgData) {
     console.log(`ShoutOut`, msgData)
     let shoutPacket = {}
     shoutList.push(msgData)
+    console.log(shoutList)
     // let shoutout = document.getElementById('shoutout');
     // shoutout.style.display = 'block';//${msgData.user["profile_image_url"]}
     // shoutout.innerHTML = `<img src="${msgData.user[0]['profile_image_url']}" width="250px" /><br /><p id="shoutout">ShoutOut: ${msgData.redeemer.display_name}!</p>`
@@ -71,12 +72,13 @@ socket.on('ShoutOut', function(msgData) {
 
 const TickLoop = setInterval(() => {
     if(shoutList[0]!=null){
-        shoutList[0].Tick();
+
     }
 }, Loop.tick);
 const DrawLoop = setInterval(() => {
     ctx.clearRect(0, 0, sCanvas.width, sCanvas.height);
     if(shoutList[0]!=null){
-        shoutList[0].Draw();
+    //     // shoutList[0].Draw();
+        // console.log(shoutList[0])
     }
 }, Loop.draw);
