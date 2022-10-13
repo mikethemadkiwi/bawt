@@ -57,8 +57,8 @@ class shoutPacket {
 
 socket.on('ShoutOut', function(msgData) {
     console.log(`ShoutOut`, msgData)
-    let shoutPacket = {}
-    shoutList.push(msgData)
+    let sP = new shoutPacket(msgData.redeemer.id, msgData.redeemer,msgData.reward, msgData.user)
+    shoutList.push(sP)
     console.log(shoutList)
     // let shoutout = document.getElementById('shoutout');
     // shoutout.style.display = 'block';//${msgData.user["profile_image_url"]}
