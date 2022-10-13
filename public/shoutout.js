@@ -71,7 +71,7 @@ class shoutPacket {
             }
         }
         this.Draw = function(){
-            ctx.font = '24px Lucida Console';
+            ctx.font = '36px Lucida Console';
             ctx.fillStyle = '#bada55';
             let offsetx = windowSize.hw + this.GPS.current.x;
             let offsety = windowSize.hh + this.GPS.current.y;
@@ -98,7 +98,7 @@ const DrawLoop = setInterval(() => {
 }, Loop.draw);
 //
 socket.on('ShoutOut', function(msgData) {
-    let tmpGPS = {x:randoFromTo(-3, 3), y:randoFromTo(-3, 3), z:randoFromTo(-3, 3)} 
+    let tmpGPS = {x:randoFromTo(-1, 1), y:randoFromTo(-1, 1), z:randoFromTo(-1, 1)} 
     let sP = new shoutPacket(msgData.redeemer.id, msgData.redeemer,msgData.reward, msgData.user, tmpGPS)
     console.log(`ShoutOut`, sP)
     shoutList.push(sP)
