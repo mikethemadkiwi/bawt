@@ -419,8 +419,11 @@ class PubLib {
                             console.log(colors.green('[POINTS]'), reward.title, redeemer.display_name) 
                             switch(reward.title){
                                 case 'kiwisdebugbutton':
-                                    let issubbed = await _mk.isUserSubscribed(redeemer.id);
-                                    console.log('issubbed?', issubbed)
+                                    let userinput = msg.data.redemption.user_input;
+                                    console.log('boop', userinput)
+                                    // Madkiwi.io.emit('kiwisdebug',rewardData)
+                                    // let issubbed = await _mk.isUserSubscribed(redeemer.id);
+                                    // console.log('issubbed?', issubbed)
                                 break;
                                 case'LookMa':
                                     io.emit('LookMa', rewardData)  
@@ -429,9 +432,8 @@ class PubLib {
                                 case'Teamspeak':
                                     MKClient['twitchchat'].say('#mikethemadkiwi', `Teamspeak Deets: ts3://mad.kiwi:9987`)  
                                 break;
-                                case'effyou':
-                                    io.emit('effyou', rewardData)
-                                    // MKClient['twitchchat'].say('#mikethemadkiwi', `Look @${redeemer.display_name} I'm a Dragon!!`)  
+                                case'EffYou':
+                                    Madkiwi.io.emit('effyou', rewardData)
                                 break;
                                 case'Guildwars2':
                                     MKClient['twitchchat'].say('#mikethemadkiwi', `|| mikethemadkiwi.6058 || plays on || Henge of Denravi - US ||`)

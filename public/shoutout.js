@@ -103,3 +103,7 @@ socket.on('ShoutOut', function(msgData) {
     console.log(`ShoutOut`, sP)
     shoutList.push(sP)
 });
+
+socket.on('kiwisdebug', function(msgData) {    
+    console.log(msgData.redeemer.id, msgData.redeemer,msgData.reward, msgData.user)
+});

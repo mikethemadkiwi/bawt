@@ -7,6 +7,7 @@ html(lang="en")
         meta(name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no")
 
         link(rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous")
+        link(rel="stylesheet" href="../rootpage.css" crossorigin="anonymous")
 
         script(src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous")
         script(src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous")
@@ -27,19 +28,11 @@ html(lang="en")
 
             div(class="row")
                 div(class="col")
-                    h2 <a href="/"><<< Back to Root</a> 
-                    p <img src='#{user.profile_image_url}' width="30px" /> #{user.display_name}
-                    p #{user.description}
-                    p 1. <a href="/bawt/" target="_mkIcon">Madkiwi Icon</a>
-                    p 2. <a href="/shoutout/" target="_mkShout">Shoutouts</a>
-                    p 3. <a href="/bubblespace/" target="_mkSpace">Bspace</a>
-                    //- table(class="table table-striped table-hover")
-                        //- for value, key in user
-                        //-     tr
-                        //-         td #{key}
-                        //-         td #{value}
-                    //- table(class="table table-striped table-hover")
-                    //-     for value, key in token
-                    //-         tr
-                    //-             td #{key}
-                    //-             td #{value}
+                    a(href="/") <<< Back to Root 
+                    p <img src='#{user.profile_image_url}' width="30px" />  #{user.display_name}<br />#{user.description}
+                    ul
+                        li <a href="/bawt/" target="_mkIcon">Madkiwi Icon</a>
+                        li <a href="/shoutout/" target="_mkShout">Shoutouts</a>
+                        li <a href="/bubblespace/" target="_mkSpace">Bubblespace</a>
+                        li <a href="/videoclips/" target="_mkVClips">Video Clips</a>
+                        li <a href="/audioclips/" target="_mkVClips">Audio Clips</a>

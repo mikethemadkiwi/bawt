@@ -74,17 +74,6 @@ socket.on('LookMa', function(msgData) {
     }, 2500)
 });
 
-socket.on('effyou', function(msgData) {
-    console.log('effyou',msgData)
-    let video = document.createElement('video');
-    video.src = './video/finger.mp4';
-    video.autoplay = true;
-    video.addEventListener("ended", function(){
-        console.log('videoended');
-        video = null;
-    }); 
-});
-
 socket.on('hosted', function(msgData) {
     // console.log('hosted',msgData)
     let audSrc = `./sounds/host/${msgData[4]}`;

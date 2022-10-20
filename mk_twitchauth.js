@@ -169,6 +169,12 @@ class mkTwitch extends EventEmitter {
         this.app.route('/bawt/').get((req, res) => {
             res.render('bawt');
         });
+        this.app.route('/videoclips/').get((req, res) => {
+            res.render('videoclips');
+        });
+        this.app.route('/audioclips/').get((req, res) => {
+            res.render('audioclips');
+        });
         this.ValidateToken = function(){
             return new Promise((resolve, reject)=>{
                 got({
