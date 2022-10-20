@@ -78,7 +78,8 @@ class MKUtils {
                                 io.emit('userJoin', apiuser)
                                 console.log(colors.green('[JOIN]'), channel, username)
                             }
-                            else{                              
+                            else{   
+
                                 if(otherChatShow){
                                     console.log(colors.grey('[JOIN]'), channel, username)
                                 }
@@ -441,6 +442,7 @@ class PubLib {
                                     let rFile = Math.floor(Math.random() * files.length);
                                     let fileSTR = `${files[rFile]}`;
                                     Madkiwi.io.emit('BunnySays', fileSTR)
+                                    MKClient['twitchchat'].say('#mikethemadkiwi', `Playing [${fileSTR.substring(0, fileSTR.length-4)}] for @${redeemer.display_name}`)
                                 break;
                                 case'Guildwars2':
                                     MKClient['twitchchat'].say('#mikethemadkiwi', `|| mikethemadkiwi.6058 || plays on || Henge of Denravi - US ||`)
