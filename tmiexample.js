@@ -436,6 +436,10 @@ class PubLib {
                                 case'EffYou':
                                     Madkiwi.io.emit('effyou', rewardData)
                                 break;
+                                case'Honk':                                
+                                    MKClient['twitchchat'].say('#mikethemadkiwi', `Honking for @${redeemer.display_name}`)
+                                    Madkiwi.io.emit('Honk', rewardData)
+                                break;
                                 case'BunnySays':                
                                     let fs = require('fs');
                                     let files = fs.readdirSync('public/sounds/host/');
