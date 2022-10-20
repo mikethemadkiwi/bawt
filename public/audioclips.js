@@ -17,7 +17,6 @@ socket.on('BunnySays', function(soundfile) {
     box.appendChild(audio);
 });
 socket.on('Honk', function(soundfile) {
-    // console.log()
     let audSrc2 = `../sounds/TSYouWhereKickedFromTheServer.mp3`;
     const audio2 = document.createElement('audio');
     audio2.src = audSrc2;
