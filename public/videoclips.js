@@ -1,11 +1,7 @@
 const socket = io(); // Socket.io
 socket.on('effyou', function(msgData) {
     const video = document.createElement('video');
-    // 👇️ Local file
-    // video.src = 'video.mp4';
     video.src = '../video/finger.mp4';
-    // video.poster =
-    //   'https://peach.blender.org/wp-content/uploads/title_anouncement.jpg?x11217';
     video.autoplay = true;
     video.controls = false;
     video.muted = false;

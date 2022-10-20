@@ -74,15 +74,8 @@ socket.on('LookMa', function(msgData) {
     }, 2500)
 });
 
-socket.on('effyou', function(msgData) {
-    console.log('effyou',msgData)
-    let video = document.createElement('video');
-    video.src = './video/finger.mp4';
-    video.autoplay = true;
-    video.addEventListener("ended", function(){
-        console.log('videoended');
-        video = null;
-    }); 
+socket.on('kiwisdebug', function(msgData) {
+    console.log('kiwisdebug',msgData)
 });
 
 socket.on('hosted', function(msgData) {

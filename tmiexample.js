@@ -420,8 +420,8 @@ class PubLib {
                             switch(reward.title){
                                 case 'kiwisdebugbutton':
                                     let userinput = msg.data.redemption.user_input;
-                                    console.log('boop', userinput)
-                                    // Madkiwi.io.emit('kiwisdebug',rewardData)
+                                    // console.log('boop', userinput)
+                                    Madkiwi.io.emit('kiwisdebug',rewardData)
                                     // let issubbed = await _mk.isUserSubscribed(redeemer.id);
                                     // console.log('issubbed?', issubbed)
                                 break;
@@ -434,6 +434,13 @@ class PubLib {
                                 break;
                                 case'EffYou':
                                     Madkiwi.io.emit('effyou', rewardData)
+                                break;
+                                case'BunnySays':                
+                                    let fs = require('fs');
+                                    let files = fs.readdirSync('public/sounds/host/');
+                                    let rFile = Math.floor(Math.random() * files.length);
+                                    let fileSTR = `${files[rFile]}`;
+                                    Madkiwi.io.emit('BunnySays', fileSTR)
                                 break;
                                 case'Guildwars2':
                                     MKClient['twitchchat'].say('#mikethemadkiwi', `|| mikethemadkiwi.6058 || plays on || Henge of Denravi - US ||`)
