@@ -12,6 +12,8 @@ const bodyParser = require('body-parser');
 const server = http.createServer(socketapp);
 const { Server } = require("socket.io");
 const path = require('path')
+const colors = require('colors');
+
 const io = new Server(server);
 const Madkiwi = new MKAuth(TwitchConf);
 socketapp.use(bodyParser.json());
@@ -21,7 +23,9 @@ socketapp.use(express.static(path.join(__dirname, 'socket-www')))
 const port = process.env.PORT || 12345;
 const sockets = [];
 const MKClient = [];
+const ChansToJoin = [];
 let mKiwi;
+let otherChatShow = false;
 const weathertimeout = [];
 //
 class MKGame {
@@ -57,144 +61,191 @@ class MKUtils {
                         console.log(`${Madkiwi.Auth.username} Connected to ${addr}:${port}`);
                 });
                 MKClient['twitchchat'].on('join', async (channel, username, self)=>{
-                        if(!self){console.log('JOIN', channel, username)}
-                        let _mk = new MKUtils;
-                        let apiuser = await _mk.fetchUserByName(username)
-                        io.emit('userJoin', apiuser)
+                        if(!self){
+                            if(channel == '#mikethemadkiwi'){
+                                let _mk = new MKUtils;
+                                let apiuser = await _mk.fetchUserByName(username)
+                                let temptchan = `#${username}`;
+                                if(ChansToJoin[temptchan]==null){
+                                    ChansToJoin.push(temptchan)
+                                    MKClient['twitchchat'].join(temptchan).then((data) => {
+                                        // data returns [channel]
+                                        // console.log(temptchan, data)
+                                    }).catch((err) => {
+                                        //
+                                    });
+                                }
+                                io.emit('userJoin', apiuser)
+                                console.log(colors.green('[JOIN]'), channel, username)
+                            }
+                            else{                              
+                                if(otherChatShow){
+                                    console.log(colors.grey('[JOIN]'), channel, username)
+                                }
+                            }
+                           
+                        }
+                        // console.log('channel to join ',temptchan)
                 });
                 MKClient['twitchchat'].on('part', async (channel, username, self)=>{           
-                        if(!self){console.log('PART', channel, username)}
-                        let _mk = new MKUtils;
-                        let apiuser = await _mk.fetchUserByName(username)
-                        io.emit('userPart', apiuser)
+                        if(!self){
+                            if(channel == '#mikethemadkiwi'){
+                                console.log(colors.green('[PART]'), channel, username)
+                            }
+                            else{                                
+                                if(otherChatShow){
+                                    console.log(colors.grey('[PART]'), channel, username)
+                                }
+                            }
+                        }
+
+                        // let _mk = new MKUtils;
+                        // let apiuser = await _mk.fetchUserByName(username)
+                        // io.emit('userPart', apiuser)
                 });        
                 MKClient['twitchchat'].on('clearchat', (channel, username)=>{
-                        console.log('Chat Cleared:', channel, username)
+                        // console.log('Chat Cleared:', channel, username)
                 });
                 MKClient['twitchchat'].on('clearmsg', (chan, msg, msgid)=>{
-                        console.log(`msg [${msgid}] cleared in:`, chan, msg)
+                        // console.log(`msg [${msgid}] cleared in:`, chan, msg)
                 });
                 MKClient['twitchchat'].on('notice', (channel, data)=>{
-                        console.log(`notice ${channel}`, data)
+                        // console.log(`notice ${channel}`, data)
                 });
                 MKClient['twitchchat'].on('reconnect', ()=>{ console.log('reconnect') })
-                MKClient['twitchchat'].on('roomstate', (chan, state)=>{ console.log('reconnect') })
-                MKClient['twitchchat'].on('usernotice', (chan, data)=>{ console.log('usernotice') })
-                MKClient['twitchchat'].on('userstate', (chan, data)=>{ console.log('userstate') })
-                MKClient['twitchchat'].on('hosted', async (channel, username, viewers, autohost)=>{ 
-                        if(autohost){console.log('Autohost','Autohost')} 
-                        var fs = require('fs');
-                        var files = fs.readdirSync('socket-www/sounds/host/');
-                        var rFile = Math.floor(Math.random() * files.length);
-                        let fileSTR = `${files[rFile]}`;
-                        console.log('HOST',`onHosted: ${username} for ${viewers} | ${fileSTR} |`);
-                        MKClient['twitchchat'].say('#mikethemadkiwi', `Hosted: ${username}! thanks for calling in the weirdos!`).catch(function(err){
-                            console.log(err)
-                        });
-                        io.emit('hosted', [channel, username, viewers, autohost, fileSTR]);
+                MKClient['twitchchat'].on('roomstate', (chan, state)=>{ 
+                    // console.log('roomstate', chan, state) 
                 })
+                MKClient['twitchchat'].on('usernotice', (chan, data)=>{ 
+                    // console.log('usernotice', chan, data) 
+                })
+                MKClient['twitchchat'].on('userstate', (chan, data)=>{ 
+                    // console.log('userstate') 
+                })
+                // MKClient['twitchchat'].on('hosted', async (channel, username, viewers, autohost)=>{ 
+                //         if(autohost){console.log('Autohost','Autohost')} 
+                //         var fs = require('fs');
+                //         var files = fs.readdirSync('socket-www/sounds/host/');
+                //         var rFile = Math.floor(Math.random() * files.length);
+                //         let fileSTR = `${files[rFile]}`;
+                //         console.log('HOST',`onHosted: ${username} for ${viewers} | ${fileSTR} |`);
+                //         MKClient['twitchchat'].say('#mikethemadkiwi', `Hosted: ${username}! thanks for calling in the weirdos!`).catch(function(err){
+                //             console.log(err)
+                //         });
+                //         io.emit('hosted', [channel, username, viewers, autohost, fileSTR]);
+                // })
                 MKClient['twitchchat'].on('message', async (target, context, msg, self)=>{
-                        // if (self) { return; } // Ignore messages from the yuse4r if it is self                    
-                        if(msg.substr(0, 1) == "`"){
-                                let stringsplit = msg.split(" ");
-                                switch (stringsplit[0]) {
-                                    case'`weather':
-                                            if(stringsplit[1]){
-                                                let isnum = /^\d+$/.test(stringsplit[1]);
-                                                if (isnum){
+                        // if (self) { return; } // Ignore messages from the yuse4r if it is self   
+                        // console.log('target', target, context)
+                        if(target=='#mikethemadkiwi'){
+                                        if(msg.substr(0, 1) == "`"){
+                                            let stringsplit = msg.split(" ");
+                                            switch (stringsplit[0]) {
+                                                case'`weather':
+                                                        if(stringsplit[1]){
+                                                            let isnum = /^\d+$/.test(stringsplit[1]);
+                                                            if (isnum){
 
-                                                    let weatherurl =`http://api.openweathermap.org/data/2.5/weather?id=${stringsplit[1]}&units=${weatherConf.wDegreeKey}&APPID=${weatherConf.wAppKey}`                                                    
-                                                    fetchUrl(weatherurl, function(error, meta, body){
-                                                        if(error){console.log('error', error)}
-                                                        let wNetwork = JSON.parse(body);
-                                                        // console.log(wNetwork)
-                                                        if(wNetwork.cod!=404){
-                                                            console.log('city found')
-                                                            let currentweather;
-                                                            if (wNetwork.Code == 'ServiceUnavailable'){
-                                                                wNetwork.WeatherText = json.Message;
+                                                                let weatherurl =`http://api.openweathermap.org/data/2.5/weather?id=${stringsplit[1]}&units=${weatherConf.wDegreeKey}&APPID=${weatherConf.wAppKey}`                                                    
+                                                                fetchUrl(weatherurl, function(error, meta, body){
+                                                                    if(error){console.log('error', error)}
+                                                                    let wNetwork = JSON.parse(body);
+                                                                    // console.log(wNetwork)
+                                                                    if(wNetwork.cod!=404){
+                                                                        console.log('city found')
+                                                                        let currentweather;
+                                                                        if (wNetwork.Code == 'ServiceUnavailable'){
+                                                                            wNetwork.WeatherText = json.Message;
+                                                                        }
+                                                                        if (wNetwork.weather) {
+                                                                            currentweather = `Hey @${context.username}, Weather for ${wNetwork.name}, ${wNetwork.sys.country}}: `                                                            
+                                                                            for (let i=0;i<wNetwork.weather.length;i++){
+                                                                                currentweather += `${wNetwork.weather[i].main} (${wNetwork.weather[i].description}) `
+                                                                            }
+                                                                        }
+                                                                        if (wNetwork.main){
+                                                                            currentweather += `Temp: ${wNetwork.main.temp}°c (High: ${wNetwork.main.temp_max} °c) Humidity: ${wNetwork.main.humidity}% `
+                                                                        }
+                                                                        if(wNetwork.wind){
+                                                                            currentweather += `Wind: ${wNetwork.wind.speed}m/s (dir: ${Math.floor(wNetwork.wind.deg)}°) `
+                                                                        }
+                                                                        MKClient['twitchchat'].say('#mikethemadkiwi', currentweather).catch(function(err){
+                                                                            console.log(err)
+                                                                        });
+                                                                        MKClient['twitchchat'].say('#mikethemadkiwi', 'Find your weather code at https://openweathermap.org/city/ and use it  like this || `weather CITYID').catch(function(err){
+                                                                            console.log(err)
+                                                                        });
+                                                                    }
+                                                                    else{
+                                                                        MKClient['twitchchat'].say('#mikethemadkiwi', 'That CITYID did not return information please confirm your cityID @ https://openweathermap.org/city/').catch(function(err){
+                                                                            console.log(err)
+                                                                        });
+                                                                    }                                                                                      
+                                                                })
+
                                                             }
-                                                            if (wNetwork.weather) {
-                                                                currentweather = `Hey @${context.username}, Weather for ${wNetwork.name}, ${wNetwork.sys.country}}: `                                                            
-                                                                for (let i=0;i<wNetwork.weather.length;i++){
-                                                                    currentweather += `${wNetwork.weather[i].main} (${wNetwork.weather[i].description}) `
-                                                                }
+                                                            else {
+                                                                // do name check instead of digit check
+
+                                                                // instead of below.
+                                                                MKClient['twitchchat'].say('#mikethemadkiwi', 'That CITYID is NOT a Number. please confirm your cityID @ https://openweathermap.org/city/').catch(function(err){
+                                                                    console.log(err)
+                                                                });
+
                                                             }
-                                                            if (wNetwork.main){
-                                                                currentweather += `Temp: ${wNetwork.main.temp}°c (High: ${wNetwork.main.temp_max} °c) Humidity: ${wNetwork.main.humidity}% `
-                                                            }
-                                                            if(wNetwork.wind){
-                                                                currentweather += `Wind: ${wNetwork.wind.speed}m/s (dir: ${Math.floor(wNetwork.wind.deg)}°) `
-                                                            }
-                                                            MKClient['twitchchat'].say('#mikethemadkiwi', currentweather).catch(function(err){
-                                                                console.log(err)
-                                                            });
-                                                            MKClient['twitchchat'].say('#mikethemadkiwi', 'Find your weather code at https://openweathermap.org/city/ and use it  like this || `weather CITYID').catch(function(err){
-                                                                console.log(err)
-                                                            });
                                                         }
                                                         else{
-                                                            MKClient['twitchchat'].say('#mikethemadkiwi', 'That CITYID did not return information please confirm your cityID @ https://openweathermap.org/city/').catch(function(err){
-                                                                console.log(err)
-                                                            });
-                                                        }                                                                                      
-                                                    })
-
-                                                }
-                                                else {
-                                                    // do name check instead of digit check
-
-                                                    // instead of below.
-                                                    MKClient['twitchchat'].say('#mikethemadkiwi', 'That CITYID is NOT a Number. please confirm your cityID @ https://openweathermap.org/city/').catch(function(err){
-                                                        console.log(err)
-                                                    });
-
-                                                }
-                                            }
-                                            else{
-                                                
-                                            let weatherurl = `http://api.openweathermap.org/data/2.5/weather?id=${weatherConf.wCityId}&units=${weatherConf.wDegreeKey}&APPID=${weatherConf.wAppKey}`
-                                                fetchUrl(weatherurl, function(error, meta, body){
-                                                    if(error){console.log('error', error)}
-                                                    let wNetwork = JSON.parse(body);
-                                                    // console.log(wNetwork)
-                                                    let currentweather;
-                                                    if (wNetwork.Code == 'ServiceUnavailable'){
-                                                        wNetwork.WeatherText = json.Message;
-                                                    }
-                                                    else{console.log(wNetwork)};
-                                                    if (wNetwork.weather) {
-                                                            currentweather = `Hey @${context.username}, Weather for ${wNetwork.name}, ${wNetwork.sys.country}: `                                                            
-                                                        for (let i=0;i<wNetwork.weather.length;i++){
-                                                            currentweather += `${wNetwork.weather[i].main} (${wNetwork.weather[i].description}) `
+                                                            
+                                                        let weatherurl = `http://api.openweathermap.org/data/2.5/weather?id=${weatherConf.wCityId}&units=${weatherConf.wDegreeKey}&APPID=${weatherConf.wAppKey}`
+                                                            fetchUrl(weatherurl, function(error, meta, body){
+                                                                if(error){console.log('error', error)}
+                                                                let wNetwork = JSON.parse(body);
+                                                                // console.log(wNetwork)
+                                                                let currentweather;
+                                                                if (wNetwork.Code == 'ServiceUnavailable'){
+                                                                    wNetwork.WeatherText = json.Message;
+                                                                }
+                                                                else{
+                                                                    // console.log(wNetwork)
+                                                                };
+                                                                if (wNetwork.weather) {
+                                                                        currentweather = `Hey @${context.username}, Weather for ${wNetwork.name}, ${wNetwork.sys.country}: `                                                            
+                                                                    for (let i=0;i<wNetwork.weather.length;i++){
+                                                                        currentweather += `${wNetwork.weather[i].main} (${wNetwork.weather[i].description}) `
+                                                                    }
+                                                                }
+                                                                if (wNetwork.main){
+                                                                    currentweather += `Temp: ${wNetwork.main.temp}°c (High: ${wNetwork.main.temp_max} °c) Humidity: ${wNetwork.main.humidity}% `
+                                                                }
+                                                                if(wNetwork.wind){
+                                                                    currentweather += `Wind: ${wNetwork.wind.speed}m/s (dir: ${Math.floor(wNetwork.wind.deg)}°) `
+                                                                }
+                                                                MKClient['twitchchat'].say('#mikethemadkiwi', currentweather).catch(function(err){
+                                                                    console.log(err)
+                                                                });
+                                                                MKClient['twitchchat'].say('#mikethemadkiwi', 'Find your weather code at https://openweathermap.org/city/ and use it  like this || `weather CITYID').catch(function(err){
+                                                                    console.log(err)
+                                                                });                              
+                                                            })
                                                         }
-                                                    }
-                                                    if (wNetwork.main){
-                                                        currentweather += `Temp: ${wNetwork.main.temp}°c (High: ${wNetwork.main.temp_max} °c) Humidity: ${wNetwork.main.humidity}% `
-                                                    }
-                                                    if(wNetwork.wind){
-                                                        currentweather += `Wind: ${wNetwork.wind.speed}m/s (dir: ${Math.floor(wNetwork.wind.deg)}°) `
-                                                    }
-                                                    MKClient['twitchchat'].say('#mikethemadkiwi', currentweather).catch(function(err){
+                                                break;
+                                                case '`ts3':
+                                                    MKClient['twitchchat'].say('#mikethemadkiwi', `We Use Teamspeak for voice Chat! Join us by downloading teamspeak at https://www.teamspeak3.com/teamspeak-download.php and use server address: mad.kiwi`).catch(function(err){
                                                         console.log(err)
-                                                    });
-                                                    MKClient['twitchchat'].say('#mikethemadkiwi', 'Find your weather code at https://openweathermap.org/city/ and use it  like this || `weather CITYID').catch(function(err){
-                                                        console.log(err)
-                                                    });                              
-                                                })
-                                            }
-                                    break;
-                                    case '`ts3':
-                                        MKClient['twitchchat'].say('#mikethemadkiwi', `We Use Teamspeak for voice Chat! Join us by downloading teamspeak at https://www.teamspeak3.com/teamspeak-download.php and use server address: mad.kiwi`).catch(function(err){
-                                            console.log(err)
-                                        }); 
-                                    break;
-                                    default:
-                                        // do nothing if the default fires  
-                                }         
+                                                    }); 
+                                                break;
+                                                default:
+                                                    // do nothing if the default fires  
+                                            }         
+                                    }
+                                    else {
+                                        console.log(colors.green('[CHAT]'), context.username, msg)
+                                    }
                         }
-                        else {
-                            console.log(context.username, msg)
+                        else{
+                            if(otherChatShow){
+                                console.log(colors.grey('[CHAT]'), context.username, msg)
+                            }
                         }
                 })
         }
@@ -353,7 +404,7 @@ class PubLib {
                     let pTopic = data.data.topic;
                     switch(pTopic){
                         case 'channel-bits-events-v2.22703261': // BITTIES
-                            console.log('Bits Event', msg)
+                            console.log(colors.green('[BITS]'), msg)
                             MKClient['twitchchat'].say('#mikethemadkiwi', `[${msg.data.user_name}] cheered ${msg.data.bits_used} bitties! Total[${msg.data.total_bits_used}]`)
                         break;
                         case 'channel-bits-badge-unlocks.22703261': // BITS BADGE UNLOCK
@@ -365,7 +416,7 @@ class PubLib {
                             let reward = msg.data.redemption.reward;
                             let tUser = await _mk.fetchUserByName(redeemer.login)
                             let rewardData = {redeemer: redeemer, reward: reward, user: tUser}
-                            console.log('Channel Points Event', reward.title, redeemer.display_name) 
+                            console.log(colors.green('[POINTS]'), reward.title, redeemer.display_name) 
                             switch(reward.title){
                                 case 'kiwisdebugbutton':
                                     let issubbed = await _mk.isUserSubscribed(redeemer.id);
@@ -398,7 +449,7 @@ class PubLib {
                                         if (wNetwork.Code == 'ServiceUnavailable'){
                                             wNetwork.WeatherText = json.Message;
                                         }
-                                        else{console.log(wNetwork)};
+                                        // else{console.log(wNetwork)};
                                         if (wNetwork.weather) {
                                                 currentweather = `Weather for ${wNetwork.name}, ${wNetwork.sys.country}: `                                                            
                                             for (let i=0;i<wNetwork.weather.length;i++){
@@ -424,7 +475,7 @@ class PubLib {
                             }
                         break;
                         case 'channel-subscribe-events-v1.22703261': // CHANNEL SUB
-                            console.log('Channel Subscription Event', msg)
+                            console.log(colors.green('[SUBSCRIPTION]'), msg)
                             switch(msg.context){
                                 case'sub':
                                     console.log('sub', msg)
@@ -512,4 +563,3 @@ io.on('connection', (socket) => {
     console.log('SOCKETIO',`${socket.name} disconnected`); 
   });
 });
-//
