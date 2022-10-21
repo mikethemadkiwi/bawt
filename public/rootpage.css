@@ -4,16 +4,16 @@ body {
     padding:0px;
     margin:0px;
     background-color: #bada55;
-    background: url('https://mad.kiwi/purplemonkeydishwasher/media/img/translucent_kiwi_fruit_2560p_by_syntheticidea-d31uc3l.jpg') no-repeat top left fixed;
+    /* background: url('https://mad.kiwi/purplemonkeydishwasher/media/img/translucent_kiwi_fruit_2560p_by_syntheticidea-d31uc3l.jpg') no-repeat top left fixed; */
 }  
 /* unvisited link */
 a:link {
-    color: #fefefe;
+    color: #1d1b1b;
   }
   
   /* visited link */
   a:visited {
-    color: #fefefe;
+    color: #1d1b1b;
   }
   
   /* mouse over link */
@@ -23,5 +23,5 @@ a:link {
   
   /* selected link */
   a:active {
-    color: #fefefe;
+    color: #1d1b1b;
   }
