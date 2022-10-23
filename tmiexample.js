@@ -2,7 +2,13 @@ let MKAuth = require('./mk_twitchauth.js');
 /////////////////////////
 let otherJoinShow = true;
 let otherPartShow = true;
-let otherChatShow = false;
+let otherChatShow = true;
+let localJoinCount = 0;
+let localPartCount = 0;
+let localChatCount = 0;
+let otherJoinCount = 0;
+let otherPartCount = 0;
+let otherChatCount = 0;
 /////////////////////////
 const tmi = require('tmi.js');
 const ws = require('ws');
@@ -81,12 +87,14 @@ class MKUtils {
                                 }
                                 io.emit('userJoin', apiuser)
                                 console.log(colors.green('[JOIN]'), channel, username)
+                                localJoinCount++;
                             }
                             else{   
 
-                                if(otherJoinShow){
+                                if(otherJoinShow){ // i should make this a function that stil.l logs to DB
                                     console.log(colors.grey('[JOIN]'), channel, username)
                                 }
+                                otherJoinCount++;
                             }
                            
                         }
@@ -96,11 +104,13 @@ class MKUtils {
                         if(!self){
                             if(channel == '#mikethemadkiwi'){
                                 console.log(colors.green('[PART]'), channel, username)
+                                localPartCount++;
                             }
                             else{                                
                                 if(otherPartShow){
                                     console.log(colors.grey('[PART]'), channel, username)
                                 }
+                                otherPartCount++;
                             }
                         }
 
@@ -118,8 +128,13 @@ class MKUtils {
                         // console.log(`notice ${channel}`, data)
                 });
                 MKClient['twitchchat'].on('reconnect', ()=>{ console.log('reconnect') })
-                MKClient['twitchchat'].on('roomstate', (chan, state)=>{ 
-                    console.log('roomstate', chan, state) 
+                MKClient['twitchchat'].on('roomstate', (chan, state)=>{
+                    if(chan=='#mikethemadkiwi'){
+                        console.log(colors.green('[RoomState]'), chan) 
+                    }
+                    else{
+                        console.log(colors.grey('[RoomState]'), chan) 
+                    }
                 })
                 MKClient['twitchchat'].on('usernotice', (chan, data)=>{ 
                     // console.log('usernotice', chan, data) 
@@ -143,6 +158,7 @@ class MKUtils {
                         // if (self) { return; } // Ignore messages from the yuse4r if it is self   
                         // console.log('target', target, context)
                         if(target=='#mikethemadkiwi'){
+                            localChatCount++;
                                         if(msg.substr(0, 1) == "`"){
                                             let stringsplit = msg.split(" ");
                                             switch (stringsplit[0]) {
@@ -251,6 +267,7 @@ class MKUtils {
                             if(otherChatShow){
                                 console.log(colors.grey('[CHAT]'), context.username, msg)
                             }
+                            otherChatCount++;
                         }
                 })
         }
