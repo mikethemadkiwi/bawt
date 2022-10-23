@@ -1,4 +1,9 @@
 let MKAuth = require('./mk_twitchauth.js');
+/////////////////////////
+let otherJoinShow = true;
+let otherPartShow = true;
+let otherChatShow = false;
+/////////////////////////
 const tmi = require('tmi.js');
 const ws = require('ws');
 const fetchUrl = require("fetch").fetchUrl
@@ -25,9 +30,6 @@ const sockets = [];
 const MKClient = [];
 const ChansToJoin = [];
 let mKiwi;
-let otherJoinShow = true;
-let otherPartShow = true;
-let otherChatShow = false;
 const weathertimeout = [];
 //
 class MKGame {
