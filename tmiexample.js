@@ -25,7 +25,9 @@ const sockets = [];
 const MKClient = [];
 const ChansToJoin = [];
 let mKiwi;
-let otherChatShow = false;
+let otherJoinShow = true;
+let otherPartShow = true;
+let otherChatShow = true;
 const weathertimeout = [];
 //
 class MKGame {
@@ -80,7 +82,7 @@ class MKUtils {
                             }
                             else{   
 
-                                if(otherChatShow){
+                                if(otherJoinShow){
                                     console.log(colors.grey('[JOIN]'), channel, username)
                                 }
                             }
@@ -94,7 +96,7 @@ class MKUtils {
                                 console.log(colors.green('[PART]'), channel, username)
                             }
                             else{                                
-                                if(otherChatShow){
+                                if(otherPartShow){
                                     console.log(colors.grey('[PART]'), channel, username)
                                 }
                             }
