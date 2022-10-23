@@ -27,7 +27,7 @@ const ChansToJoin = [];
 let mKiwi;
 let otherJoinShow = true;
 let otherPartShow = true;
-let otherChatShow = true;
+let otherChatShow = false;
 const weathertimeout = [];
 //
 class MKGame {
@@ -117,7 +117,7 @@ class MKUtils {
                 });
                 MKClient['twitchchat'].on('reconnect', ()=>{ console.log('reconnect') })
                 MKClient['twitchchat'].on('roomstate', (chan, state)=>{ 
-                    // console.log('roomstate', chan, state) 
+                    console.log('roomstate', chan, state) 
                 })
                 MKClient['twitchchat'].on('usernotice', (chan, data)=>{ 
                     // console.log('usernotice', chan, data) 
