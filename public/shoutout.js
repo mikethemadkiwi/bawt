@@ -104,6 +104,6 @@ socket.on('ShoutOut', function(msgData) {
     shoutList.push(sP)
 });
 
-socket.on('kiwisdebug', function(msgData) {    
-    console.log(msgData.redeemer.id, msgData.redeemer,msgData.reward, msgData.user)
-});
+// socket.on('kiwisdebug', function(msgData) {    
+//     console.log(msgData.redeemer.id, msgData.redeemer,msgData.reward, msgData.user)
+// });
