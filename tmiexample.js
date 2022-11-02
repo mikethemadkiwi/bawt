@@ -585,7 +585,7 @@ Madkiwi.on('ScopeToken', async function(data){
         console.log('[AuthDate]', `Key Expires: ${exDate.getHours()}:${exDate.getMinutes()}:${exDate.getSeconds()}`)
         updateTokens = setInterval(() => {
             let tDate = (fleDate-300000);
-            if(tDate>=Date.now()){
+            if(tDate<=Date.now()){
                 console.log(`run token refresh`)
             }
             else{
