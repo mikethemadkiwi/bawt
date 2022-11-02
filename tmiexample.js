@@ -1,5 +1,6 @@
 let MKAuth = require('./mk_twitchauth.js');
 let currentTokens = {};
+let updateTokens = {};
 /////////////////////////
 let otherJoinShow = true;
 let otherPartShow = true;
@@ -575,7 +576,23 @@ class PubLib {
 ///////////////////////////////////////
 Madkiwi.LoadAuthServer(8081);
 Madkiwi.on('ScopeToken', async function(data){
-        currentTokens = data
+        currentTokens = data;
+        let timeinmilli = (currentTokens.expires_in * 1000) // should take the seconds and make them into milli
+        let fleDate = (Date.now()+timeinmilli)
+        let exDate = new Date(fleDate);
+        let curDate = new Date(Date.now());
+        console.log('[AuthDate]', `Current Time: ${curDate.getHours()}:${curDate.getMinutes()}:${curDate.getSeconds()}`)
+        console.log('[AuthDate]', `Key Expires: ${exDate.getHours()}:${exDate.getMinutes()}:${exDate.getSeconds()}`)
+        updateTokens = setInterval(() => {
+            let tDate = (fleDate-300000);
+            if(tDate>=Date.now()){
+                console.log(`run token refresh`)
+            }
+            else{
+                console.log('[AuthDate]', `Key Expires: ${exDate.getHours()}:${exDate.getMinutes()}:${exDate.getSeconds()}`)
+            }
+        }, 60000);
+        ///////////////////////
         let _mk = new MKUtils;
         mKiwi = await _mk.fetchUserByName(Madkiwi.Auth.username)
         _mk.CreateChat()
