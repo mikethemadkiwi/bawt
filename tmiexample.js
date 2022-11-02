@@ -1,4 +1,5 @@
 let MKAuth = require('./mk_twitchauth.js');
+let currentTokens = {};
 /////////////////////////
 let otherJoinShow = true;
 let otherPartShow = true;
@@ -574,6 +575,7 @@ class PubLib {
 ///////////////////////////////////////
 Madkiwi.LoadAuthServer(8081);
 Madkiwi.on('ScopeToken', async function(data){
+        currentTokens = data
         let _mk = new MKUtils;
         mKiwi = await _mk.fetchUserByName(Madkiwi.Auth.username)
         _mk.CreateChat()
