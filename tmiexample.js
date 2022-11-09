@@ -21,8 +21,8 @@ const currentCounts = function(){
 const tmi = require('tmi.js');
 const ws = require('ws');
 const fetchUrl = require("fetch").fetchUrl
-const TwitchConf = require('../kiwiauths/twitch/oauth2.json');
-const weatherConf = require('../kiwiauths/weather/londonontario.json');
+const TwitchConf = require('../kiwiauth/twitch/oauth2.json');
+const weatherConf = require('../kiwiauth/weather/londonontario.json');
 const express = require('express');
 const socketapp = express();
 const http = require('http');
@@ -665,7 +665,7 @@ class DBObject {
     }
 }
 const mysql = require('mysql');
-const DBAUTH = require('../kiwiauths/sql/dbconfig.json');
+const DBAUTH = require('../kiwiauth/sql/dbconfig.json');
 let DBConn_Server = null;         
 let _db = new DBObject;
 let goboy = setTimeout(async () => {
