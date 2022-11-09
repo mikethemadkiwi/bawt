@@ -588,9 +588,6 @@ Madkiwi.on('ScopeToken', async function(data){
             if(tDate<=Date.now()){
                 console.log(`run token refresh`)
             }
-            else{
-                console.log('[AuthDate]', `Key Expires: ${exDate.getHours()}:${exDate.getMinutes()}:${exDate.getSeconds()}`)
-            }
         }, 60000);
         ///////////////////////
         let _mk = new MKUtils;
@@ -610,3 +607,68 @@ io.on('connection', (socket) => {
     console.log('SOCKETIO',`${socket.name} disconnected`); 
   });
 });
+
+///////
+// Database
+class DBObject {
+    initiateMe(){
+        return new Promise((resolve, reject)=>{
+            if(DBConn_Server!=null){                
+                DBConn_Server.end();
+                DBConn_Server = null;
+            }
+            DBConn_Server = mysql.createConnection({
+                host     : DBAUTH.host,
+                user     :  DBAUTH.username,
+                password :  DBAUTH.password,
+                database :  DBAUTH.dbname
+            });
+            DBConn_Server.connect(function(err) {
+                if (err) throw err;
+                console.log("Connected!");                
+              });
+
+            DBConn_Server.on('error', function(err) {
+                console.log('DB CONNECTION ERROR', err.code); // 'ER_BAD_DB_ERROR'
+                DBConn_Server.end();
+                let reconn = setTimeout(() => {
+                    DBConn_Server.connect();
+                    console.log('Database Connection Recreated')
+                }, 5000);              
+            });
+            resolve(true)
+        })
+    }
+    exterminateMe(){
+        return new Promise((resolve, reject)=>{
+            DBConn_Server.end();
+            DBConn_Server = null;
+            console.log('Database Connection Ended')
+            resolve(true)
+        })
+    }
+    SanityCheck(){
+        return new Promise((resolve, reject)=>{
+            let rand1 = Math.floor(Math.random() * 2600);
+            let rand2 = Math.floor(Math.random() * 1337);
+            let qStr = `SELECT ${rand1} + ${rand2} AS solution`
+            DBConn_Server.query(qStr, function (error, results, fields) {
+                if (error) {
+                    reject(error)
+                    return;
+                };
+                console.log(`Database Sanity Check\nRequest: ${rand1} + ${rand2}\nResult:`, results[0].solution);
+                resolve(true)
+            });
+            
+        })
+    }
+}
+const mysql = require('mysql');
+const DBAUTH = require('../auths/sql/dbconfig.json');
+let DBConn_Server = null;         
+let _db = new DBObject;
+let goboy = setTimeout(async () => {
+    await _db.initiateMe();
+    await _db.SanityCheck();    
+}, 500);
