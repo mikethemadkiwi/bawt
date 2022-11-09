@@ -669,6 +669,6 @@ const DBAUTH = require('../kiwiauth/sql/dbconfig.json');
 let DBConn_Server = null;         
 let _db = new DBObject;
 let goboy = setTimeout(async () => {
-    await _db.initiateMe();
-    await _db.SanityCheck();    
+    // await _db.initiateMe();
+    // await _db.SanityCheck();    
 }, 500);
