@@ -23,6 +23,7 @@ const ws = require('ws');
 const fetchUrl = require("fetch").fetchUrl
 const TwitchConf = require('../kiwiauth/twitch/oauth2.json');
 const weatherConf = require('../kiwiauth/weather/londonontario.json');
+const DBAUTH = require('../kiwiauth/sql/dbconfig.json');
 const express = require('express');
 const socketapp = express();
 const http = require('http');
@@ -32,7 +33,8 @@ const server = http.createServer(socketapp);
 const { Server } = require("socket.io");
 const path = require('path')
 const colors = require('colors');
-
+const mysql = require('mysql');
+////
 const io = new Server(server);
 const Madkiwi = new MKAuth(TwitchConf);
 socketapp.use(bodyParser.json());
@@ -45,6 +47,62 @@ const MKClient = [];
 const ChansToJoin = [];
 let mKiwi;
 const weathertimeout = [];
+let DBConn_Server = null;
+// Database
+class DBObject {
+    initiateMe(){
+        return new Promise((resolve, reject)=>{
+            if(DBConn_Server!=null){                
+                DBConn_Server.end();
+                DBConn_Server = null;
+            }
+            DBConn_Server = mysql.createConnection({
+                host     : DBAUTH.host,
+                user     :  DBAUTH.username,
+                password :  DBAUTH.password,
+                database :  DBAUTH.dbname
+            });
+            DBConn_Server.connect(function(err) {
+                if (err) throw err;
+                console.log("Connected!");                
+              });
+
+            DBConn_Server.on('error', function(err) {
+                console.log('DB CONNECTION ERROR', err.code); // 'ER_BAD_DB_ERROR'
+                DBConn_Server.end();
+                let reconn = setTimeout(() => {
+                    DBConn_Server.connect();
+                    console.log('Database Connection Recreated')
+                }, 5000);              
+            });
+            resolve(true)
+        })
+    }
+    exterminateMe(){
+        return new Promise((resolve, reject)=>{
+            DBConn_Server.end();
+            DBConn_Server = null;
+            console.log('Database Connection Ended')
+            resolve(true)
+        })
+    }
+    SanityCheck(){
+        return new Promise((resolve, reject)=>{
+            let rand1 = Math.floor(Math.random() * 2600);
+            let rand2 = Math.floor(Math.random() * 1337);
+            let qStr = `SELECT ${rand1} + ${rand2} AS solution`
+            DBConn_Server.query(qStr, function (error, results, fields) {
+                if (error) {
+                    reject(error)
+                    return;
+                };
+                console.log(`Database Sanity Check\nRequest: ${rand1} + ${rand2}\nResult:`, results[0].solution);
+                resolve(true)
+            });
+            
+        })
+    }
+}
 //
 class MKGame {
     checkPlayer = (twitchUser) => {
@@ -576,21 +634,28 @@ class PubLib {
 ///////////////////////////////////////
 Madkiwi.LoadAuthServer(8081);
 Madkiwi.on('ScopeToken', async function(data){
+        let _db = new DBObject;
+        let _mk = new MKUtils;
         currentTokens = data;
-        let timeinmilli = (currentTokens.expires_in * 1000) // should take the seconds and make them into milli
-        let fleDate = (Date.now()+timeinmilli)
-        let exDate = new Date(fleDate);
-        let curDate = new Date(Date.now());
-        console.log('[AuthDate]', `Current Time: ${curDate.getHours()}:${curDate.getMinutes()}:${curDate.getSeconds()}`)
-        console.log('[AuthDate]', `Key Expires: ${exDate.getHours()}:${exDate.getMinutes()}:${exDate.getSeconds()}`)
+        // console.log('[AuthKey]', `Access Token: ${currentTokens.access_token}`)
+        // console.log('[AuthKey]', `Refresh Token: ${currentTokens.refresh_token}`)
         updateTokens = setInterval(() => {
-            let tDate = (fleDate-300000);
-            if(tDate<=Date.now()){
-                console.log(`run token refresh`)
+            if (currentTokens.expires_in!=null){
+                let timeinmilli = (currentTokens.expires_in * 1000) // should take the seconds and make them into milli
+                let fleDate = (Date.now()+timeinmilli)
+                let tDate = (fleDate-300000);
+                let exDate = new Date(fleDate);
+                let curDate = new Date(Date.now());
+                // console.log('[AuthDate]', `Current Time: ${curDate.getHours()}:${curDate.getMinutes()}:${curDate.getSeconds()}`)
+                // console.log('[AuthDate]', `Key Expires: ${exDate.getHours()}:${exDate.getMinutes()}:${exDate.getSeconds()}`)
+                //
+                let dbstart = _db.initiateMe();
+                if(tDate<=Date.now()){
+                    console.log(`run token refresh`, currentTokens.refresh_token)
+                }
             }
         }, 60000);
         ///////////////////////
-        let _mk = new MKUtils;
         mKiwi = await _mk.fetchUserByName(Madkiwi.Auth.username)
         _mk.CreateChat()
         let topics = _mk.CreatePubsubTopics(mKiwi[0].id)
@@ -609,66 +674,8 @@ io.on('connection', (socket) => {
 });
 
 ///////
-// Database
-class DBObject {
-    initiateMe(){
-        return new Promise((resolve, reject)=>{
-            if(DBConn_Server!=null){                
-                DBConn_Server.end();
-                DBConn_Server = null;
-            }
-            DBConn_Server = mysql.createConnection({
-                host     : DBAUTH.host,
-                user     :  DBAUTH.username,
-                password :  DBAUTH.password,
-                database :  DBAUTH.dbname
-            });
-            DBConn_Server.connect(function(err) {
-                if (err) throw err;
-                console.log("Connected!");                
-              });
-
-            DBConn_Server.on('error', function(err) {
-                console.log('DB CONNECTION ERROR', err.code); // 'ER_BAD_DB_ERROR'
-                DBConn_Server.end();
-                let reconn = setTimeout(() => {
-                    DBConn_Server.connect();
-                    console.log('Database Connection Recreated')
-                }, 5000);              
-            });
-            resolve(true)
-        })
-    }
-    exterminateMe(){
-        return new Promise((resolve, reject)=>{
-            DBConn_Server.end();
-            DBConn_Server = null;
-            console.log('Database Connection Ended')
-            resolve(true)
-        })
-    }
-    SanityCheck(){
-        return new Promise((resolve, reject)=>{
-            let rand1 = Math.floor(Math.random() * 2600);
-            let rand2 = Math.floor(Math.random() * 1337);
-            let qStr = `SELECT ${rand1} + ${rand2} AS solution`
-            DBConn_Server.query(qStr, function (error, results, fields) {
-                if (error) {
-                    reject(error)
-                    return;
-                };
-                console.log(`Database Sanity Check\nRequest: ${rand1} + ${rand2}\nResult:`, results[0].solution);
-                resolve(true)
-            });
-            
-        })
-    }
-}
-const mysql = require('mysql');
-const DBAUTH = require('../kiwiauth/sql/dbconfig.json');
-let DBConn_Server = null;         
-let _db = new DBObject;
-let goboy = setTimeout(async () => {
-    // await _db.initiateMe();
-    // await _db.SanityCheck();    
-}, 500);
+// let goboy = setTimeout(async () => {
+//     console.log(`key refresh`, currentTokens)
+//     // await _db.initiateMe();
+//     // await _db.SanityCheck();    
+// }, 500);
