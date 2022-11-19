@@ -48,20 +48,17 @@ const ChansToJoin = [];
 let mKiwi;
 const weathertimeout = [];
 let DBConn_Server = null;
+let tDate = null;
 // Database
 class DBObject {
-    initiateMe(){
+    initiateMe(auth){
+        this.auth = auth;
         return new Promise((resolve, reject)=>{
             if(DBConn_Server!=null){                
                 DBConn_Server.end();
                 DBConn_Server = null;
             }
-            DBConn_Server = mysql.createConnection({
-                host     : DBAUTH.host,
-                user     :  DBAUTH.username,
-                password :  DBAUTH.password,
-                database :  DBAUTH.dbname
-            });
+            DBConn_Server = mysql.createConnection(this.auth);
             DBConn_Server.connect(function(err) {
                 if (err) throw err;
                 console.log("Connected!");                
@@ -96,10 +93,16 @@ class DBObject {
                     reject(error)
                     return;
                 };
-                console.log(`Database Sanity Check\nRequest: ${rand1} + ${rand2}\nResult:`, results[0].solution);
+                console.log(`[Database] Sanity Check : ${rand1} + ${rand2} Result:`, results[0].solution);
                 resolve(true)
             });
             
+        })
+    }
+    StoreAuth(auth){
+        return new Promise((resolve, reject)=>{
+            console.log(`[Storing Auth]`)
+            resolve(true)
         })
     }
 }
@@ -637,21 +640,24 @@ Madkiwi.on('ScopeToken', async function(data){
         let _db = new DBObject;
         let _mk = new MKUtils;
         currentTokens = data;
-        // console.log('[AuthKey]', `Access Token: ${currentTokens.access_token}`)
-        // console.log('[AuthKey]', `Refresh Token: ${currentTokens.refresh_token}`)
-        updateTokens = setInterval(() => {
+        let dbstart = await _db.initiateMe(DBAUTH);
+        let dbsanity = await _db.SanityCheck();
+        let dbstore = await _db.StoreAuth(currentTokens)    
+        server.listen(port, () => {
+            console.log(`listening on *:${port}`);
+        });
+        ///////////////////////
+        let timeinmilli = (currentTokens.expires_in * 1000) // should take the seconds and make them into milli
+        let fleDate = (Date.now()+timeinmilli)
+        tDate = (fleDate-300000);
+        let exDate = new Date(fleDate);
+        updateTokens = setInterval(async () => {
             if (currentTokens.expires_in!=null){
-                let timeinmilli = (currentTokens.expires_in * 1000) // should take the seconds and make them into milli
-                let fleDate = (Date.now()+timeinmilli)
-                let tDate = (fleDate-300000);
-                let exDate = new Date(fleDate);
-                let curDate = new Date(Date.now());
-                // console.log('[AuthDate]', `Current Time: ${curDate.getHours()}:${curDate.getMinutes()}:${curDate.getSeconds()}`)
-                // console.log('[AuthDate]', `Key Expires: ${exDate.getHours()}:${exDate.getMinutes()}:${exDate.getSeconds()}`)
-                //
-                let dbstart = _db.initiateMe();
                 if(tDate<=Date.now()){
                     console.log(`run token refresh`, currentTokens.refresh_token)
+                }
+                else{
+                    console.log('[AuthDate]', `Key Expires: ${exDate.getHours()}:${exDate.getMinutes()}:${exDate.getSeconds()}`)
                 }
             }
         }, 60000);
@@ -659,10 +665,7 @@ Madkiwi.on('ScopeToken', async function(data){
         mKiwi = await _mk.fetchUserByName(Madkiwi.Auth.username)
         _mk.CreateChat()
         let topics = _mk.CreatePubsubTopics(mKiwi[0].id)
-        _mk.RestartPub(topics, mKiwi[0].id)     
-        server.listen(port, () => {
-            console.log(`listening on *:${port}`);
-        });
+        _mk.RestartPub(topics, mKiwi[0].id) 
 })
 io.on('connection', (socket) => {
   socket.name = socket.id;
