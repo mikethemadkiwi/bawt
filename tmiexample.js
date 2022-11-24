@@ -2,9 +2,10 @@ let MKAuth = require('./mk_twitchauth.js');
 let currentTokens = {};
 let updateTokens = {};
 /////////////////////////
-let otherJoinShow = true;
-let otherPartShow = true;
-let otherChatShow = true;
+let otherJoinShow = false;
+let otherPartShow = false;
+let otherChatShow = false;
+let authKeyShow = false;
 let localJoinCount = 0;
 let localPartCount = 0;
 let localChatCount = 0;
@@ -20,6 +21,7 @@ const currentCounts = function(){
 /////////////////////////
 const tmi = require('tmi.js');
 const ws = require('ws');
+const got = require('got');
 const fetchUrl = require("fetch").fetchUrl
 const TwitchConf = require('../kiwiauth/twitch/oauth2.json');
 const weatherConf = require('../kiwiauth/weather/londonontario.json');
@@ -61,7 +63,7 @@ class DBObject {
             DBConn_Server = mysql.createConnection(this.auth);
             DBConn_Server.connect(function(err) {
                 if (err) throw err;
-                console.log("Connected!");                
+                console.log('Database Connection Created')         
               });
 
             DBConn_Server.on('error', function(err) {
@@ -79,7 +81,7 @@ class DBObject {
         return new Promise((resolve, reject)=>{
             DBConn_Server.end();
             DBConn_Server = null;
-            console.log('Database Connection Ended')
+            console.log('Database Connection Terminated')
             resolve(true)
         })
     }
@@ -102,6 +104,35 @@ class DBObject {
     StoreAuth(auth){
         return new Promise((resolve, reject)=>{
             console.log(`[Storing Auth]`)
+            resolve(true)
+        })
+    }
+    CurrentKey(){        
+        return new Promise((resolve, reject)=>{
+            console.log(`[Checking Expired_in Data for Current Key]`)
+            got({
+                url: "https://id.twitch.tv/oauth2/validate",
+                method: "GET",
+                headers: {
+                    Authorization: "OAuth " + currentTokens
+                },
+                responseType: "json"
+            })
+            .then(resp => {
+                if (resp.body.expires_in <= 3600) {
+                    console.log(`Renewal Required for Token`, resp.body.client_id, resp.body.scopes, resp.body.expires_in);
+                    this.GetToken();
+                    resolve(true)
+                } 
+                else {
+                    console.log(`Key is Fine`, resp.body.client_id, resp.body.scopes, resp.body.expires_in);                  
+                    resolve(true)
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                resolve(false)
+            });
             resolve(true)
         })
     }
@@ -635,13 +666,16 @@ class PubLib {
 ///////////////////////////////////////
 // START ENGINE
 ///////////////////////////////////////
-Madkiwi.LoadAuthServer(8081);
+let _db = new DBObject;
+let startNow = setTimeout(async () => {
+    let dbstart = await _db.initiateMe(DBAUTH);
+    let dbsanity = await _db.SanityCheck(); 
+    Madkiwi.LoadAuthServer(8081);   
+}, 500);
+
 Madkiwi.on('ScopeToken', async function(data){
-        let _db = new DBObject;
         let _mk = new MKUtils;
         currentTokens = data;
-        let dbstart = await _db.initiateMe(DBAUTH);
-        let dbsanity = await _db.SanityCheck();
         let dbstore = await _db.StoreAuth(currentTokens)    
         server.listen(port, () => {
             console.log(`listening on *:${port}`);
@@ -653,20 +687,26 @@ Madkiwi.on('ScopeToken', async function(data){
         let exDate = new Date(fleDate);
         updateTokens = setInterval(async () => {
             if (currentTokens.expires_in!=null){
+                let ltime = tDate - Date.now(); 
                 if(tDate<=Date.now()){
                     console.log(`run token refresh`, currentTokens.refresh_token)
                 }
-                else{
-                    console.log('[AuthDate]', `Key Expires: ${exDate.getHours()}:${exDate.getMinutes()}:${exDate.getSeconds()}`)
+                else{                   
+                    if(authKeyShow){
+                        console.log('[AuthDate]', `Key Expires in: [ ${ltime} ]ms or [ ${exDate.getHours()}:${exDate.getMinutes()}:${exDate.getSeconds()} ]`)
+                    }
                 }
             }
-        }, 60000);
+        }, 1000);
         ///////////////////////
         mKiwi = await _mk.fetchUserByName(Madkiwi.Auth.username)
         _mk.CreateChat()
         let topics = _mk.CreatePubsubTopics(mKiwi[0].id)
         _mk.RestartPub(topics, mKiwi[0].id) 
 })
+
+
+
 io.on('connection', (socket) => {
   socket.name = socket.id;
   console.log('SOCKETIO',`${socket.name} connected from : ${socket.handshake.address}`); 
@@ -675,10 +715,3 @@ io.on('connection', (socket) => {
     console.log('SOCKETIO',`${socket.name} disconnected`); 
   });
 });
-
-///////
-// let goboy = setTimeout(async () => {
-//     console.log(`key refresh`, currentTokens)
-//     // await _db.initiateMe();
-//     // await _db.SanityCheck();    
-// }, 500);

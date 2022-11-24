@@ -10,9 +10,10 @@ const { Server } = require("socket.io");
 const { EventEmitter } = require("events");
 //
 class mkTwitch extends EventEmitter {
-    constructor(authfile){
+    constructor(authfile, currentToken){
         super();
         this.Auth = authfile;
+        this.currentToken = currentToken;
         this.BotToken = null;
         this.ScopeToken = null;
         this.showtoken = false;
