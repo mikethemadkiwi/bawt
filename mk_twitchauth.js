@@ -275,5 +275,5 @@ class mkTwitch extends EventEmitter {
         };
     }
 };
-//
+// 
 module.exports = mkTwitch;
