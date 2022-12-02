@@ -1,7 +1,6 @@
 const socket = io(); // Socket.io
-const video = document.createElement('video');
 socket.on('effyou', function(msgData) {
-    video = document.createElement('video');
+    let video = document.createElement('video');
     video.src = '../video/finger.mp4';
     video.autoplay = true;
     video.controls = false;
@@ -11,14 +10,14 @@ socket.on('effyou', function(msgData) {
     video.volume = 0.25;
     video.addEventListener("ended", function(){
         console.log('videoended');
-        video = null;
+        // video = null;
         document.getElementById('vidContainer').innerHTML = null;
     });
     const box = document.getElementById('vidContainer');
     box.appendChild(video);
 });
 socket.on('dumbanswer', function(msgData) {
-    video = document.createElement('video');
+    let video = document.createElement('video');
     video.src = '../video/dumbanswer.mp4';
     video.autoplay = true;
     video.controls = false;
@@ -28,7 +27,7 @@ socket.on('dumbanswer', function(msgData) {
     video.volume = 0.25;
     video.addEventListener("ended", function(){
         console.log('videoended');
-        video = null;
+        // video = null;
         document.getElementById('vidContainer').innerHTML = null;
     });
     const box = document.getElementById('vidContainer');
