@@ -543,6 +543,9 @@ class PubLib {
                                 case'EffYou':
                                     Madkiwi.io.emit('effyou', rewardData)
                                 break;
+                                case'DumbAnswer':
+                                    Madkiwi.io.emit('dumbanswer', rewardData)
+                                break;
                                 case'Honk':                                
                                     MKClient['twitchchat'].say('#mikethemadkiwi', `Honking for @${redeemer.display_name}`)
                                     Madkiwi.io.emit('Honk', rewardData)

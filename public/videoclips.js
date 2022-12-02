@@ -1,6 +1,7 @@
 const socket = io(); // Socket.io
+const video = document.createElement('video');
 socket.on('effyou', function(msgData) {
-    const video = document.createElement('video');
+    video = document.createElement('video');
     video.src = '../video/finger.mp4';
     video.autoplay = true;
     video.controls = false;
@@ -10,9 +11,26 @@ socket.on('effyou', function(msgData) {
     video.volume = 0.25;
     video.addEventListener("ended", function(){
         console.log('videoended');
+        video = null;
         document.getElementById('vidContainer').innerHTML = null;
     });
     const box = document.getElementById('vidContainer');
     box.appendChild(video);
 });
-
+socket.on('dumbanswer', function(msgData) {
+    video = document.createElement('video');
+    video.src = '../video/dumbanswer.mp4';
+    video.autoplay = true;
+    video.controls = false;
+    video.muted = false;
+    video.height = 480; // 👈️ in px
+    video.width = 854; // 👈️ in px
+    video.volume = 0.25;
+    video.addEventListener("ended", function(){
+        console.log('videoended');
+        video = null;
+        document.getElementById('vidContainer').innerHTML = null;
+    });
+    const box = document.getElementById('vidContainer');
+    box.appendChild(video);
+});
