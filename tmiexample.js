@@ -690,17 +690,18 @@ Madkiwi.on('ScopeToken', async function(data){
         let exDate = new Date(fleDate);
         updateTokens = setInterval(async () => {
             if (currentTokens.expires_in!=null){
-                let ltime = tDate - Date.now(); 
-                if(tDate<=Date.now()){
+                // let ltime = tDate - Date.now(); 
+                // if(tDate<=Date.now()){
                     console.log(`run token refresh`, currentTokens.refresh_token)
-                }
-                else{                   
-                    if(authKeyShow){
-                        console.log('[AuthDate]', `Key Expires in: [ ${ltime} ]ms or [ ${exDate.getHours()}:${exDate.getMinutes()}:${exDate.getSeconds()} ]`)
-                    }
-                }
+                    Madkiwi.ValidateToken();
+                // }
+                // else{                   
+                //     if(authKeyShow){
+                //         console.log('[AuthDate]', `Key Expires in: [ ${ltime} ]ms or [ ${exDate.getHours()}:${exDate.getMinutes()}:${exDate.getSeconds()} ]`)
+                //     }
+                // }
             }
-        }, 1000);
+        }, 60000);
         ///////////////////////
         mKiwi = await _mk.fetchUserByName(Madkiwi.Auth.username)
         _mk.CreateChat()
