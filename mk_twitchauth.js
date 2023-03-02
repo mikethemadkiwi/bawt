@@ -8,14 +8,18 @@ const http = require('http');
 const https = require('https');
 const { Server } = require("socket.io");
 const { EventEmitter } = require("events");
+const colors = require('colors');
 //
 class mkTwitch extends EventEmitter {
     constructor(authfile, currentToken){
         super();
         this.Auth = authfile;
+        this.port = null;
         this.currentToken = currentToken;
         this.BotToken = null;
         this.ScopeToken = null;
+        this.ScopeTokenTimer = null;
+        this.scopetimerloop = 60000; // 1min
         this.showtoken = false;
         this.showscopedtoken = false;
         this.chatClients = [];
@@ -111,8 +115,15 @@ class mkTwitch extends EventEmitter {
                 })
                 .then(resp => {
                     req.session.token = resp.body;
+                    ///////
                     this.ScopeToken = resp.body;
                     this.emit('ScopeToken', resp.body)
+                    this.ScopeTokenTimer = setInterval(async () => {
+                        if (this.ScopeToken.expires_in!=null){
+                            this.ValidateToken();
+                        }
+                    }, this.scopetimerloop);
+                    ////////
                     return got({
                         "url": "https://api.twitch.tv/helix/users",
                         "method": "GET",
@@ -182,18 +193,36 @@ class mkTwitch extends EventEmitter {
                     url: "https://id.twitch.tv/oauth2/validate",
                     method: "GET",
                     headers: {
-                        Authorization: "OAuth " + TAuth.Token_Current
+                        Authorization: "OAuth " + this.ScopeToken.access_token
                     },
                     responseType: "json"
                 })
                 .then(resp => {
                     if (resp.body.expires_in <= 3600) {
-                        console.log(`Renewal Required for Token`, resp.body.client_id, resp.body.scopes, resp.body.expires_in);
-                        this.GetToken();
+                        console.log(colors.red(`[AuthToken] Renewal Required.`));
+                        got({
+                            "url": "https://id.twitch.tv/oauth2/token",
+                            "method": 'POST',
+                            "headers": {
+                                "Accept": "application/json"
+                            },
+                            "form": {
+                                "client_id": this.Auth.client_id,
+                                "client_secret": this.Auth.client_secret,
+                                "grant_type": "refresh_token",
+                                "refresh_token": this.ScopeToken.refresh_token
+                            },
+                            "responseType": 'json'
+                        })
+                        .then(resp => {
+                            console.log(colors.cyan(`[AuthToken] Refreshed.`), `Expires in: ${resp.body.expires_in}`);
+                            this.ScopeToken = resp.body;
+                            this.emit('TokenRefresh', resp.body)
+                        })
                         resolve(true)
                     } 
                     else {
-                        console.log(`Key is Fine`, resp.body.client_id, resp.body.scopes, resp.body.expires_in);                  
+                        console.log(colors.cyan(`[AuthToken] Valid.`), `Expires in: ${resp.body.expires_in}`);                  
                         resolve(true)
                     }
                 })
@@ -219,8 +248,9 @@ class mkTwitch extends EventEmitter {
                     responseType: "json"
                 })
                 .then(resp => {
-                    // console.log(`Token Generated using ClientId [${this.Auth.client_id}]`)  
-                    this.BotToken = resp.body;
+                    console.log(colors.cyan(`[AuthToken] Generated. `), `Client ID: [${this.Auth.client_id}]`);
+                    console.log(colors.red(`[!!NOTICE!!] WAITING ON CLIENT INTERACTION VIA PORT: ${this.port}`)); 
+                    this.BotToken = resp.body
                     resolve(true)
                 })
                 .catch(err => {
@@ -256,17 +286,18 @@ class mkTwitch extends EventEmitter {
         this.LoadAuthServer = (port)=>{
             return new Promise((resolve, reject)=>{
                 this.GetToken(this.Auth);
+                this.port = port;
                 this.server = require('http').createServer(this.app)                
                 this.io = new Server(this.server);
                 this.io.on('connection', (socket) => {
                     socket.name = socket.id;
-                    console.log('AUTHSOCKET',`${socket.name} connected from : ${socket.handshake.address}`);            
+                    console.log(colors.magenta('AUTHSOCKET'),`${socket.name} connected from : ${socket.handshake.address}`);            
                     socket.on('disconnect', function () {
-                        console.log('AUTHSOCKET',`${socket.name} disconnected`); 
+                        console.log(colors.magenta('AUTHSOCKET'),`${socket.name} disconnected`); 
                     });
                 });
                 this.server.listen(port, function () {
-                    console.log('Server listening at port :' + port);
+                    console.log(colors.magenta(`[Web Auth server] Opened.`, `Port: ${port}`));
                 });
                 // possibly add the webhook auth code here?
                 resolve(true);

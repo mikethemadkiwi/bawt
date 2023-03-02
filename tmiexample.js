@@ -526,6 +526,7 @@ class PubLib {
                             switch(reward.title){
                                 case 'kiwisdebugbutton':
                                     let d = currentCounts()
+                                    console.log('debug', d)
                                     Madkiwi.io.emit('kiwisdebug', d)
                                     // let userinput = msg.data.redemption.user_input;
                                     // console.log('boop', userinput)
@@ -683,30 +684,15 @@ Madkiwi.on('ScopeToken', async function(data){
         server.listen(port, () => {
             console.log(`listening on *:${port}`);
         });
-        ///////////////////////
-        let timeinmilli = (currentTokens.expires_in * 1000) // should take the seconds and make them into milli
-        let fleDate = (Date.now()+timeinmilli)
-        tDate = (fleDate-300000);
-        let exDate = new Date(fleDate);
-        updateTokens = setInterval(async () => {
-            if (currentTokens.expires_in!=null){
-                // let ltime = tDate - Date.now(); 
-                // if(tDate<=Date.now()){
-                    console.log(`run token refresh`, currentTokens.refresh_token)
-                    Madkiwi.ValidateToken();
-                // }
-                // else{                   
-                //     if(authKeyShow){
-                //         console.log('[AuthDate]', `Key Expires in: [ ${ltime} ]ms or [ ${exDate.getHours()}:${exDate.getMinutes()}:${exDate.getSeconds()} ]`)
-                //     }
-                // }
-            }
-        }, 60000);
-        ///////////////////////
         mKiwi = await _mk.fetchUserByName(Madkiwi.Auth.username)
         _mk.CreateChat()
         let topics = _mk.CreatePubsubTopics(mKiwi[0].id)
         _mk.RestartPub(topics, mKiwi[0].id) 
+})
+Madkiwi.on('TokenRefresh', async function(newTokens){
+    // console.log(newTokens)
+    currentTokens = newTokens;
+    let dbstore = await _db.StoreAuth(newTokens)
 })
 
 
