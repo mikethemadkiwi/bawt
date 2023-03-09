@@ -1,3 +1,5 @@
+const DEBUGSHOW = true;
+//
 const fs = require('fs');
 const path = require('path');
 const got = require('got');
@@ -199,7 +201,9 @@ class mkTwitch extends EventEmitter {
                 })
                 .then(resp => {
                     if (resp.body.expires_in <= 3600) {
-                        console.log(colors.red(`[AuthToken] Renewal Required.`));
+                        if(DEBUGSHOW){
+                                console.log(colors.red(`[AuthToken] Renewal Required.`));
+                        }
                         got({
                             "url": "https://id.twitch.tv/oauth2/token",
                             "method": 'POST',
@@ -215,14 +219,18 @@ class mkTwitch extends EventEmitter {
                             "responseType": 'json'
                         })
                         .then(resp => {
-                            console.log(colors.cyan(`[AuthToken] Refreshed.`), `Expires in: ${resp.body.expires_in}`);
+                            if(DEBUGSHOW){
+                                console.log(colors.cyan(`[AuthToken] Refreshed.`), `Expires in: ${resp.body.expires_in}`);
+                            }
                             this.ScopeToken = resp.body;
                             this.emit('TokenRefresh', resp.body)
                         })
                         resolve(true)
                     } 
                     else {
-                        console.log(colors.cyan(`[AuthToken] Valid.`), `Expires in: ${resp.body.expires_in}`);                  
+                        if(DEBUGSHOW){
+                            console.log(colors.cyan(`[AuthToken] Valid.`), `Expires in: ${resp.body.expires_in}`);                  
+                        }
                         resolve(true)
                     }
                 })
@@ -248,8 +256,10 @@ class mkTwitch extends EventEmitter {
                     responseType: "json"
                 })
                 .then(resp => {
-                    console.log(colors.cyan(`[AuthToken] Generated. `), `Client ID: [${this.Auth.client_id}]`);
-                    console.log(colors.red(`[!!NOTICE!!] WAITING ON CLIENT INTERACTION VIA PORT: ${this.port}`)); 
+                    if(DEBUGSHOW){
+                        console.log(colors.cyan(`[AuthToken] Generated. `), `Client ID: [${this.Auth.client_id}]`);
+                        console.log(colors.red(`[!!NOTICE!!] WAITING ON CLIENT INTERACTION VIA PORT: ${this.port}`)); 
+                    }
                     this.BotToken = resp.body
                     resolve(true)
                 })
@@ -291,9 +301,13 @@ class mkTwitch extends EventEmitter {
                 this.io = new Server(this.server);
                 this.io.on('connection', (socket) => {
                     socket.name = socket.id;
-                    console.log(colors.magenta('AUTHSOCKET'),`${socket.name} connected from : ${socket.handshake.address}`);            
+                    if(DEBUGSHOW){
+                        console.log(colors.magenta('AUTHSOCKET'),`${socket.name} connected from : ${socket.handshake.address}`);            
+                    }
                     socket.on('disconnect', function () {
-                        console.log(colors.magenta('AUTHSOCKET'),`${socket.name} disconnected`); 
+                        if(DEBUGSHOW){
+                                console.log(colors.magenta('AUTHSOCKET'),`${socket.name} disconnected`); 
+                        }
                     });
                 });
                 this.server.listen(port, function () {
