@@ -258,8 +258,8 @@ class mkTwitch extends EventEmitter {
                 .then(resp => {
                     if(DEBUGSHOW){
                         console.log(colors.cyan(`[AuthToken] Generated. `), `Client ID: [${this.Auth.client_id}]`);
-                        console.log(colors.red(`[!!NOTICE!!] WAITING ON CLIENT INTERACTION VIA PORT: ${this.port}`)); 
                     }
+                    console.log(colors.red(`[!!NOTICE!!] WAITING ON CLIENT INTERACTION VIA PORT: ${this.port}`)); 
                     this.BotToken = resp.body
                     resolve(true)
                 })
