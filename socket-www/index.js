@@ -35,6 +35,7 @@ class CSSAnim {
     }, dur);
   }
 }
+
 socket.on('userJoin', function(msgData) {
     console.log('userJoin',msgData)
     if(chatList[msgData.display_name]!=null){
@@ -48,6 +49,7 @@ socket.on('userJoin', function(msgData) {
     _css.raiseEyeLeft(2500);
     _css.makeRedEyes(2500);
 });
+
 socket.on('userPart', function(msgData) {
     console.log('userPart',msgData)
     if(chatList[msgData.display_name]!=null){
@@ -62,11 +64,12 @@ socket.on('userPart', function(msgData) {
     _css.raiseEyeLeft(2500);
     _css.makeRedEyes(2500);
 });
+
+
 socket.on('LookMa', function(msgData) {
     console.log('LookMa',msgData)
     let _css = new CSSAnim;
     let dragonflame = document.getElementById('dragonflame')
-    let dragonname =  document.getElementById('dragonname')
     dragonflame.style.display = 'block';
     _css.makeRedEyes(2500);
     let flametimer = setTimeout(()=>{
@@ -74,13 +77,14 @@ socket.on('LookMa', function(msgData) {
     }, 2500)
 });
 
-socket.on('hosted', function(msgData) {
-    // console.log('hosted',msgData)
-    let audSrc = `./sounds/host/${msgData[4]}`;
-    document.getElementById('shoutout').innerHTML = `<audio id="audio-player" controls="controls" src="${audSrc}" type="audio/mpeg" autoplay="true">`;
-    document.getElementById('audio-player').style.display = 'none';
-    document.getElementById('audio-player').setAttribute("autoplay","autoplay");
-    let _css = new CSSAnim;
-    _css.raiseEyeLeft(2500);
-    _css.makeRedEyes(2500);
+
+
+
+
+
+
+
+
+socket.on('kiwisdebug', function(msgData) {
+    console.log('gandaulf is cool', msgData)
 });

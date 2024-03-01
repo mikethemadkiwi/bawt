@@ -15,7 +15,7 @@ const colors = require('colors');
 class mkTwitch extends EventEmitter {
     constructor(authfile, currentToken){
         super();
-        this.Auth = authfile;
+        this.Auth = require('../kiwiauth/twitch/oauth2.json');;
         this.port = null;
         this.currentToken = currentToken;
         this.BotToken = null;
@@ -228,9 +228,9 @@ class mkTwitch extends EventEmitter {
                         resolve(true)
                     } 
                     else {
-                        if(DEBUGSHOW){
-                            console.log(colors.cyan(`[AuthToken] Valid.`), `Expires in: ${resp.body.expires_in}`);                  
-                        }
+                        // if(DEBUGSHOW){
+                        //     console.log(colors.cyan(`[AuthToken] Valid.`), `Expires in: ${resp.body.expires_in}`);                  
+                        // }
                         resolve(true)
                     }
                 })

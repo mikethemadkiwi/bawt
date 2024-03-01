@@ -1,6 +1,7 @@
-let MKAuth = require('./mk_twitchauth.js');
+// let MKAuth = require('./mk_twitchauth.js');
 let currentTokens = {};
-let updateTokens = {};
+let currentMeta = {};
+let keyupdate;
 /////////////////////////
 let otherJoinShow = false;
 let otherPartShow = false;
@@ -38,7 +39,10 @@ const colors = require('colors');
 const mysql = require('mysql');
 ////
 const io = new Server(server);
-const Madkiwi = new MKAuth(TwitchConf);
+let Madkiwi = {
+    Auth: TwitchConf,
+    ScopeToken: {}
+};
 socketapp.use(bodyParser.json());
 socketapp.use(bodyParser.urlencoded({ extended: false }));
 socketapp.use(cookieParser());
@@ -53,87 +57,37 @@ let DBConn_Server = null;
 let tDate = null;
 // Database
 class DBObject {
-    initiateMe(auth){
-        this.auth = auth;
+    FetchAuth(){
         return new Promise((resolve, reject)=>{
             if(DBConn_Server!=null){                
                 DBConn_Server.end();
                 DBConn_Server = null;
             }
-            DBConn_Server = mysql.createConnection(this.auth);
+            DBConn_Server = new mysql.createConnection(DBAUTH);
             DBConn_Server.connect(function(err) {
-                if (err) throw err;
-                console.log('Database Connection Created')         
-              });
-
-            DBConn_Server.on('error', function(err) {
-                console.log('DB CONNECTION ERROR', err.code); // 'ER_BAD_DB_ERROR'
-                DBConn_Server.end();
-                let reconn = setTimeout(() => {
-                    DBConn_Server.connect();
-                    console.log('Database Connection Recreated')
-                }, 5000);              
+                if (err) throw err;    
             });
-            resolve(true)
-        })
-    }
-    exterminateMe(){
-        return new Promise((resolve, reject)=>{
-            DBConn_Server.end();
-            DBConn_Server = null;
-            console.log('Database Connection Terminated')
-            resolve(true)
-        })
-    }
-    SanityCheck(){
-        return new Promise((resolve, reject)=>{
-            let rand1 = Math.floor(Math.random() * 2600);
-            let rand2 = Math.floor(Math.random() * 1337);
-            let qStr = `SELECT ${rand1} + ${rand2} AS solution`
+
+            let qStr = `SELECT * from twitch`
             DBConn_Server.query(qStr, function (error, results, fields) {
                 if (error) {
                     reject(error)
                     return;
                 };
-                console.log(`[Database] Sanity Check : ${rand1} + ${rand2} Result:`, results[0].solution);
-                resolve(true)
+                //
+                let ta = JSON.parse(results[0].Auth);
+                currentTokens = ta
+                currentMeta = JSON.parse(results[0].Meta);
+                resolve(ta)
             });
-            
-        })
-    }
-    StoreAuth(auth){
-        return new Promise((resolve, reject)=>{
-            console.log(`[Storing Auth]`)
-            resolve(true)
-        })
-    }
-    CurrentKey(){        
-        return new Promise((resolve, reject)=>{
-            console.log(`[Checking Expired_in Data for Current Key]`)
-            got({
-                url: "https://id.twitch.tv/oauth2/validate",
-                method: "GET",
-                headers: {
-                    Authorization: "OAuth " + currentTokens
-                },
-                responseType: "json"
-            })
-            .then(resp => {
-                if (resp.body.expires_in <= 3600) {
-                    console.log(`Renewal Required for Token`, resp.body.client_id, resp.body.scopes, resp.body.expires_in);
-                    this.GetToken();
-                    resolve(true)
-                } 
-                else {
-                    console.log(`Key is Fine`, resp.body.client_id, resp.body.scopes, resp.body.expires_in);                  
-                    resolve(true)
-                }
-            })
-            .catch(err => {
-                console.error(err);
-                resolve(false)
+            DBConn_Server.on('error', function(err) {
+                console.log('DB CONNECTION ERROR', err.code); // 'ER_BAD_DB_ERROR'
+                DBConn_Server.end();
+                let reconn = setTimeout(() => {
+                    DBConn_Server.connect();
+                }, 5000);              
             });
-            resolve(true)
+            // resolve(currentTokens)
         })
     }
 }
@@ -157,34 +111,34 @@ class MKGame {
     }
 }
 class MKUtils {
-        CreateChat = function(){                
+        CreateChat = function(TAUTH){            
                 MKClient['twitchchat'] = new tmi.client({
                         identity: {
-                        username: Madkiwi.Auth.username,
-                        password: Madkiwi.ScopeToken.access_token
+                        username: TwitchConf.username,
+                        password: TAUTH.access_token
                         },
                         channels: ['mikethemadkiwi']
                 })
                 // Listeners
                 MKClient['twitchchat'].connect().catch(err => {console.error("Chatbot Connection Error", (err.body ? err.body : err))});
                 MKClient['twitchchat'].on('connected', (addr, port)=>{
-                        console.log(`${Madkiwi.Auth.username} Connected to ${addr}:${port}`);
+                        console.log(`${TwitchConf.username} Connected to ${addr}:${port}`);
                 });
                 MKClient['twitchchat'].on('join', async (channel, username, self)=>{
                         if(!self){
                             if(channel == '#mikethemadkiwi'){
                                 let _mk = new MKUtils;
                                 let apiuser = await _mk.fetchUserByName(username)
-                                let temptchan = `#${username}`;
-                                if(ChansToJoin[temptchan]==null){
-                                    ChansToJoin.push(temptchan)
-                                    MKClient['twitchchat'].join(temptchan).then((data) => {
-                                        // data returns [channel]
-                                        // console.log(temptchan, data)
-                                    }).catch((err) => {
-                                        //
-                                    });
-                                }
+                                // let temptchan = `#${username}`;
+                                // if(ChansToJoin[temptchan]==null){
+                                //     ChansToJoin.push(temptchan)
+                                //     MKClient['twitchchat'].join(temptchan).then((data) => {
+                                //         // data returns [channel]
+                                //         // console.log(temptchan, data)
+                                //     }).catch((err) => {
+                                //         //
+                                //     });
+                                // }
                                 io.emit('userJoin', apiuser)
                                 console.log(colors.green('[JOIN]'), channel, username)
                                 localJoinCount++;
@@ -379,18 +333,18 @@ class MKUtils {
         ListentoPubsubTopics = function (topics){
             let pck = {}
             pck.type = 'LISTEN';
-            pck.nonce = Madkiwi.Auth.username + '-' + new Date().getTime();
+            pck.nonce = TwitchConf.username + '-' + new Date().getTime();
             pck.data = {};
             pck.data.topics = topics;
-            pck.data.auth_token = Madkiwi.ScopeToken.access_token;
+            pck.data.auth_token = currentTokens.access_token;
             MKClient['pubsub'].send(JSON.stringify(pck));
         }        
         fetchUserByName(name){
             return new Promise((resolve, reject) => {
-                let tmpAuth = Madkiwi.ScopeToken.access_token;
+                let tmpAuth = currentTokens.access_token;
                 let fetchu = fetchUrl(`https://api.twitch.tv/helix/users?login=${name}`,
                 {"headers": {
-                        "Client-ID": Madkiwi.Auth.client_id,
+                        "Client-ID": TwitchConf.client_id,
                         "Authorization": "Bearer " + tmpAuth
                         }
                 },
@@ -403,10 +357,10 @@ class MKUtils {
         }
         fetchUserById(uId){
             return new Promise((resolve, reject) => {
-                let tmpAuth = Madkiwi.ScopeToken.access_token;
+                let tmpAuth = currentTokens.access_token;
                 let fetchu = fetchUrl(`https://api.twitch.tv/helix/users?id=${uId}`,
                 {"headers": {
-                        "Client-ID": Madkiwi.Auth.client_id,
+                        "Client-ID": TwitchConf.client_id,
                         "Authorization": "Bearer " + tmpAuth
                         }
                 },
@@ -419,10 +373,10 @@ class MKUtils {
         }
         isUserSubscribed(userid){
             return new Promise((resolve, reject) => {
-                let tmpAuth = Madkiwi.ScopeToken.access_token;
+                let tmpAuth = currentTokens.access_token;
                 let fetchu = fetchUrl(`https://api.twitch.tv/helix/subscriptions/user?broadcaster_id=${mKiwi[0].id}&user_id=${userid}`,
                 {"headers": {
-                        "Client-ID": Madkiwi.Auth.client_id,
+                        "Client-ID": TwitchConf.client_id,
                         "Authorization": "Bearer " + tmpAuth
                         }
                 },
@@ -465,14 +419,14 @@ ping.sendPing = function() {
     } catch (e) {
         console.log('pubsub error:',e);
         MKClient['pubsub'].close();
-        start();
+        ping.start();
     }
 }
 ping.awaitPong = function() {
     ping.pingtimeout = setTimeout(function() {
         console.log('Pubsub Ping','WS Pong Timeout');
         MKClient['pubsub'].close();
-        start();
+        ping.start();
     }, 10000)
 }
 ping.gotPong = function() {
@@ -525,14 +479,12 @@ class PubLib {
                             console.log(colors.green('[POINTS]'), reward.title, redeemer.display_name) 
                             switch(reward.title){
                                 case 'kiwisdebugbutton':
-                                    let d = currentCounts()
+                                    let d = {                                        
+                                        userinput: msg.data.redemption.user_input,
+                                        rewardData: rewardData
+                                    }
                                     console.log('debug', d)
-                                    Madkiwi.io.emit('kiwisdebug', d)
-                                    // let userinput = msg.data.redemption.user_input;
-                                    // console.log('boop', userinput)
-                                    // Madkiwi.io.emit('kiwisdebug',rewardData)
-                                    // let issubbed = await _mk.isUserSubscribed(redeemer.id);
-                                    // console.log('issubbed?', issubbed)
+                                    io.emit('kiwisdebug', d)
                                 break;
                                 case'LookMa':
                                     io.emit('LookMa', rewardData)  
@@ -541,32 +493,32 @@ class PubLib {
                                 case'Teamspeak':
                                     MKClient['twitchchat'].say('#mikethemadkiwi', `Teamspeak Deets: ts3://mad.kiwi:9987`)  
                                 break;
-                                case'TotalCunt':
-                                    Madkiwi.io.emit('totalcunt', rewardData)
-                                break;
                                 case'EffYou':
-                                    Madkiwi.io.emit('effyou', rewardData)
+                                    io.emit('effyou', rewardData)
+                                break;
+                                case'TotalCunt':
+                                    io.emit('totalcunt', rewardData)
                                 break;
                                 case'DumbAnswer':
-                                    Madkiwi.io.emit('dumbanswer', rewardData)
+                                    io.emit('dumbanswer', rewardData)
                                 break;
                                 case'Honk':                                
                                     MKClient['twitchchat'].say('#mikethemadkiwi', `Honking for @${redeemer.display_name}`)
-                                    Madkiwi.io.emit('Honk', rewardData)
+                                    io.emit('Honk', rewardData)
                                 break;
                                 case'BunnySays':                
                                     let fs = require('fs');
                                     let files = fs.readdirSync('public/sounds/host/');
                                     let rFile = Math.floor(Math.random() * files.length);
                                     let fileSTR = `${files[rFile]}`;
-                                    Madkiwi.io.emit('BunnySays', fileSTR)
+                                    io.emit('BunnySays', fileSTR)
                                     MKClient['twitchchat'].say('#mikethemadkiwi', `Playing [${fileSTR.substring(0, fileSTR.length-4)}] for @${redeemer.display_name}`)
                                 break;
                                 case'Guildwars2':
                                     MKClient['twitchchat'].say('#mikethemadkiwi', `|| mikethemadkiwi.6058 || plays on || Henge of Denravi - US ||`)
                                 break;   
                                 case'ShoutOut':
-                                    Madkiwi.io.emit('ShoutOut', rewardData)  
+                                    io.emit('ShoutOut', rewardData)  
                                     MKClient['twitchchat'].say('#mikethemadkiwi', `You should all go follow ${redeemer.display_name} @ twitch.tv/${redeemer.display_name} because i fuggin said so. They are amazing. I'm a bot, i'm totally capable of making that observation.`)
                                 break;
                                 case 'KiwisWeather':
@@ -597,6 +549,25 @@ class PubLib {
                                         MKClient['twitchchat'].say('#mikethemadkiwi', 'Find your weather code at https://openweathermap.org/city/ and use it  like this || `weather CITYID').catch(function(err){
                                             console.log(err)
                                         });                              
+                                    })
+                                break;
+                                case twitchage:
+                                    let tmpAuth = currentTokens.access_token;
+                                    let fetchu = fetchUrl(`https://api.twitch.tv/helix/user?login=${redeemer.display_name}`,
+                                    {"headers": {
+                                            "Client-ID": TwitchConf.client_id,
+                                            "Authorization": "Bearer " + tmpAuth
+                                            }
+                                    },
+                                    function(error, meta, body){
+                                            let bs = JSON.parse(body);
+                                            console.log(bs)
+                                            // if(bs.data){
+                                            //     resolve(bs.data)
+                                            // }
+                                            // else{
+                                            //     resolve({})
+                                            // }
                                     })
                                 break;
                                 default:
@@ -674,31 +645,24 @@ class PubLib {
 // START ENGINE
 ///////////////////////////////////////
 let _db = new DBObject;
+let _mk = new MKUtils;
+server.listen(port, () => {
+    console.log(`listening on *:${port}`);
+});
 let startNow = setTimeout(async () => {
-    let dbstart = await _db.initiateMe(DBAUTH);
-    let dbsanity = await _db.SanityCheck(); 
-    Madkiwi.LoadAuthServer(8081);   
-}, 500);
+    let auth = await _db.FetchAuth();
+    keyupdate = setInterval(async () => {
+        let auth = await _db.FetchAuth();
+    }, 60000);
 
-Madkiwi.on('ScopeToken', async function(data){
-        let _mk = new MKUtils;
-        currentTokens = data;
-        let dbstore = await _db.StoreAuth(currentTokens)    
-        server.listen(port, () => {
-            console.log(`listening on *:${port}`);
-        });
-        mKiwi = await _mk.fetchUserByName(Madkiwi.Auth.username)
-        _mk.CreateChat()
-        let topics = _mk.CreatePubsubTopics(mKiwi[0].id)
-        _mk.RestartPub(topics, mKiwi[0].id) 
-})
-Madkiwi.on('TokenRefresh', async function(newTokens){
-    // console.log(newTokens)
-    currentTokens = newTokens;
-    let dbstore = await _db.StoreAuth(newTokens)
-})
+    //
+    _mk.CreateChat(auth)
+    mKiwi = await _mk.fetchUserByName(TwitchConf.username)
+    let topics = _mk.CreatePubsubTopics(mKiwi[0].id)
+    _mk.RestartPub(topics, mKiwi[0].id)
+    //
 
-
+}, 500); 
 
 io.on('connection', (socket) => {
   socket.name = socket.id;
