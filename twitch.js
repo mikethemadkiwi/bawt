@@ -129,9 +129,19 @@ class MKUtils {
                             if(channel == '#mikethemadkiwi'){
                                 let _mk = new MKUtils;
                                 let apiuser = await _mk.fetchUserByName(username)
+                                // let temptchan = `#${username}`;
+                                // if(ChansToJoin[temptchan]==null){
+                                //     ChansToJoin.push(temptchan)
+                                //     MKClient['twitchchat'].join(temptchan).then((data) => {
+                                //         // data returns [channel]
+                                //         // console.log(temptchan, data)
+                                //     }).catch((err) => {
+                                //         //
+                                //     });
+                                // }
                                 io.emit('userJoin', apiuser)
                                 let now = new Date(Date.now())
-                                console.log(now, colors.green('[JOIN]'), channel, username, apiuser[0].created_at)
+                                console.log(now, localJoinCount, colors.green('[JOIN]'), channel, username, apiuser[0].created_at)
                                 localJoinCount++;
                             }
                             else{   
@@ -147,7 +157,7 @@ class MKUtils {
                 });
                 MKClient['twitchchat'].on('part', async (channel, username, self)=>{           
                         if(!self){
-                            if(channel == '#mikethemadkiwi'){
+                            if(channel == '#mikethemadkiwi'){                                
                                 let now = new Date(Date.now())
                                 console.log(now, colors.green('[PART]'), channel, username)
                                 localPartCount++;
@@ -299,7 +309,7 @@ class MKUtils {
                                 }
                                 else {
                                     let now = new Date(Date.now())
-                                    console.log(now, colors.green('[CHAT]'), context.username, msg)
+                                console.log(now, colors.green('[CHAT]'), context.username, msg)
                                 }
                     }
                     else{
