@@ -129,18 +129,9 @@ class MKUtils {
                             if(channel == '#mikethemadkiwi'){
                                 let _mk = new MKUtils;
                                 let apiuser = await _mk.fetchUserByName(username)
-                                // let temptchan = `#${username}`;
-                                // if(ChansToJoin[temptchan]==null){
-                                //     ChansToJoin.push(temptchan)
-                                //     MKClient['twitchchat'].join(temptchan).then((data) => {
-                                //         // data returns [channel]
-                                //         // console.log(temptchan, data)
-                                //     }).catch((err) => {
-                                //         //
-                                //     });
-                                // }
                                 io.emit('userJoin', apiuser)
-                                console.log(colors.green('[JOIN]'), channel, username)
+                                let now = new Date(Date.now())
+                                console.log(now, colors.green('[JOIN]'), channel, username, apiuser[0].created_at)
                                 localJoinCount++;
                             }
                             else{   
@@ -157,7 +148,8 @@ class MKUtils {
                 MKClient['twitchchat'].on('part', async (channel, username, self)=>{           
                         if(!self){
                             if(channel == '#mikethemadkiwi'){
-                                console.log(colors.green('[PART]'), channel, username)
+                                let now = new Date(Date.now())
+                                console.log(now, colors.green('[PART]'), channel, username)
                                 localPartCount++;
                             }
                             else{                                
@@ -293,12 +285,21 @@ class MKUtils {
                                                     console.log(err)
                                                 }); 
                                             break;
+                                            // case '`twitchage':
+                                            //     let _mk = new MKUtils;
+                                            //     let apiuser = await _mk.fetchUserByName(context.username)
+                                            //     // console.log(apiuser[0].created_at)                                                
+                                            //     MKClient['twitchchat'].say('#mikethemadkiwi', `Account Creation Date for ${apiuser[0].display_name}: ${apiuser[0].created_at}`).catch(function(err){
+                                            //         console.log(err)
+                                            //     }); 
+                                            // break;
                                             default:
                                                 // do nothing if the default fires  
                                         }         
                                 }
                                 else {
-                                    console.log(colors.green('[CHAT]'), context.username, msg)
+                                    let now = new Date(Date.now())
+                                    console.log(now, colors.green('[CHAT]'), context.username, msg)
                                 }
                     }
                     else{
@@ -484,29 +485,37 @@ class PubLib {
                                         rewardData: rewardData
                                     }
                                     console.log('debug', d)
-                                    io.emit('kiwisdebug', d)
+                                    io.emit('kiwisdebug', d)                              
                                 break;
-                                case'LookMa':
+                                case 'TwitchAge':
+                                    let _mk = new MKUtils;
+                                    let apiuser = await _mk.fetchUserByName(redeemer.display_name)
+                                    // console.log(apiuser[0].created_at)                                                
+                                    MKClient['twitchchat'].say('#mikethemadkiwi', `Account Creation Date for ${apiuser[0].display_name}: ${apiuser[0].created_at}`).catch(function(err){
+                                        console.log(err)
+                                    }); 
+                                break;
+                                case 'LookMa':
                                     io.emit('LookMa', rewardData)  
                                     MKClient['twitchchat'].say('#mikethemadkiwi', `Look @${redeemer.display_name} I'm a Dragon!!`)  
                                 break;
-                                case'Teamspeak':
+                                case 'Teamspeak':
                                     MKClient['twitchchat'].say('#mikethemadkiwi', `Teamspeak Deets: ts3://mad.kiwi:9987`)  
                                 break;
-                                case'EffYou':
+                                case 'EffYou':
                                     io.emit('effyou', rewardData)
                                 break;
-                                case'TotalCunt':
+                                case 'TotalCunt':
                                     io.emit('totalcunt', rewardData)
                                 break;
-                                case'DumbAnswer':
+                                case 'DumbAnswer':
                                     io.emit('dumbanswer', rewardData)
                                 break;
-                                case'Honk':                                
+                                case 'Honk':                                
                                     MKClient['twitchchat'].say('#mikethemadkiwi', `Honking for @${redeemer.display_name}`)
                                     io.emit('Honk', rewardData)
                                 break;
-                                case'BunnySays':                
+                                case 'BunnySays':                
                                     let fs = require('fs');
                                     let files = fs.readdirSync('public/sounds/host/');
                                     let rFile = Math.floor(Math.random() * files.length);
@@ -514,10 +523,10 @@ class PubLib {
                                     io.emit('BunnySays', fileSTR)
                                     MKClient['twitchchat'].say('#mikethemadkiwi', `Playing [${fileSTR.substring(0, fileSTR.length-4)}] for @${redeemer.display_name}`)
                                 break;
-                                case'Guildwars2':
+                                case 'Guildwars2':
                                     MKClient['twitchchat'].say('#mikethemadkiwi', `|| mikethemadkiwi.6058 || plays on || Henge of Denravi - US ||`)
                                 break;   
-                                case'ShoutOut':
+                                case 'ShoutOut':
                                     io.emit('ShoutOut', rewardData)  
                                     MKClient['twitchchat'].say('#mikethemadkiwi', `You should all go follow ${redeemer.display_name} @ twitch.tv/${redeemer.display_name} because i fuggin said so. They are amazing. I'm a bot, i'm totally capable of making that observation.`)
                                 break;
