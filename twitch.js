@@ -711,9 +711,15 @@ let startNow = setTimeout(async () => {
     keyupdate = setInterval(async () => {
         let auth = await _db.FetchAuth();
         let ac = await _mk.CheckAds(mKiwi)
-        console.log(ac)
         if (ac[0] == 'Ads'){
-            io.emit('Ads', 90)  
+            io.emit('Ads', 90)
+            let adsStr = `Ads are Playing! Kiwi Runs 1:30m Worth of ads to scare away Prerolls! Thanks for your Patience!`
+            MKClient['twitchchat'].say('#mikethemadkiwi', adsStr).catch(function(err){
+                console.log(err)
+            });
+        }
+        if (ac[0] == 'NextRun'){
+            console.log(ac)
         }
     }, 60000);
     //
