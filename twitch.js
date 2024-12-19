@@ -54,7 +54,7 @@ const ChansToJoin = [];
 let mKiwi;
 const weathertimeout = [];
 let DBConn_Server = null;
-let tDate = null;
+let tDate = Date.now();
 // Database
 class DBObject {
     FetchAuth(){
@@ -140,14 +140,13 @@ class MKUtils {
                                 //     });
                                 // }
                                 io.emit('userJoin', apiuser)
-                                let now = new Date(Date.now())
-                                console.log(now, localJoinCount, colors.green('[JOIN]'), channel, username, apiuser[0].created_at)
+                                console.log(new Date(Date.now()), colors.green('[JOIN]'), channel, username, apiuser[0].created_at)
                                 localJoinCount++;
                             }
                             else{   
 
                                 if(otherJoinShow){ // i should make this a function that stil.l logs to DB
-                                    console.log(colors.grey('[JOIN]'), channel, username)
+                                    console.log(new Date(Date.now()), colors.grey('[JOIN]'), channel, username)
                                 }
                                 otherJoinCount++;
                             }
@@ -157,14 +156,13 @@ class MKUtils {
                 });
                 MKClient['twitchchat'].on('part', async (channel, username, self)=>{           
                         if(!self){
-                            if(channel == '#mikethemadkiwi'){                                
-                                let now = new Date(Date.now())
-                                console.log(now, colors.green('[PART]'), channel, username)
+                            if(channel == '#mikethemadkiwi'){
+                                console.log(new Date(Date.now()), colors.green('[PART]'), channel, username)
                                 localPartCount++;
                             }
                             else{                                
                                 if(otherPartShow){
-                                    console.log(colors.grey('[PART]'), channel, username)
+                                    console.log(new Date(Date.now()), colors.grey('[PART]'), channel, username)
                                 }
                                 otherPartCount++;
                             }
@@ -308,8 +306,7 @@ class MKUtils {
                                         }         
                                 }
                                 else {
-                                    let now = new Date(Date.now())
-                                console.log(now, colors.green('[CHAT]'), context.username, msg)
+                                    console.log(colors.green('[CHAT]'), context.username, msg)
                                 }
                     }
                     else{
@@ -402,7 +399,42 @@ class MKUtils {
                         }
                 })
             })
-        } 
+        }
+        CheckAds(account){
+            return new Promise((resolve, reject) => {
+                let checkDT = Date.now()
+                if (checkDT >= tDate){
+                    //
+                    tDate = (Date.now()+1200000)
+                    //
+                    let tmpAuth = currentTokens.access_token;
+                    got({
+                        "url": "https://api.twitch.tv/helix/channels/commercial",
+                        "method": 'POST',
+                        "headers": {                            
+                            "Client-ID": TwitchConf.client_id,
+                            "Authorization": "Bearer " + tmpAuth
+                        },
+                        "form": {
+                            "broadcaster_id": mKiwi[0].id,
+                            "length": 90
+                        },
+                        "responseType": 'json'
+                    })
+                    .then(resp => {
+                        resolve(['Ads', resp])                    
+                    })
+                    .catch(err => {
+                        console.error('Error body:', err.response.body);
+                    });
+                }
+                else {
+                    let diff = (tDate-checkDT)
+                    let diffm = Math.floor((diff/1000)/60)
+                    resolve(['NextRun', diffm])
+                }
+            })    
+        }
 }
 ///////////////////////////////////////
 // PingLib
@@ -670,17 +702,21 @@ server.listen(port, () => {
 });
 let startNow = setTimeout(async () => {
     let auth = await _db.FetchAuth();
-    keyupdate = setInterval(async () => {
-        let auth = await _db.FetchAuth();
-    }, 60000);
-
     //
     _mk.CreateChat(auth)
     mKiwi = await _mk.fetchUserByName(TwitchConf.username)
     let topics = _mk.CreatePubsubTopics(mKiwi[0].id)
     _mk.RestartPub(topics, mKiwi[0].id)
     //
-
+    keyupdate = setInterval(async () => {
+        let auth = await _db.FetchAuth();
+        let ac = await _mk.CheckAds(mKiwi)
+        console.log(ac)
+        if (ac[0] == 'Ads'){
+            io.emit('Ads', 90)  
+        }
+    }, 60000);
+    //
 }, 500); 
 
 io.on('connection', (socket) => {

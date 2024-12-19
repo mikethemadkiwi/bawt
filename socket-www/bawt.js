@@ -51,9 +51,36 @@ socket.on('totalcunt', function(msgData) {
     const box = document.getElementById('vidContainer');
     box.appendChild(video);
 });
-
-
+socket.on('Ads', function(msgData) {
+    const box = document.getElementById('AdsContainer');
+    let johnImg = document.createElement('img');
+    johnImg.src = "https://mad.kiwi/purplemonkeydishwasher/media/img/draper.jpg";
+    box.appendChild(johnImg);
+    let johnTxt = document.createElement('p');
+    johnTxt.innerHTML = "<br />Currently Running Ads!"
+    box.appendChild(johnTxt); 
+    //
+    let audSrc3 = `../sounds/Morse.ogg`;
+    const audio3 = document.createElement('audio');
+    audio3.src = audSrc3;
+    audio3.autoplay = true;
+    audio3.controls = false;
+    audio3.muted = false;
+    audio3.volume = 0.75;
+    audio3.addEventListener("ended", function(){
+        console.log('audio3ended');
+        document.getElementById('AudContainer').innerHTML = null;
+    });
+    document.getElementById('AudContainer').innerHTML = null;
+    const box2 = document.getElementById('AudContainer');
+    box2.appendChild(audio3);
+    //
+    setTimeout(() => {
+        document.getElementById('AdsContainer').innerHTML = null;
+    }, 90000);
+});
 const shoutList = [];
+const adList = [];
 const sCanvas = document.getElementById('shoutCanvas');
 const ctx = sCanvas.getContext("2d");
 const Loop = {
