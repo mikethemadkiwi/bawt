@@ -602,25 +602,6 @@ class PubLib {
                                         });                              
                                     })
                                 break;
-                                case twitchage:
-                                    let tmpAuth = currentTokens.access_token;
-                                    let fetchu = fetchUrl(`https://api.twitch.tv/helix/user?login=${redeemer.display_name}`,
-                                    {"headers": {
-                                            "Client-ID": TwitchConf.client_id,
-                                            "Authorization": "Bearer " + tmpAuth
-                                            }
-                                    },
-                                    function(error, meta, body){
-                                            let bs = JSON.parse(body);
-                                            console.log(bs)
-                                            // if(bs.data){
-                                            //     resolve(bs.data)
-                                            // }
-                                            // else{
-                                            //     resolve({})
-                                            // }
-                                    })
-                                break;
                                 default:
                                     console.log('UNREGISTERED CHANNEL POINT REDEEM', `${reward.title} [${redeemer.display_name}]`, reward)                
                             }
