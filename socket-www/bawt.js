@@ -53,12 +53,8 @@ socket.on('totalcunt', function(msgData) {
 });
 socket.on('Ads', function(msgData) {
     const box = document.getElementById('AdsContainer');
-    let johnImg = document.createElement('img');
-    johnImg.src = "https://mad.kiwi/purplemonkeydishwasher/media/img/draper.jpg";
-    box.appendChild(johnImg);
-    let johnTxt = document.createElement('p');
-    johnTxt.innerHTML = "<br />Currently Running Ads!"
-    box.appendChild(johnTxt); 
+    let boxinner = `<img src='img/draper.jpg' /><p>Currently Running Ads!</p>`;
+    box.innerHTML = boxinner
     //
     let audSrc3 = `../sounds/Morse.ogg`;
     const audio3 = document.createElement('audio');
@@ -66,7 +62,7 @@ socket.on('Ads', function(msgData) {
     audio3.autoplay = true;
     audio3.controls = false;
     audio3.muted = false;
-    audio3.volume = 0.75;
+    audio3.volume = 0.25;
     audio3.addEventListener("ended", function(){
         console.log('audio3ended');
         document.getElementById('AudContainer').innerHTML = null;
@@ -77,7 +73,7 @@ socket.on('Ads', function(msgData) {
     //
     setTimeout(() => {
         document.getElementById('AdsContainer').innerHTML = null;
-    }, 90000);
+    }, 5000);
 });
 const shoutList = [];
 const adList = [];
