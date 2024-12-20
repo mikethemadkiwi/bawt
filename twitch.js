@@ -52,6 +52,7 @@ const sockets = [];
 const MKClient = [];
 const ChansToJoin = [];
 let mKiwi;
+let mStream;
 const weathertimeout = [];
 let DBConn_Server = null;
 let tDate = Date.now();
@@ -379,6 +380,22 @@ class MKUtils {
                 })
             })
         }
+        fetchStreamById(uId){
+            return new Promise((resolve, reject) => {
+                let tmpAuth = currentTokens.access_token;
+                let fetchu = fetchUrl(`https://api.twitch.tv/helix/streams?user_login=${uId}`,
+                {"headers": {
+                        "Client-ID": TwitchConf.client_id,
+                        "Authorization": "Bearer " + tmpAuth
+                        }
+                },
+                function(error, meta, body){
+                    // console.log('fetchuser:', body)
+                        let bs = JSON.parse(body);
+                        resolve(bs.data)
+                })
+            })
+        }
         isUserSubscribed(userid){
             return new Promise((resolve, reject) => {
                 let tmpAuth = currentTokens.access_token;
@@ -686,23 +703,32 @@ let startNow = setTimeout(async () => {
     //
     _mk.CreateChat(auth)
     mKiwi = await _mk.fetchUserByName(TwitchConf.username)
+    mStream = await _mk.fetchStreamById(TwitchConf.username)
     let topics = _mk.CreatePubsubTopics(mKiwi[0].id)
     _mk.RestartPub(topics, mKiwi[0].id)
     //
     keyupdate = setInterval(async () => {
         let auth = await _db.FetchAuth();
-        let ac = await _mk.CheckAds(mKiwi)
-        if (ac[0] == 'Ads'){
-            io.emit('Ads', 90)
-            let adsStr = `Ads are Playing! Kiwi Runs 1:30m Worth of ads to scare away Prerolls! Thanks for your Patience!`
-            MKClient['twitchchat'].say('#mikethemadkiwi', adsStr).catch(function(err){
-                console.log(err)
-            });
-        }
-        if (ac[0] == 'NextRun'){
-            console.log(ac)
+        mKiwi = await _mk.fetchUserByName(TwitchConf.username)
+        mStream = await _mk.fetchStreamById(TwitchConf.username)
+        if(mStream[0]!=null){
+            if(mStream[0].type=='live'){
+                let ac = await _mk.CheckAds(mKiwi)
+                if (ac[0] == 'Ads'){
+                    console.log(`Viewercount: ${mStream[0].view_count}`, `Running Ads`)
+                    io.emit('Ads', 111)
+                    let adsStr = `Ads are Playing! Kiwi Runs between 1-2 minutes worth of ads every 20 mins to scare away Prerolls! I dont control them!! Thanks for your Patience!`
+                    MKClient['twitchchat'].say('#mikethemadkiwi', adsStr).catch(function(err){
+                        console.log(err)
+                    });
+                }
+                if (ac[0] == 'NextRun'){
+                    console.log(`Viewercount: ${mStream[0].view_count}`, ac)
+                }
+            }
         }
     }, 60000);
+    // console.log(mKiwi,mStream)
     //
 }, 500); 
 
