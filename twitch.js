@@ -522,6 +522,9 @@ class PubLib {
                 } else if (data.type == 'MESSAGE') {
                     var msg = JSON.parse(data.data.message);
                     let pTopic = data.data.topic;
+                    // send to Logger/socket
+                    io.emit('ircd', {pTopic, msg})
+                    //
                     switch(pTopic){
                         case 'channel-bits-events-v2.22703261': // BITTIES
                             console.log(colors.green('[BITS]'), msg)
@@ -707,6 +710,7 @@ let startNow = setTimeout(async () => {
     let topics = _mk.CreatePubsubTopics(mKiwi[0].id)
     _mk.RestartPub(topics, mKiwi[0].id)
     //
+    //
     keyupdate = setInterval(async () => {
         let auth = await _db.FetchAuth();
         mKiwi = await _mk.fetchUserByName(TwitchConf.username)
@@ -715,15 +719,15 @@ let startNow = setTimeout(async () => {
             if(mStream[0].type=='live'){
                 let ac = await _mk.CheckAds(mKiwi)
                 if (ac[0] == 'Ads'){
-                    console.log(`Viewercount: ${mStream[0].view_count}`, `Running Ads`)
-                    io.emit('Ads', 111)
-                    let adsStr = `Ads are Playing! Kiwi Runs between 1-2 minutes worth of ads every 20 mins to scare away Prerolls! I dont control them!! Thanks for your Patience!`
+                    console.log(`Viewercount: ${mKiwi[0].view_count}`, `Running Ads`)
+                    io.emit('Ads', 120)
+                    let adsStr = `Ads are Playing! Kiwisbot Runs between 1-2 minutes worth of ads every 20 mins to scare away Prerolls! I dont trigger them just to annoy you!! Thanks for your Patience!`
                     MKClient['twitchchat'].say('#mikethemadkiwi', adsStr).catch(function(err){
                         console.log(err)
                     });
                 }
                 if (ac[0] == 'NextRun'){
-                    console.log(`Viewercount: ${mStream[0].view_count}`, ac)
+                    console.log(`Viewercount: ${mKiwi[0].view_count}`, ac)
                 }
             }
         }
