@@ -53,6 +53,7 @@ const MKClient = [];
 const ChansToJoin = [];
 let mKiwi;
 let mStream;
+let lastAds;
 const weathertimeout = [];
 let DBConn_Server = null;
 let tDate = Date.now();
@@ -439,7 +440,8 @@ class MKUtils {
                         "responseType": 'json'
                     })
                     .then(resp => {
-                        resolve(['Ads', resp])                    
+                        lastAds = resp.body.data
+                        resolve(['Ads', resp.body.data])                    
                     })
                     .catch(err => {
                         console.error('Error body:', err.response.body);
@@ -715,19 +717,31 @@ let startNow = setTimeout(async () => {
         let auth = await _db.FetchAuth();
         mKiwi = await _mk.fetchUserByName(TwitchConf.username)
         mStream = await _mk.fetchStreamById(TwitchConf.username)
+
+        // console.log(mStream[0], mKiwi[0])
+
         if(mStream[0]!=null){
             if(mStream[0].type=='live'){
                 let ac = await _mk.CheckAds(mKiwi)
                 if (ac[0] == 'Ads'){
-                    console.log(`Viewercount: ${mKiwi[0].view_count}`, `Running Ads`)
                     io.emit('Ads', 120)
                     let adsStr = `Ads are Playing! Kiwisbot Runs between 1-2 minutes worth of ads every 20 mins to scare away Prerolls! I dont trigger them just to annoy you!! Thanks for your Patience!`
                     MKClient['twitchchat'].say('#mikethemadkiwi', adsStr).catch(function(err){
                         console.log(err)
                     });
+                    let nextRuntime = Date.now()+(ac[1][0].retry_after*1000) //date.now+480000 == future tiume
+                    let adtimer = (ac[1][0].length*1000) //90000
+                    let dd = new Date(nextRuntime)
+                    console.log(`Viewercount: ${mStream[0].viewer_count}`, `Running Ads`, ac[1][0].length, `Safe Ad Reload: ${dd}`)
+                    let notifyadend = setTimeout(() => {
+                        let adsStr = `Ads should be over. (${ac[1][0].length}seconds). Welcome Back!`
+                        MKClient['twitchchat'].say('#mikethemadkiwi', adsStr).catch(function(err){
+                            console.log(err)
+                        });
+                    }, adtimer);
                 }
                 if (ac[0] == 'NextRun'){
-                    console.log(`Viewercount: ${mKiwi[0].view_count}`, ac)
+                    console.log(`Viewercount: ${mStream[0].viewer_count}`, ac)
                 }
             }
         }

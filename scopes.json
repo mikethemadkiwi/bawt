@@ -20,7 +20,8 @@
         "user:read:blocked_users":      "View the block list of a user.",
         "user:read:subscriptions":      "Get the details of the users subscription to a channel.",
         "user:manage:blocked_users":    "Manage the block list of a user.",
-        "user:read:email":              "Read authorized user's email address."
+        "user:read:email":              "Read authorized user's email address.",
+        "channel:manage:predictions":   "Manages Channel Predictions Systems"
     },
     "kraken": {
         "channel_check_subscription":   "Read whether a user is subscribed to your channel.",
