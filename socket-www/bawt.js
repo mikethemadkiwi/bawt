@@ -62,7 +62,7 @@ socket.on('Ads', function(msgData) {
     audio3.autoplay = true;
     audio3.controls = false;
     audio3.muted = false;
-    audio3.volume = 0.25;
+    audio3.volume = 0.10;
     audio3.addEventListener("ended", function(){
         console.log('audio3ended');
         document.getElementById('AudContainer').innerHTML = null;
