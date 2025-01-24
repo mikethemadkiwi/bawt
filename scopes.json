@@ -2,6 +2,7 @@
     "helix": {
         "analytics:read:extensions":    "View analytics data for your extensions.",
         "analytics:read:games":         "View analytics data for your games.",
+        "channel:read:ads":             "ads system info endpoint",
         "bits:read":                    "View Bits information for your channel.",
         "channel:edit:commercial":      "Run commercials on a channel",
         "channel:manage:redemptions":   "Manage Channel Points custom rewards and their redemptions on a channel.",
@@ -13,6 +14,7 @@
         "channel:read:subscriptions":   "Get a list of all subscribers to your channel and check if a user is subscribed to your channel",
         "clips:edit":                   "Manage a clip object.",
         "moderation:read":              "Get Moderators/Banned users (and mod/ban events) for a channel and perform AutoMod checks",
+        "moderator:read:followers":      "Holy shit this lets me moderate follower list",
         "user:edit":                    "Manage a user object.",
         "user:edit:broadcast":          "Edit your channel’s broadcast configuration, including extension configuration. (This scope implies user:read:broadcast capability.)",
         "user:read:broadcast":          "View your broadcasting configuration, including extension configurations.",

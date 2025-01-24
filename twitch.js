@@ -53,9 +53,11 @@ const MKClient = [];
 const ChansToJoin = [];
 let mKiwi;
 let mStream;
+let mAds;
 let lastAds;
 const weathertimeout = [];
 let DBConn_Server = null;
+let DBConn_ads = null;
 let tDate = Date.now();
 // Database
 class DBObject {
@@ -90,6 +92,35 @@ class DBObject {
                 }, 5000);              
             });
             // resolve(currentTokens)
+        })
+    }    
+    StoreAdData(addata){
+        return new Promise((resolve, reject)=>{            
+            if(DBConn_ads!=null){                
+                DBConn_ads.end();
+                DBConn_ads = null;
+            }
+            DBConn_ads = new mysql.createConnection(DBAUTH);
+            DBConn_ads.connect(function(err) {
+                if (err) throw err;    
+            });            
+            DBConn_ads.on('error', function(err) {
+                console.log('DB ads connect ERROR', err.code); // 'ER_BAD_DB_ERROR'
+                DBConn_ads.end();
+                let reconn = setTimeout(() => {
+                    DBConn_ads.connect();
+                }, 5000);              
+            });            
+            let prepadData = JSON.stringify(addata)
+            let qStr = `UPDATE twitch SET Ads='${prepadData}' WHERE id='1'`;
+            DBConn_ads.query(qStr, function (error, results, fields) {
+                if (error) {
+                    reject(error)
+                    return;
+                };               
+                console.log(`[Storing Ad Data]`, results.message)
+                resolve(results)
+            });
         })
     }
 }
@@ -147,7 +178,7 @@ class MKUtils {
                             }
                             else{   
 
-                                if(otherJoinShow){ // i should make this a function that stil.l logs to DB
+                                if(otherJoinShow){ // i should make this a function that stil.lconsole.logs to DB
                                     console.log(new Date(Date.now()), colors.grey('[JOIN]'), channel, username)
                                 }
                                 otherJoinCount++;
@@ -295,14 +326,6 @@ class MKUtils {
                                                     console.log(err)
                                                 }); 
                                             break;
-                                            // case '`twitchage':
-                                            //     let _mk = new MKUtils;
-                                            //     let apiuser = await _mk.fetchUserByName(context.username)
-                                            //     // console.log(apiuser[0].created_at)                                                
-                                            //     MKClient['twitchchat'].say('#mikethemadkiwi', `Account Creation Date for ${apiuser[0].display_name}: ${apiuser[0].created_at}`).catch(function(err){
-                                            //         console.log(err)
-                                            //     }); 
-                                            // break;
                                             default:
                                                 // do nothing if the default fires  
                                         }         
@@ -348,7 +371,7 @@ class MKUtils {
             pck.data.topics = topics;
             pck.data.auth_token = currentTokens.access_token;
             MKClient['pubsub'].send(JSON.stringify(pck));
-        }        
+        }       
         fetchUserByName(name){
             return new Promise((resolve, reject) => {
                 let tmpAuth = currentTokens.access_token;
@@ -397,6 +420,21 @@ class MKUtils {
                 })
             })
         }
+        fetchAdsSchedule(uId){            
+            return new Promise((resolve, reject) => {
+                let tmpAuth = currentTokens.access_token;
+                let fetchu = fetchUrl(`https://api.twitch.tv/helix/channels/ads?broadcaster_id=${mKiwi[0].id}`,
+                {"headers": {
+                        "Client-ID": TwitchConf.client_id,
+                        "Authorization": "Bearer " + tmpAuth
+                        }
+                },
+                function(error, meta, body){
+                    let bs = JSON.parse(body);
+                    resolve(bs.data[0])
+                })
+            })
+        }
         isUserSubscribed(userid){
             return new Promise((resolve, reject) => {
                 let tmpAuth = currentTokens.access_token;
@@ -418,7 +456,28 @@ class MKUtils {
                 })
             })
         }
-        CheckAds(account){
+        isUserFollower(userid){
+            return new Promise((resolve, reject)=> {
+                let tmpAuth = currentTokens.access_token;
+                let fetchu = fetchUrl(`https://api.twitch.tv/helix/channels/followers?broadcaster_id=${mKiwi[0].id}&user_id=${userid}`,
+                {"headers": {
+                        "Client-ID": TwitchConf.client_id,
+                        "Authorization": "Bearer " + tmpAuth
+                        }
+                },
+                function(error, meta, body){
+                        let bs = JSON.parse(body);
+                        // console.log(bs)
+                        if(bs.data){
+                            resolve(bs.data)
+                        }
+                        else{
+                            resolve({})
+                        }
+                }) 
+            })
+        }
+        RunAds(account){
             return new Promise((resolve, reject) => {
                 let checkDT = Date.now()
                 if (checkDT >= tDate){
@@ -441,7 +500,8 @@ class MKUtils {
                     })
                     .then(resp => {
                         lastAds = resp.body.data
-                        resolve(['Ads', resp.body.data])                    
+                        // console.log('ad data', lastAds)
+                        resolve(['Ads', checkDT, resp.body.data])                    
                     })
                     .catch(err => {
                         console.error('Error body:', err.response.body);
@@ -450,9 +510,65 @@ class MKUtils {
                 else {
                     let diff = (tDate-checkDT)
                     let diffm = Math.floor((diff/1000)/60)
-                    resolve(['NextRun', diffm])
+                    resolve(['NextRun', checkDT, diffm])
                 }
             })    
+        }
+        spawnHook(type, version, condition) {
+            fetch(
+                'https://api.twitch.tv/helix/eventsub/subscriptions',
+                {
+                    "method": "POST",
+                    "headers": {
+                        "Client-ID": TwitchConf.client_id,
+                        "Authorization": "Bearer " + tmpAuth,
+                        'Content-Type': 'application/json'
+                    },
+                    "body": JSON.stringify({
+                        type,
+                        version,
+                        condition,
+                        transport: {
+                            method: "websocket",
+                            session_id
+                        }
+                    })
+                }
+            )
+                .then(resp => resp.json())
+                .then(resp => {
+                    if (resp.error) {
+                        console.log(`Error with eventsub Call ${type} Call: ${resp.message ? resp.message : ''}`);
+                    } else {
+                       console.log(`Created ${type}`);
+                    }
+                })
+                .catch(err => {
+                    console.log(err);
+                   console.log(`Error with eventsub Call ${type} Call: ${err.message ? err.message : ''}`);
+                });
+        }
+        requestHooks(user_id, my_id) {
+            let eventSubTypes = {
+                'channel.update': { version: "1", condition: { broadcaster_user_id: user_id } },
+                'channel.follow': { version: "2", condition: { broadcaster_user_id: user_id, moderator_user_id: my_id } },
+                //inbound raid
+                'channel.raid': { version: "1", condition: { to_broadcaster_user_id: user_id } },
+        
+                'stream.online': { version: "1", condition: { broadcaster_user_id: user_id } },
+                'stream.offline': { version: "1", condition: { broadcaster_user_id: user_id } },
+        
+                'user.update': { version: "1", condition: { user_id: user_id } }
+            }
+            
+        console.log(`Spawn Topics for ${user_id}`);
+        
+            for (let type in eventSubTypes) {
+            console.log(`Attempt create ${type} - ${user_id}`);
+                let { version, condition } = eventSubTypes[type];
+        
+                this.spawnHook(type, version, condition);
+            }
         }
 }
 ///////////////////////////////////////
@@ -524,7 +640,7 @@ class PubLib {
                 } else if (data.type == 'MESSAGE') {
                     var msg = JSON.parse(data.data.message);
                     let pTopic = data.data.topic;
-                    // send to Logger/socket
+                    // send toconsole.logger/socket
                     io.emit('ircd', {pTopic, msg})
                     //
                     switch(pTopic){
@@ -558,6 +674,26 @@ class PubLib {
                                     MKClient['twitchchat'].say('#mikethemadkiwi', `Account Creation Date for ${apiuser[0].display_name}: ${apiuser[0].created_at}`).catch(function(err){
                                         console.log(err)
                                     }); 
+                                break;
+                                case 'FollowAge':
+                                    let _mk2 = new MKUtils;
+                                    let apiuser2 = await _mk2.isUserFollower(redeemer.id)
+                                    // console.log(apiuser2)
+                                    if (apiuser2[0]!=null) {                                                
+                                        MKClient['twitchchat'].say('#mikethemadkiwi', `Account Follow Date for ${apiuser2[0].user_name}: ${apiuser2[0].followed_at}`).catch(function(err){
+                                            console.log(err)
+                                        }); 
+                                    }
+                                break;
+                                case 'ProveSub':
+                                    let _mk3 = new MKUtils;
+                                    let apiuser3 = await _mk3.isUserSubscribed(redeemer.id)
+                                    console.log(apiuser3)
+                                    // if (apiuser3[0]!=null) {                                                
+                                    //     MKClient['twitchchat'].say('#mikethemadkiwi', `Account Follow Date for ${apiuser3[0].user_name}: ${apiuser3[0].followed_at}`).catch(function(err){
+                                    //         console.log(err)
+                                    //     }); 
+                                    // }
                                 break;
                                 case 'LookMa':
                                     io.emit('LookMa', rewardData)  
@@ -695,6 +831,226 @@ class PubLib {
             });
         }
 }
+// class EventSocket {
+//     counter = 0;
+//     closeCodes = {
+//         4000: "Internal Server Error",
+//         4001: "Client sent inbound traffic",
+//         4002: "Client failed ping-pong",
+//         4003: "Connection unused",
+//         4004: "Reconnect grace time expired",
+//         4005: "Network Timeout",
+//         4006: "Network error",
+//         4007: "Invalid Reconnect",
+//     };
+
+//     constructor({
+//         url = "wss://eventsub.wss.twitch.tv/ws",
+//         connect = false,
+//         silenceReconnect = true,
+//         disableAutoReconnect = false,
+//     }) {
+//         // super();
+
+//         this.silenceReconnect = silenceReconnect;
+//         this.disableAutoReconnect = disableAutoReconnect;
+//         this.mainUrl = url;
+
+//         if (connect) {
+//             this.connect();
+//         }
+//     }
+
+//     mainUrl = "wss://eventsub.wss.twitch.tv/ws";
+//     //mainUrl = "ws://127.0.0.1:8080/ws";
+//     backoff = 0;
+//     backoffStack = 100;
+
+//     connect(url, is_reconnect) {
+//         this.eventsub = {};
+//         this.counter++;
+
+//         url = url ? url : this.mainUrl;
+//         is_reconnect = is_reconnect ? is_reconnect : false;
+
+//         console.debug(`Connecting to ${url}`);
+//         // this overrites and kills the old reference
+//         this.eventsub = new WebSocket(url);
+//         this.eventsub.counter = this.counter;
+
+//         this.eventsub.addEventListener("open", () => {
+//             this.backoff = 0;
+//             console.debug(`Opened Connection to Twitch`);
+//         });
+
+//         // https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/close_event
+//         // https://github.com/Luka967/websocket-close-codes
+//         this.eventsub.addEventListener("close", (close) => {
+//             // forward the close event
+//             this.emit("close", close);
+
+//             console.debug(
+//                 `${this.eventsub.twitch_websocket_id}/${this.eventsub.counter} Connection Closed: ${close.code} Reason - ${this.closeCodes[close.code]}`,
+//             );
+
+//             // 4000 well damn
+//             // 4001 we should never get...
+//             // 4002 make a new socket
+//             if (close.code == 4003) {
+//                 console.debug(
+//                     "Did not subscribe to anything, the client should decide to reconnect (when it is ready)",
+//                 );
+//                 return;
+//             }
+//             if (close.code == 4004) {
+//                 // this is the old connection dying
+//                 // we should of made a new connection to the new socket
+//                 console.debug("Old Connection is 4004-ing");
+//                 return;
+//             }
+//             // 4005 make a new socket
+//             // 4006 make a new socket
+//             // 4007 make a new socket as we screwed up the reconnect?
+
+//             // anything else we should auto reconnect
+//             // but only if the user wants
+//             if (this.disableAutoReconnect) {
+//                 return;
+//             }
+
+//             //console.debug(`for ${this.eventsub.counter} making new`);
+//             this.backoff++;
+//             console.debug("retry in", this.backoff * this.backoffStack);
+//             setTimeout(() => {
+//                 this.connect();
+//             }, this.backoff * this.backoffStack);
+//         });
+//         // https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/error_event
+//         this.eventsub.addEventListener("error", (err) => {
+//             //console.debug(err);
+//             console.debug(
+//                 `${this.eventsub.twitch_websocket_id}/${this.eventsub.counter} Connection Error`,
+//             );
+//         });
+//         // https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/message_event
+//         this.eventsub.addEventListener("message", (message) => {
+//             //console.debug('Message');
+//             //console.debug(this.eventsub.counter, message);
+//             let { data } = message;
+//             data = JSON.parse(data);
+
+//             let { metadata, payload } = data;
+//             let { message_id, message_type, message_timestamp } = metadata;
+//             //console.debug(`Recv ${message_id} - ${message_type}`);
+
+//             switch (message_type) {
+//                 case "session_welcome":
+//                     let { session } = payload;
+//                     let { id, keepalive_timeout_seconds } = session;
+
+//                     console.debug(`${this.eventsub.counter} This is Socket ID ${id}`);
+//                     this.eventsub.twitch_websocket_id = id;
+
+//                     console.debug(
+//                         `${this.eventsub.counter} This socket declared silence as ${keepalive_timeout_seconds} seconds`,
+//                     );
+
+//                     // is this a reconnect?
+//                     if (is_reconnect) {
+//                         // we carried subscriptions over
+//                         this.emit("reconnected", id);
+//                     } else {
+//                         // now you would spawn your topics
+//                         this.emit("connected", id);
+//                     }
+
+//                     this.silence(keepalive_timeout_seconds);
+
+//                     break;
+//                 case "session_keepalive":
+//                     //console.debug(`Recv KeepAlive - ${message_type}`);
+//                     this.emit("session_keepalive");
+//                     this.silence();
+//                     break;
+
+//                 case "notification":
+//                     //console.debug('notification', metadata, payload);
+//                     let { subscription } = payload;
+//                     let { type } = subscription;
+
+//                     // chat.message is NOISY
+//                     if (type != "channel.chat.message") {
+//                         console.debug(
+//                             `${this.eventsub.twitch_websocket_id}/${this.eventsub.counter} Recv notification ${type}`,
+//                         );
+//                     }
+
+//                     this.emit("notification", { metadata, payload });
+//                     this.emit(type, { metadata, payload });
+//                     this.silence();
+
+//                     break;
+
+//                 case "session_reconnect":
+//                     this.eventsub.is_reconnecting = true;
+
+//                     let { reconnect_url } = payload.session;
+
+//                     console.debug(
+//                         `${this.eventsub.twitch_websocket_id}/${this.eventsub.counter} Reconnect request ${reconnect_url}`,
+//                     );
+
+//                     this.emit("session_reconnect", reconnect_url);
+//                     // stash old socket?
+//                     //this.eventsub_dying = this.eventsub;
+//                     //this.eventsub_dying.dying = true;
+//                     // make new socket
+//                     this.connect(reconnect_url, true);
+
+//                     break;
+//                 case "websocket_disconnect":
+//                     console.debug(`${this.eventsub.counter} Recv Disconnect`);
+//                     console.debug("websocket_disconnect", payload);
+
+//                     break;
+
+//                 case "revocation":
+//                     console.debug(`${this.eventsub.counter} Recv Topic Revocation`);
+//                     console.debug("revocation", payload);
+//                     this.emit("revocation", { metadata, payload });
+//                     break;
+
+//                 default:
+//                     console.debug(`${this.eventsub.counter} unexpected`, metadata, payload);
+//                     break;
+//             }
+//         });
+//     }
+
+//     trigger() {
+//         // this function lets you test the disconnect on send method
+//         this.eventsub.send("cat");
+//     }
+//     close() {
+//         this.eventsub.close();
+//     }
+
+//     silenceHandler = false;
+//     silenceTime = 10; // default per docs is 10 so set that as a good default
+//     silence(keepalive_timeout_seconds) {
+//         if (keepalive_timeout_seconds) {
+//             this.silenceTime = keepalive_timeout_seconds;
+//             this.silenceTime++; // add a little window as it's too anal
+//         }
+//         clearTimeout(this.silenceHandler);
+//         this.silenceHandler = setTimeout(() => {
+//             this.emit("session_silenced"); // -> self reconnecting
+//             if (this.silenceReconnect) {
+//                 this.close(); // close it and let it self loop
+//             }
+//         }, this.silenceTime * 1000);
+//     }
+// }
 ///////////////////////////////////////
 // START ENGINE
 ///////////////////////////////////////
@@ -709,39 +1065,61 @@ let startNow = setTimeout(async () => {
     _mk.CreateChat(auth)
     mKiwi = await _mk.fetchUserByName(TwitchConf.username)
     mStream = await _mk.fetchStreamById(TwitchConf.username)
-    let topics = _mk.CreatePubsubTopics(mKiwi[0].id)
+    let topics = _mk.CreatePubsubTopics(mKiwi[0].id)    
+    mAds = await _mk.fetchAdsSchedule(mKiwi[0].id)
     _mk.RestartPub(topics, mKiwi[0].id)
     //
+    // sockets["eventsub"] = new EventSocket(true);
+    // sockets["eventsub"].on('connected', (id) => {
+    //    console.log(`Connected to WebSocket with ${id}`);
+    //     session_id = id;
+    //     my_user_id = mKiwi[0].id;
+
+    //     _mk.requestHooks(mKiwi[0].id, my_user_id);
+    // });
+
+    // sockets["eventsub"].on('session_keepalive', () => {
+    //     console.log('ES Keepalive')
+    // });
     //
     keyupdate = setInterval(async () => {
         let auth = await _db.FetchAuth();
         mKiwi = await _mk.fetchUserByName(TwitchConf.username)
         mStream = await _mk.fetchStreamById(TwitchConf.username)
-
-        // console.log(mStream[0], mKiwi[0])
+        mAds = await _mk.fetchAdsSchedule(mKiwi[0].id)
 
         if(mStream[0]!=null){
             if(mStream[0].type=='live'){
-                let ac = await _mk.CheckAds(mKiwi)
-                if (ac[0] == 'Ads'){
-                    io.emit('Ads', 120)
-                    let adsStr = `Ads are Playing! Kiwisbot Runs between 1-2 minutes worth of ads every 20 mins to scare away Prerolls! I dont trigger them just to annoy you!! Thanks for your Patience!`
-                    MKClient['twitchchat'].say('#mikethemadkiwi', adsStr).catch(function(err){
-                        console.log(err)
-                    });
-                    let nextRuntime = Date.now()+(ac[1][0].retry_after*1000) //date.now+480000 == future tiume
-                    let adtimer = (ac[1][0].length*1000) //90000
-                    let dd = new Date(nextRuntime)
-                    console.log(`Viewercount: ${mStream[0].viewer_count}`, `Running Ads`, ac[1][0].length, `Safe Ad Reload: ${dd}`)
-                    let notifyadend = setTimeout(() => {
-                        let adsStr = `Ads should be over. (${ac[1][0].length}seconds). Welcome Back!`
+                if (mAds.preroll_free_time<=360){
+                    let ac = await _mk.RunAds(mKiwi)   
+                    if (ac[0] == 'Ads'){ 
+                        console.log(`Viewercount: ${mStream[0].viewer_count}`, ac)            
+                        _db.StoreAdData([mAds, ac])
+                        io.emit('Ads', 120)
+                        let adsStr = `Ads are Playing! Kiwisbot Runs between 1-2 minutes worth of ads every 20 mins to scare away Prerolls! I dont trigger them just to annoy you!! Thanks for your Patience!`
                         MKClient['twitchchat'].say('#mikethemadkiwi', adsStr).catch(function(err){
                             console.log(err)
                         });
-                    }, adtimer);
+                        let nextRuntime = Date.now()+(ac[2][0].retry_after*1000) //date.now+480000 == future tiume
+                        let adtimer = (ac[2][0].length*1000) //90000
+                        let dd = new Date(nextRuntime)
+                        console.log(`Viewercount: ${mStream[0].viewer_count}`, `Running Ads`, ac[2][0].length, `Safe Ad Reload: ${dd}`)
+                        let notifyadend = setTimeout(() => {
+                            let adsStr = `Ads should be over. (${ac[2][0].length}seconds). Welcome Back!`
+                            MKClient['twitchchat'].say('#mikethemadkiwi', adsStr).catch(function(err){
+                                console.log(err)
+                            });
+                        }, adtimer);
+                    }
+                    if (ac[0] == 'NextRun'){
+                        if (ac[2] < 5){
+                            console.log(`Viewercount: ${mStream[0].viewer_count}`, ac)
+                        }              
+                    }
                 }
-                if (ac[0] == 'NextRun'){
-                    console.log(`Viewercount: ${mStream[0].viewer_count}`, ac)
+                else{
+                    let prtimeclean = Math.floor((mAds.preroll_free_time/60))
+                    console.log(`Viewercount: ${mStream[0].viewer_count} PreRoll Clear Time: ${prtimeclean}`)
                 }
             }
         }
