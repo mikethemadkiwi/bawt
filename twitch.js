@@ -1,5 +1,6 @@
 // let MKAuth = require('./mk_twitchauth.js');
 let currentTokens = {};
+let botTokens = {};
 let currentMeta = {};
 let keyupdate;
 /////////////////////////
@@ -25,6 +26,7 @@ const ws = require('ws');
 const got = require('got');
 const fetchUrl = require("fetch").fetchUrl
 const TwitchConf = require('../kiwiauth/twitch/oauth2.json');
+const kiwibotConf = require('../kiwiauth/twitch/kiwisbot2.json');
 const weatherConf = require('../kiwiauth/weather/londonontario.json');
 const DBAUTH = require('../kiwiauth/sql/dbconfig.json');
 const express = require('express');
@@ -39,10 +41,6 @@ const colors = require('colors');
 const mysql = require('mysql');
 ////
 const io = new Server(server);
-let Madkiwi = {
-    Auth: TwitchConf,
-    ScopeToken: {}
-};
 socketapp.use(bodyParser.json());
 socketapp.use(bodyParser.urlencoded({ extended: false }));
 socketapp.use(cookieParser());
@@ -80,9 +78,11 @@ class DBObject {
                 };
                 //
                 let ta = JSON.parse(results[0].Auth);
+                let tba = JSON.parse(results[0].BotAuth);
                 currentTokens = ta
+                botTokens = tba
                 currentMeta = JSON.parse(results[0].Meta);
-                resolve(ta)
+                resolve([ta,tba])
             });
             DBConn_Server.on('error', function(err) {
                 console.log('DB CONNECTION ERROR', err.code); // 'ER_BAD_DB_ERROR'
@@ -144,10 +144,10 @@ class MKGame {
     }
 }
 class MKUtils {
-        CreateChat = function(TAUTH){            
+        CreateChat = function(TAUTH, TCONF){            
                 MKClient['twitchchat'] = new tmi.client({
                         identity: {
-                        username: TwitchConf.username,
+                        username: TCONF.username,
                         password: TAUTH.access_token
                         },
                         channels: ['mikethemadkiwi']
@@ -155,7 +155,7 @@ class MKUtils {
                 // Listeners
                 MKClient['twitchchat'].connect().catch(err => {console.error("Chatbot Connection Error", (err.body ? err.body : err))});
                 MKClient['twitchchat'].on('connected', (addr, port)=>{
-                        console.log(`${TwitchConf.username} Connected to ${addr}:${port}`);
+                        console.log(`${TCONF.username} Connected to ${addr}:${port}`);
                 });
                 MKClient['twitchchat'].on('join', async (channel, username, self)=>{
                         if(!self){
@@ -446,7 +446,7 @@ class MKUtils {
                 },
                 function(error, meta, body){
                         let bs = JSON.parse(body);
-                        console.log(bs)
+                        // console.log(bs)
                         if(bs.data){
                             resolve(bs.data)
                         }
@@ -689,11 +689,45 @@ class PubLib {
                                     let _mk3 = new MKUtils;
                                     let apiuser3 = await _mk3.isUserSubscribed(redeemer.id)
                                     console.log(apiuser3)
-                                    // if (apiuser3[0]!=null) {                                                
-                                    //     MKClient['twitchchat'].say('#mikethemadkiwi', `Account Follow Date for ${apiuser3[0].user_name}: ${apiuser3[0].followed_at}`).catch(function(err){
-                                    //         console.log(err)
-                                    //     }); 
-                                    // }
+                                    // {
+                                    //     "broadcaster_id": "141981764",
+                                    //     "broadcaster_login": "twitchdev",
+                                    //     "broadcaster_name": "TwitchDev",
+                                        // "gifter_id": "12826",
+                                        // "gifter_login": "twitch",
+                                        // "gifter_name": "Twitch",
+                                    //     "is_gift": true,
+                                    //     "tier": "1000",
+                                    //     "plan_name": "Channel Subscription (twitchdev)",
+                                        // "user_id": "527115020",
+                                        // "user_name": "twitchgaming",
+                                        // "user_login": "twitchgaming"
+                                    //   }                        
+                                    if (apiuser3[0]!=null) { 
+                                        let gifter = null
+                                        let subbed = {
+                                            "user_id": apiuser3[0].user_id,
+                                            "user_name": apiuser3[0].user_name,
+                                            "user_login": apiuser3[0].user_login
+                                        }
+                                        let tier = apiuser3[0].tier
+                                        if (apiuser3[0].is_gift==true) {
+                                            gifter = {
+                                                "gifter_id": apiuser3[0].gifter_id,
+                                                "gifter_login": apiuser3[0].gifter_login,
+                                                "gifter_name": apiuser3[0].gifter_name,
+                                            }
+                                        }
+
+                                        MKClient['twitchchat'].say('#mikethemadkiwi', `Sub Levelfor : ${subbed.user_name} = ${tier}`).catch(function(err){
+                                            console.log(err)
+                                        }); 
+                                    }
+                                    else {
+                                        MKClient['twitchchat'].say('#mikethemadkiwi', `Scrublord! ${redeemer.display_name}`).catch(function(err){
+                                            console.log(err)
+                                        }); 
+                                    }
                                 break;
                                 case 'LookMa':
                                     io.emit('LookMa', rewardData)  
@@ -1061,8 +1095,8 @@ server.listen(port, () => {
 });
 let startNow = setTimeout(async () => {
     let auth = await _db.FetchAuth();
+    _mk.CreateChat(auth[1], kiwibotConf)
     //
-    _mk.CreateChat(auth)
     mKiwi = await _mk.fetchUserByName(TwitchConf.username)
     mStream = await _mk.fetchStreamById(TwitchConf.username)
     let topics = _mk.CreatePubsubTopics(mKiwi[0].id)    

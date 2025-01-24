@@ -48,6 +48,20 @@ class mkDbObj extends EventEmitter {
                     resolve(results)
                 });
             })
+        }        
+        this.StoreBotAuth = function(auth){
+            return new Promise((resolve, reject)=>{
+                let prepData = JSON.stringify(auth)
+                let qStr = `UPDATE twitch SET BotAuth='${prepData}' WHERE id='1'`;
+                this.currConn.query(qStr, function (error, results, fields) {
+                    if (error) {
+                        reject(error)
+                        return;
+                    };               
+                    console.log(`[Storing Bot Auth]`, results.message, `expires_in: ${auth.expires_in}`)
+                    resolve(results)
+                });
+            })
         }
         this.CurrentKey = function(){        
             return new Promise((resolve, reject)=>{
@@ -62,6 +76,22 @@ class mkDbObj extends EventEmitter {
                         let meta = JSON.parse(results[0].Meta)
                         console.log(`[Sending Current Key]`, `expires_in: ${auth.expires_in}`)
                         resolve(auth)
+                    });        
+                // });                    
+            })
+        }
+        this.CurrentBotKey = function(){        
+            return new Promise((resolve, reject)=>{
+                    let qStr = `SELECT * from twitch`
+                    this.currConn.query(qStr, function (error, results, fields) {
+                        if (error) {
+                            reject(error)
+                            return;
+                        };
+                        //
+                        let botauth = JSON.parse(results[0].BotAuth)
+                        console.log(`[Sending Bot Current Key]`, `expires_in: ${botauth.expires_in}`)
+                        resolve(botauth)
                     });        
                 // });                    
             })
