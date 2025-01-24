@@ -1124,7 +1124,7 @@ let startNow = setTimeout(async () => {
 
         if(mStream[0]!=null){
             if(mStream[0].type=='live'){
-                if (mAds.preroll_free_time<=360){
+                if (mAds.preroll_free_time<=600){
                     let ac = await _mk.RunAds(mKiwi)   
                     if (ac[0] == 'Ads'){ 
                         console.log(`Viewercount: ${mStream[0].viewer_count}`, ac)            
