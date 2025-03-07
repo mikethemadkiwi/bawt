@@ -864,7 +864,6 @@ server.listen(port, () => {
 });
 let startNow = setTimeout(async () => {
     let auth = await _db.FetchAuth();
-    // _mk.CreateChat(auth[1], kiwibotConf)
     //
     mKiwi = await _mk.fetchUserByName(TwitchConf.username)
     mKbot = await _mk.fetchUserByName(kiwibotConf.username)
@@ -875,17 +874,13 @@ let startNow = setTimeout(async () => {
     _mk.RestartPub(topics, mKiwi[0].id)
     //
     let testSock = new initSocket(true);
-    // and build schnanaigans
     testSock.on('connected', (id) => {
         let twitchsocketID = id;
         console.log(`Connected to WebSocket with ${id}`, mKiwi[0].id);       
         /////////////////////////////////////////////////
         /////////////////////////////////////////////////        
         _mk.SubscribeToTopic(id, 'user.update', '1', { user_id: mKiwi[0].id })
-        // _mk.SubscribeToTopic(id, 'stream.online', '1', { broadcaster_user_id: mKiwi[0].id })
-        // _mk.SubscribeToTopic(id, 'stream.offline', '1', { broadcaster_user_id: mKiwi[0].id })
         _mk.SubscribeToTopic(id, 'channel.update', '2', { broadcaster_user_id: mKiwi[0].id })
-        // firefox is totally telling the truth here.
         _mk.SubscribeToTopic(id, 'channel.follow', '2', { broadcaster_user_id: mKiwi[0].id, moderator_user_id: mKiwi[0].id })
         _mk.SubscribeToTopic(id, 'channel.raid', '1', { to_broadcaster_user_id: mKiwi[0].id })
         _mk.SubscribeToTopic(id, 'channel.subscribe', '1', { broadcaster_user_id: mKiwi[0].id })
@@ -893,7 +888,6 @@ let startNow = setTimeout(async () => {
         _mk.SubscribeToTopic(id, 'channel.bits.use', '1', { broadcaster_user_id: mKiwi[0].id })
         _mk.SubscribeToTopic(id, 'channel.chat.message', '1', { broadcaster_user_id: mKiwi[0].id, user_id: mKiwi[0].id })
         _mk.SubscribeToTopic(id, 'channel.chat.notification', '1', { broadcaster_user_id: mKiwi[0].id, user_id: mKiwi[0].id })
-        _mk.SayInChat('Kiwisbot Online.')
         /////////////////////////////////////////////////
         /////////////////////////////////////////////////
     });
@@ -906,14 +900,33 @@ let startNow = setTimeout(async () => {
     //     let msg = new Date();
     //     console.log("keepalive", msg)
     // });
-
+    testSock.on('channel.update', function({ payload }){
+        // console.log('channel.update',payload)
+        _mk.SayInChat(`Updated: Category[${payload.event.category_name}] Title[${payload.event.title}]`)
+    });
+    testSock.on('user.update', function({ payload }){
+        console.log('user.update',payload)
+    });
+    testSock.on('channel.follow', function({ payload }){
+        console.log('channel.follow', payload.event.username)
+        _mk.SayInChat(`Thanks for the Follow: ${payload.event.user_name}! Please do not chew on the furniture.`)
+    });
+    testSock.on('channel.raid', function({ payload }){
+        console.log('channel.raid',payload.event.from_broadcaster_user_name, payload.event.viewers)
+        _mk.SayInChat(`Thanks for the Raid: ${payload.event.from_broadcaster_user_name}! What did your <${payload.event.viewers}> Viewers do to deserve this?!`)
+    });
+    testSock.on('channel.subscribe', function({ payload }){
+        console.log('channel.subscribe',payload)
+    });
+    testSock.on('channel.subscription.gift', function({ payload }){
+        console.log('channel.subscription.gift',payload)
+    });
     testSock.on('channel.chat.notification', function({ payload }){
-        console.log(payload)
+        console.log('channel.chat.notification',payload)
     });
     testSock.on('channel.bits.use', function({ payload }){
-        console.log(payload)
+        console.log('channel.bits.use',payload)
     });
-    // signal to noise in channels that not auth'ed in
     testSock.on('channel.chat.message', function({ payload }){
         console.log("[CHAT]", `<${payload.event.chatter_user_name}>`, payload.event.message.text)
     });
