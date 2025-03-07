@@ -576,8 +576,7 @@ class MKUtils {
                         from_broadcaster_id: mKiwi[0].id,
                         to_broadcaster_id: targetID,
                         moderator_id: mKiwi[0].id
-                    }),
-                    "responseType": 'json'
+                    })
                 })
                 .then(resp => {
                     resolve(resp.body.data)               
@@ -682,8 +681,9 @@ class PubLib {
                                         userinput: msg.data.redemption.user_input,
                                         rewardData: rewardData
                                     }
-                                    console.log('debug', d)
-                                    io.emit('kiwisdebug', d)                              
+                                    console.log('debug', redeemer)
+                                    // // io.emit('kiwisdebug', d)
+                                               
                                 break;
                                 case 'TwitchAge':
                                     let _mk = new MKUtils;
@@ -785,7 +785,7 @@ class PubLib {
                                     let _mk9 = new MKUtils;
                                     io.emit('ShoutOut', rewardData)  
                                     _mk9.SayInChat(`You should all go follow ${redeemer.display_name} @ twitch.tv/${redeemer.display_name} because i fuggin said so. They are amazing. I'm a bot, i'm totally capable of making that observation.`)
-                                    // _mk9.ShoutoutUser(redeemer.id)
+                                    _mk9.ShoutoutUser(redeemer.id)
                                 break;
                                 case 'KiwisWeather':
                                     let weatherurl = `http://api.openweathermap.org/data/2.5/weather?id=${weatherConf.wCityId}&units=${weatherConf.wDegreeKey}&APPID=${weatherConf.wAppKey}`
@@ -942,7 +942,7 @@ let startNow = setTimeout(async () => {
     testSock.on('channel.raid', function({ payload }){
         console.log('channel.raid',payload.event.from_broadcaster_user_name, payload.event.viewers)
         _mk.SayInChat(`Thanks for the Raid: ${payload.event.from_broadcaster_user_name}! What did your <${payload.event.viewers}> Viewers do to deserve this?!`)
-        // _mk.ShoutoutUser(payload.event.from_broadcaster_user_id)
+        _mk.ShoutoutUser(payload.event.from_broadcaster_user_id)
     });
     testSock.on('channel.subscribe', function({ payload }){
         console.log('channel.subscribe',payload)
