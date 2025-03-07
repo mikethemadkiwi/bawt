@@ -23,6 +23,7 @@
         "user:read:subscriptions":      "Get the details of the users subscription to a channel.",
         "user:manage:blocked_users":    "Manage the block list of a user.",
         "user:read:email":              "Read authorized user's email address.",
+        "user:read:chat":              "Read authorized user's chat event packets",
         "channel:manage:predictions":   "Manages Channel Predictions Systems"
     },
     "kraken": {

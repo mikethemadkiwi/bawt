@@ -27,7 +27,7 @@ class initSocket {
         is_reconnect = is_reconnect ? is_reconnect : false;
 
         console.log(`Connecting to ${url}|${is_reconnect}`);
-        this.eventsub = new WebSocket(url);
+        this.eventsub = new ws(url);
         this.eventsub.is_reconnecting = is_reconnect;
         this.eventsub.counter = this.counter;
 

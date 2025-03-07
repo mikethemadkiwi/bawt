@@ -54,6 +54,7 @@ let mStream;
 let mAds;
 let lastAds;
 const weathertimeout = [];
+const subscribedtopics = [];
 let DBConn_Server = null;
 let DBConn_ads = null;
 let tDate = Date.now();
@@ -141,6 +142,189 @@ class MKGame {
                 resolve((position-1))              
             }
         })
+    }
+}
+class initSocket {
+    counter = 0
+    closeCodes = {
+        4000: 'Internal Server Error',
+        4001: 'Client sent inbound traffic',
+        4002: 'Client failed ping-pong',
+        4003: 'Connection unused',
+        4004: 'Reconnect grace time expired',
+        4005: 'Network Timeout',
+        4006: 'Network error',
+        4007: 'Invalid Reconnect'
+    }
+
+    constructor(connect) {
+        this._events = {};
+
+        if (connect) {
+            this.connect();
+        }
+    }
+
+    connect(url, is_reconnect) {
+        this.eventsub = {};
+        this.counter++;
+
+        url = url ? url : 'wss://eventsub.wss.twitch.tv/ws';
+        is_reconnect = is_reconnect ? is_reconnect : false;
+
+        console.log(`Connecting to ${url}|${is_reconnect}`);
+        this.eventsub = new ws(url);
+        this.eventsub.is_reconnecting = is_reconnect;
+        this.eventsub.counter = this.counter;
+
+        this.eventsub.addEventListener('open', () => {
+            console.log(`Opened Connection to Twitch`);
+        });
+        // https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/close_event
+        // https://github.com/Luka967/websocket-close-codes
+        this.eventsub.addEventListener('close', (close) => {
+            console.log('EventSub close', close, this.eventsub);
+            console.log(`${this.eventsub.twitch_websocket_id}/${this.eventsub.counter} Connection Closed: ${close.code} Reason - ${this.closeCodes[close.code]}`);
+
+            if (!this.eventsub.is_reconnecting) {
+                console.log(`${this.eventsub.twitch_websocket_id}/${this.eventsub.counter} Is not reconnecting, auto reconnect`);
+                //new initSocket();
+                this.connect();
+            }
+
+            if (close.code == 1006) {
+                // do a single retry
+                this.eventsub.is_reconnecting = true;
+            }
+        });
+        // https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/error_event
+        this.eventsub.addEventListener('error', (err) => {
+            console.log(err);
+            console.log(`${this.eventsub.twitch_websocket_id}/${this.eventsub.counter} Connection Error`);
+        });
+        // https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/message_event
+        this.eventsub.addEventListener('message', (message) => {
+            //log('Message');
+            //console.log(this.eventsub.counter, message);
+            let { data } = message;
+            data = JSON.parse(data);
+
+            let { metadata, payload } = data;
+            let { message_id, message_type, message_timestamp } = metadata;
+            //log(`Recv ${message_id} - ${message_type}`);
+
+            switch (message_type) {
+                case 'session_welcome':
+                    let { session } = payload;
+                    let { id, keepalive_timeout_seconds } = session;
+
+                    console.log(`${this.eventsub.counter} This is Socket ID ${id}`);
+                    this.eventsub.twitch_websocket_id = id;
+
+                    console.log(`${this.eventsub.counter} This socket declared silence as ${keepalive_timeout_seconds} seconds`);
+
+                    if (!this.eventsub.is_reconnecting) {
+                        console.log('Dirty disconnect or first spawn');
+                        this.emit('connected', id);
+                        // now you would spawn your topics
+                    } else {
+                        this.emit('reconnected', id);
+                        // no need to spawn topics as carried over
+                    }
+
+                    this.silence(keepalive_timeout_seconds);
+
+                    break;
+                case 'session_keepalive':
+                    //log(`Recv KeepAlive - ${message_type}`);
+                    this.emit('session_keepalive');
+                    this.silence();
+                    break;
+
+                case 'notification':
+                    //console.log('notification', metadata, payload);
+                    //log(`${this.eventsub.twitch_websocket_id}/${this.eventsub.counter} Recv notification`);// ${JSON.stringify(payload)}`);
+
+                    let { subscription, event } = payload;
+                    let { type } = subscription;
+
+                    this.emit('notification', { metadata, payload });
+                    this.emit(type, { metadata, payload });
+                    this.silence();
+
+                    break;
+
+                case 'session_reconnect':
+                    this.eventsub.is_reconnecting = true;
+
+                    let reconnect_url = payload.session.reconnect_url;
+
+                    console.log('Connect to new url', reconnect_url);
+                    console.log(`${this.eventsub.twitch_websocket_id}/${this.eventsub.counter} Reconnect request ${reconnect_url}`)
+
+                    //this.eventsub.close();
+                    //new initSocket(reconnect_url, true);
+                    this.connect(reconnect_url, true);
+
+                    break;
+                case 'websocket_disconnect':
+                    console.log(`${this.eventsub.counter} Recv Disconnect`);
+                    console.log('websocket_disconnect', payload);
+
+                    break;
+
+                case 'revocation':
+                    console.log(`${this.eventsub.counter} Recv Topic Revocation`);
+                    console.log('revocation', payload);
+                    this.emit('revocation', { metadata, payload });
+                    break;
+
+                default:
+                    console.log(`${this.eventsub.counter} unexpected`, metadata, payload);
+                    break;
+            }
+        });
+    }
+
+    trigger() {
+        // this function lets you test the disconnect on send method
+        this.eventsub.send('cat');
+    }
+    close() {
+        this.eventsub.close();
+    }
+
+    silenceHandler = false;
+    silenceTime = 10;// default per docs is 10 so set that as a good default
+    silence(keepalive_timeout_seconds) {
+        if (keepalive_timeout_seconds) {
+            this.silenceTime = keepalive_timeout_seconds;
+            this.silenceTime++;// add a little window as it's too anal
+        }
+        clearTimeout(this.silenceHandler);
+        this.silenceHandler = setTimeout(() => {
+            this.emit('session_silenced');// -> self reconnecting
+            this.close();// close it and let it self loop
+        }, (this.silenceTime * 1000));
+    }
+
+    on(name, listener) {
+        if (!this._events[name]) {
+            this._events[name] = [];
+        }
+
+        this._events[name].push(listener);
+    }
+    emit(name, data) {
+        if (!this._events[name]) {
+            return;
+        }
+
+        const fireCallbacks = (callback) => {
+            callback(data);
+        };
+
+        this._events[name].forEach(fireCallbacks);
     }
 }
 class MKUtils {
@@ -513,18 +697,20 @@ class MKUtils {
                     resolve(['NextRun', checkDT, diffm])
                 }
             })    
-        }
-        spawnHook(type, version, condition) {
-            fetch(
-                'https://api.twitch.tv/helix/eventsub/subscriptions',
-                {
-                    "method": "POST",
-                    "headers": {
+        }            
+        SubscribeToTopic(session_id, type, version, condition){
+            return new Promise((resolve, reject) => {
+                console.log("Eventsocket Topic:", session_id, type)
+                let tmpAuth = currentTokens.access_token;
+                got({
+                    "url": "https://api.twitch.tv/helix/eventsub/subscriptions",
+                    "method": 'POST',
+                    "headers": {                            
                         "Client-ID": TwitchConf.client_id,
                         "Authorization": "Bearer " + tmpAuth,
                         'Content-Type': 'application/json'
                     },
-                    "body": JSON.stringify({
+                    body: JSON.stringify({
                         type,
                         version,
                         condition,
@@ -532,43 +718,18 @@ class MKUtils {
                             method: "websocket",
                             session_id
                         }
-                    })
-                }
-            )
-                .then(resp => resp.json())
+                    }),
+                    "responseType": 'json'
+                })
                 .then(resp => {
-                    if (resp.error) {
-                        console.log(`Error with eventsub Call ${type} Call: ${resp.message ? resp.message : ''}`);
-                    } else {
-                       console.log(`Created ${type}`);
-                    }
+                    resolve(resp.body.data)               
                 })
                 .catch(err => {
-                    console.log(err);
-                   console.log(`Error with eventsub Call ${type} Call: ${err.message ? err.message : ''}`);
+                    console.error('Error body:', err);
+                    reject(false)
                 });
-        }
-        requestHooks(user_id, my_id) {
-            let eventSubTypes = {
-                'channel.update': { version: "1", condition: { broadcaster_user_id: user_id } },
-                'channel.follow': { version: "2", condition: { broadcaster_user_id: user_id, moderator_user_id: my_id } },
-                //inbound raid
-                'channel.raid': { version: "1", condition: { to_broadcaster_user_id: user_id } },
-        
-                'stream.online': { version: "1", condition: { broadcaster_user_id: user_id } },
-                'stream.offline': { version: "1", condition: { broadcaster_user_id: user_id } },
-        
-                'user.update': { version: "1", condition: { user_id: user_id } }
-            }
-            
-        console.log(`Spawn Topics for ${user_id}`);
-        
-            for (let type in eventSubTypes) {
-            console.log(`Attempt create ${type} - ${user_id}`);
-                let { version, condition } = eventSubTypes[type];
-        
-                this.spawnHook(type, version, condition);
-            }
+
+            })
         }
 }
 ///////////////////////////////////////
@@ -672,6 +833,14 @@ class PubLib {
                                     let apiuser = await _mk.fetchUserByName(redeemer.display_name)
                                     // console.log(apiuser[0].created_at)                                                
                                     MKClient['twitchchat'].say('#mikethemadkiwi', `Account Creation Date for ${apiuser[0].display_name}: ${apiuser[0].created_at}`).catch(function(err){
+                                        console.log(err)
+                                    }); 
+                                break;
+                                case 'LurkMode':
+                                    let _mkl = new MKUtils;
+                                    let apiuserl = await _mkl.fetchUserByName(redeemer.display_name)
+                                    // console.log(apiuser[0].created_at)                                                
+                                    MKClient['twitchchat'].say('#mikethemadkiwi', `Lurk Mode Activated for ${apiuserl[0].display_name}. Enjoy your Lurk! miketh101Love`).catch(function(err){
                                         console.log(err)
                                     }); 
                                 break;
@@ -865,226 +1034,6 @@ class PubLib {
             });
         }
 }
-// class EventSocket {
-//     counter = 0;
-//     closeCodes = {
-//         4000: "Internal Server Error",
-//         4001: "Client sent inbound traffic",
-//         4002: "Client failed ping-pong",
-//         4003: "Connection unused",
-//         4004: "Reconnect grace time expired",
-//         4005: "Network Timeout",
-//         4006: "Network error",
-//         4007: "Invalid Reconnect",
-//     };
-
-//     constructor({
-//         url = "wss://eventsub.wss.twitch.tv/ws",
-//         connect = false,
-//         silenceReconnect = true,
-//         disableAutoReconnect = false,
-//     }) {
-//         // super();
-
-//         this.silenceReconnect = silenceReconnect;
-//         this.disableAutoReconnect = disableAutoReconnect;
-//         this.mainUrl = url;
-
-//         if (connect) {
-//             this.connect();
-//         }
-//     }
-
-//     mainUrl = "wss://eventsub.wss.twitch.tv/ws";
-//     //mainUrl = "ws://127.0.0.1:8080/ws";
-//     backoff = 0;
-//     backoffStack = 100;
-
-//     connect(url, is_reconnect) {
-//         this.eventsub = {};
-//         this.counter++;
-
-//         url = url ? url : this.mainUrl;
-//         is_reconnect = is_reconnect ? is_reconnect : false;
-
-//         console.debug(`Connecting to ${url}`);
-//         // this overrites and kills the old reference
-//         this.eventsub = new WebSocket(url);
-//         this.eventsub.counter = this.counter;
-
-//         this.eventsub.addEventListener("open", () => {
-//             this.backoff = 0;
-//             console.debug(`Opened Connection to Twitch`);
-//         });
-
-//         // https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/close_event
-//         // https://github.com/Luka967/websocket-close-codes
-//         this.eventsub.addEventListener("close", (close) => {
-//             // forward the close event
-//             this.emit("close", close);
-
-//             console.debug(
-//                 `${this.eventsub.twitch_websocket_id}/${this.eventsub.counter} Connection Closed: ${close.code} Reason - ${this.closeCodes[close.code]}`,
-//             );
-
-//             // 4000 well damn
-//             // 4001 we should never get...
-//             // 4002 make a new socket
-//             if (close.code == 4003) {
-//                 console.debug(
-//                     "Did not subscribe to anything, the client should decide to reconnect (when it is ready)",
-//                 );
-//                 return;
-//             }
-//             if (close.code == 4004) {
-//                 // this is the old connection dying
-//                 // we should of made a new connection to the new socket
-//                 console.debug("Old Connection is 4004-ing");
-//                 return;
-//             }
-//             // 4005 make a new socket
-//             // 4006 make a new socket
-//             // 4007 make a new socket as we screwed up the reconnect?
-
-//             // anything else we should auto reconnect
-//             // but only if the user wants
-//             if (this.disableAutoReconnect) {
-//                 return;
-//             }
-
-//             //console.debug(`for ${this.eventsub.counter} making new`);
-//             this.backoff++;
-//             console.debug("retry in", this.backoff * this.backoffStack);
-//             setTimeout(() => {
-//                 this.connect();
-//             }, this.backoff * this.backoffStack);
-//         });
-//         // https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/error_event
-//         this.eventsub.addEventListener("error", (err) => {
-//             //console.debug(err);
-//             console.debug(
-//                 `${this.eventsub.twitch_websocket_id}/${this.eventsub.counter} Connection Error`,
-//             );
-//         });
-//         // https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/message_event
-//         this.eventsub.addEventListener("message", (message) => {
-//             //console.debug('Message');
-//             //console.debug(this.eventsub.counter, message);
-//             let { data } = message;
-//             data = JSON.parse(data);
-
-//             let { metadata, payload } = data;
-//             let { message_id, message_type, message_timestamp } = metadata;
-//             //console.debug(`Recv ${message_id} - ${message_type}`);
-
-//             switch (message_type) {
-//                 case "session_welcome":
-//                     let { session } = payload;
-//                     let { id, keepalive_timeout_seconds } = session;
-
-//                     console.debug(`${this.eventsub.counter} This is Socket ID ${id}`);
-//                     this.eventsub.twitch_websocket_id = id;
-
-//                     console.debug(
-//                         `${this.eventsub.counter} This socket declared silence as ${keepalive_timeout_seconds} seconds`,
-//                     );
-
-//                     // is this a reconnect?
-//                     if (is_reconnect) {
-//                         // we carried subscriptions over
-//                         this.emit("reconnected", id);
-//                     } else {
-//                         // now you would spawn your topics
-//                         this.emit("connected", id);
-//                     }
-
-//                     this.silence(keepalive_timeout_seconds);
-
-//                     break;
-//                 case "session_keepalive":
-//                     //console.debug(`Recv KeepAlive - ${message_type}`);
-//                     this.emit("session_keepalive");
-//                     this.silence();
-//                     break;
-
-//                 case "notification":
-//                     //console.debug('notification', metadata, payload);
-//                     let { subscription } = payload;
-//                     let { type } = subscription;
-
-//                     // chat.message is NOISY
-//                     if (type != "channel.chat.message") {
-//                         console.debug(
-//                             `${this.eventsub.twitch_websocket_id}/${this.eventsub.counter} Recv notification ${type}`,
-//                         );
-//                     }
-
-//                     this.emit("notification", { metadata, payload });
-//                     this.emit(type, { metadata, payload });
-//                     this.silence();
-
-//                     break;
-
-//                 case "session_reconnect":
-//                     this.eventsub.is_reconnecting = true;
-
-//                     let { reconnect_url } = payload.session;
-
-//                     console.debug(
-//                         `${this.eventsub.twitch_websocket_id}/${this.eventsub.counter} Reconnect request ${reconnect_url}`,
-//                     );
-
-//                     this.emit("session_reconnect", reconnect_url);
-//                     // stash old socket?
-//                     //this.eventsub_dying = this.eventsub;
-//                     //this.eventsub_dying.dying = true;
-//                     // make new socket
-//                     this.connect(reconnect_url, true);
-
-//                     break;
-//                 case "websocket_disconnect":
-//                     console.debug(`${this.eventsub.counter} Recv Disconnect`);
-//                     console.debug("websocket_disconnect", payload);
-
-//                     break;
-
-//                 case "revocation":
-//                     console.debug(`${this.eventsub.counter} Recv Topic Revocation`);
-//                     console.debug("revocation", payload);
-//                     this.emit("revocation", { metadata, payload });
-//                     break;
-
-//                 default:
-//                     console.debug(`${this.eventsub.counter} unexpected`, metadata, payload);
-//                     break;
-//             }
-//         });
-//     }
-
-//     trigger() {
-//         // this function lets you test the disconnect on send method
-//         this.eventsub.send("cat");
-//     }
-//     close() {
-//         this.eventsub.close();
-//     }
-
-//     silenceHandler = false;
-//     silenceTime = 10; // default per docs is 10 so set that as a good default
-//     silence(keepalive_timeout_seconds) {
-//         if (keepalive_timeout_seconds) {
-//             this.silenceTime = keepalive_timeout_seconds;
-//             this.silenceTime++; // add a little window as it's too anal
-//         }
-//         clearTimeout(this.silenceHandler);
-//         this.silenceHandler = setTimeout(() => {
-//             this.emit("session_silenced"); // -> self reconnecting
-//             if (this.silenceReconnect) {
-//                 this.close(); // close it and let it self loop
-//             }
-//         }, this.silenceTime * 1000);
-//     }
-// }
 ///////////////////////////////////////
 // START ENGINE
 ///////////////////////////////////////
@@ -1099,23 +1048,53 @@ let startNow = setTimeout(async () => {
     //
     mKiwi = await _mk.fetchUserByName(TwitchConf.username)
     mStream = await _mk.fetchStreamById(TwitchConf.username)
-    let topics = _mk.CreatePubsubTopics(mKiwi[0].id)    
     mAds = await _mk.fetchAdsSchedule(mKiwi[0].id)
+    //
+    let topics = _mk.CreatePubsubTopics(mKiwi[0].id)    
     _mk.RestartPub(topics, mKiwi[0].id)
     //
-    // sockets["eventsub"] = new EventSocket(true);
-    // sockets["eventsub"].on('connected', (id) => {
-    //    console.log(`Connected to WebSocket with ${id}`);
-    //     session_id = id;
-    //     my_user_id = mKiwi[0].id;
+    let testSock = new initSocket(true);
+    // and build schnanaigans
+    testSock.on('connected', (id) => {
+        let twitchsocketID = id;
+        console.log(`Connected to WebSocket with ${id}`, mKiwi[0].id);       
+        /////////////////////////////////////////////////
+        /////////////////////////////////////////////////        
+        _mk.SubscribeToTopic(id, 'user.update', '1', { user_id: mKiwi[0].id })
+        _mk.SubscribeToTopic(id, 'stream.online', '1', { broadcaster_user_id: mKiwi[0].id })
+        _mk.SubscribeToTopic(id, 'stream.offline', '1', { broadcaster_user_id: mKiwi[0].id })
+        _mk.SubscribeToTopic(id, 'channel.update', '2', { broadcaster_user_id: mKiwi[0].id })
+        // firefox is totally telling the truth here.
+        _mk.SubscribeToTopic(id, 'channel.follow', '2', { broadcaster_user_id: mKiwi[0].id, moderator_user_id: mKiwi[0].id })
+        _mk.SubscribeToTopic(id, 'channel.raid', '1', { to_broadcaster_user_id: mKiwi[0].id })
+        _mk.SubscribeToTopic(id, 'channel.subscribe', '1', { broadcaster_user_id: mKiwi[0].id })
+        _mk.SubscribeToTopic(id, 'channel.subscription.gift', '1', { broadcaster_user_id: mKiwi[0].id })
+        // _mk.SubscribeToTopic(id, 'channel.subscription.message', '1', { broadcaster_user_id: mKiwi[0].id })
+        _mk.SubscribeToTopic(id, 'channel.bits.use', '1', { broadcaster_user_id: mKiwi[0].id })
+        /////////////////////////////////////////////////
+        /////////////////////////////////////////////////
+    });
 
-    //     _mk.requestHooks(mKiwi[0].id, my_user_id);
+    testSock.on('session_silenced', () => {
+        let msg = 'Session mystery died due to silence detected';
+        console.log(msg)
+    });
+    // testSock.on('session_keepalive', () => {
+    //     let msg = new Date();
+    //     console.log("keepalive", msg)
     // });
 
-    // sockets["eventsub"].on('session_keepalive', () => {
-    //     console.log('ES Keepalive')
-    // });
-    //
+    testSock.on('channel.chat.notification', function({ payload }){
+        console.log(payload)
+    });
+    testSock.on('channel.bits.use', function({ payload }){
+        console.log(payload)
+    });
+    // signal to noise in channels that not auth'ed in
+    testSock.on('channel.chat.message', function({ payload }){
+        console.log(payload)
+    });
+
     keyupdate = setInterval(async () => {
         let auth = await _db.FetchAuth();
         mKiwi = await _mk.fetchUserByName(TwitchConf.username)
