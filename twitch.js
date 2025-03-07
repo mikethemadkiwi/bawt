@@ -21,7 +21,7 @@ const currentCounts = function(){
     }
 }
 /////////////////////////
-const tmi = require('tmi.js');
+// const tmi = require('tmi.js');
 const ws = require('ws');
 const got = require('got');
 const fetchUrl = require("fetch").fetchUrl
@@ -50,6 +50,7 @@ const sockets = [];
 const MKClient = [];
 const ChansToJoin = [];
 let mKiwi;
+let mKbot;
 let mStream;
 let mAds;
 let lastAds;
@@ -328,203 +329,32 @@ class initSocket {
     }
 }
 class MKUtils {
-        CreateChat = function(TAUTH, TCONF){            
-                MKClient['twitchchat'] = new tmi.client({
-                        identity: {
-                        username: TCONF.username,
-                        password: TAUTH.access_token
-                        },
-                        channels: ['mikethemadkiwi']
+        SayInChat = function(chatMessage){
+            return new Promise((resolve, reject) => {
+                let tmpAuth = botTokens.access_token;
+                got({
+                    "url": "https://api.twitch.tv/helix/chat/messages",
+                    "method": 'POST',
+                    "headers": {                            
+                        "Client-ID": kiwibotConf.client_id,
+                        "Authorization": "Bearer " + tmpAuth,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        "broadcaster_id": mKiwi[0].id,
+                        "sender_id": mKbot[0].id,
+                        "message": chatMessage
+                    }),
+                    "responseType": 'json'
                 })
-                // Listeners
-                MKClient['twitchchat'].connect().catch(err => {console.error("Chatbot Connection Error", (err.body ? err.body : err))});
-                MKClient['twitchchat'].on('connected', (addr, port)=>{
-                        console.log(`${TCONF.username} Connected to ${addr}:${port}`);
-                });
-                MKClient['twitchchat'].on('join', async (channel, username, self)=>{
-                        if(!self){
-                            if(channel == '#mikethemadkiwi'){
-                                let _mk = new MKUtils;
-                                let apiuser = await _mk.fetchUserByName(username)
-                                // let temptchan = `#${username}`;
-                                // if(ChansToJoin[temptchan]==null){
-                                //     ChansToJoin.push(temptchan)
-                                //     MKClient['twitchchat'].join(temptchan).then((data) => {
-                                //         // data returns [channel]
-                                //         // console.log(temptchan, data)
-                                //     }).catch((err) => {
-                                //         //
-                                //     });
-                                // }
-                                io.emit('userJoin', apiuser)
-                                console.log(new Date(Date.now()), colors.green('[JOIN]'), channel, username, apiuser[0].created_at)
-                                localJoinCount++;
-                            }
-                            else{   
-
-                                if(otherJoinShow){ // i should make this a function that stil.lconsole.logs to DB
-                                    console.log(new Date(Date.now()), colors.grey('[JOIN]'), channel, username)
-                                }
-                                otherJoinCount++;
-                            }
-                           
-                        }
-                        // console.log('channel to join ',temptchan)
-                });
-                MKClient['twitchchat'].on('part', async (channel, username, self)=>{           
-                        if(!self){
-                            if(channel == '#mikethemadkiwi'){
-                                console.log(new Date(Date.now()), colors.green('[PART]'), channel, username)
-                                localPartCount++;
-                            }
-                            else{                                
-                                if(otherPartShow){
-                                    console.log(new Date(Date.now()), colors.grey('[PART]'), channel, username)
-                                }
-                                otherPartCount++;
-                            }
-                        }
-                });        
-                MKClient['twitchchat'].on('clearchat', (channel, username)=>{
-                        // console.log('Chat Cleared:', channel, username)
-                });
-                MKClient['twitchchat'].on('clearmsg', (chan, msg, msgid)=>{
-                        // console.log(`msg [${msgid}] cleared in:`, chan, msg)
-                });
-                MKClient['twitchchat'].on('notice', (channel, data)=>{
-                        // console.log(`notice ${channel}`, data)
-                });
-                MKClient['twitchchat'].on('reconnect', ()=>{ console.log('reconnect') })
-                MKClient['twitchchat'].on('roomstate', (chan, state)=>{
-                    if(chan=='#mikethemadkiwi'){
-                        console.log(colors.green('[RoomState]'), chan) 
-                    }
-                    else{
-                        console.log(colors.grey('[RoomState]'), chan) 
-                    }
+                .then(resp => {
+                    resolve(resp.body.data)               
                 })
-                MKClient['twitchchat'].on('usernotice', (chan, data)=>{ 
-                    // console.log('usernotice', chan, data) 
-                })
-                MKClient['twitchchat'].on('userstate', (chan, data)=>{ 
-                    // console.log('userstate') 
-                })
-                MKClient['twitchchat'].on('message', async (target, context, msg, self)=>{
-                    // if (self) { return; } // Ignore messages from the yuse4r if it is self   
-                    // console.log('target', target, context)
-                    if(target=='#mikethemadkiwi'){
-                        localChatCount++;
-                                    if(msg.substr(0, 1) == "`"){
-                                        let stringsplit = msg.split(" ");
-                                        switch (stringsplit[0]) {
-                                            case'`weather':
-                                                    if(stringsplit[1]){
-                                                        let isnum = /^\d+$/.test(stringsplit[1]);
-                                                        if (isnum){
-
-                                                            let weatherurl =`http://api.openweathermap.org/data/2.5/weather?id=${stringsplit[1]}&units=${weatherConf.wDegreeKey}&APPID=${weatherConf.wAppKey}`                                                    
-                                                            fetchUrl(weatherurl, function(error, meta, body){
-                                                                if(error){console.log('error', error)}
-                                                                let wNetwork = JSON.parse(body);
-                                                                // console.log(wNetwork)
-                                                                if(wNetwork.cod!=404){
-                                                                    console.log('city found')
-                                                                    let currentweather;
-                                                                    if (wNetwork.Code == 'ServiceUnavailable'){
-                                                                        wNetwork.WeatherText = json.Message;
-                                                                    }
-                                                                    if (wNetwork.weather) {
-                                                                        currentweather = `Hey @${context.username}, Weather for ${wNetwork.name}, ${wNetwork.sys.country}}: `                                                            
-                                                                        for (let i=0;i<wNetwork.weather.length;i++){
-                                                                            currentweather += `${wNetwork.weather[i].main} (${wNetwork.weather[i].description}) `
-                                                                        }
-                                                                    }
-                                                                    if (wNetwork.main){
-                                                                        currentweather += `Temp: ${wNetwork.main.temp}°c (High: ${wNetwork.main.temp_max} °c) Humidity: ${wNetwork.main.humidity}% `
-                                                                    }
-                                                                    if(wNetwork.wind){
-                                                                        currentweather += `Wind: ${wNetwork.wind.speed}m/s (dir: ${Math.floor(wNetwork.wind.deg)}°) `
-                                                                    }
-                                                                    MKClient['twitchchat'].say('#mikethemadkiwi', currentweather).catch(function(err){
-                                                                        console.log(err)
-                                                                    });
-                                                                    MKClient['twitchchat'].say('#mikethemadkiwi', 'Find your weather code at https://openweathermap.org/city/ and use it  like this || `weather CITYID').catch(function(err){
-                                                                        console.log(err)
-                                                                    });
-                                                                }
-                                                                else{
-                                                                    MKClient['twitchchat'].say('#mikethemadkiwi', 'That CITYID did not return information please confirm your cityID @ https://openweathermap.org/city/').catch(function(err){
-                                                                        console.log(err)
-                                                                    });
-                                                                }                                                                                      
-                                                            })
-
-                                                        }
-                                                        else {
-                                                            // do name check instead of digit check
-
-                                                            // instead of below.
-                                                            MKClient['twitchchat'].say('#mikethemadkiwi', 'That CITYID is NOT a Number. please confirm your cityID @ https://openweathermap.org/city/').catch(function(err){
-                                                                console.log(err)
-                                                            });
-
-                                                        }
-                                                    }
-                                                    else{
-                                                        
-                                                    let weatherurl = `http://api.openweathermap.org/data/2.5/weather?id=${weatherConf.wCityId}&units=${weatherConf.wDegreeKey}&APPID=${weatherConf.wAppKey}`
-                                                        fetchUrl(weatherurl, function(error, meta, body){
-                                                            if(error){console.log('error', error)}
-                                                            let wNetwork = JSON.parse(body);
-                                                            // console.log(wNetwork)
-                                                            let currentweather;
-                                                            if (wNetwork.Code == 'ServiceUnavailable'){
-                                                                wNetwork.WeatherText = json.Message;
-                                                            }
-                                                            else{
-                                                                // console.log(wNetwork)
-                                                            };
-                                                            if (wNetwork.weather) {
-                                                                    currentweather = `Hey @${context.username}, Weather for ${wNetwork.name}, ${wNetwork.sys.country}: `                                                            
-                                                                for (let i=0;i<wNetwork.weather.length;i++){
-                                                                    currentweather += `${wNetwork.weather[i].main} (${wNetwork.weather[i].description}) `
-                                                                }
-                                                            }
-                                                            if (wNetwork.main){
-                                                                currentweather += `Temp: ${wNetwork.main.temp}°c (High: ${wNetwork.main.temp_max} °c) Humidity: ${wNetwork.main.humidity}% `
-                                                            }
-                                                            if(wNetwork.wind){
-                                                                currentweather += `Wind: ${wNetwork.wind.speed}m/s (dir: ${Math.floor(wNetwork.wind.deg)}°) `
-                                                            }
-                                                            MKClient['twitchchat'].say('#mikethemadkiwi', currentweather).catch(function(err){
-                                                                console.log(err)
-                                                            });
-                                                            MKClient['twitchchat'].say('#mikethemadkiwi', 'Find your weather code at https://openweathermap.org/city/ and use it  like this || `weather CITYID').catch(function(err){
-                                                                console.log(err)
-                                                            });                              
-                                                        })
-                                                    }
-                                            break;
-                                            case '`ts3':
-                                                MKClient['twitchchat'].say('#mikethemadkiwi', `We Use Teamspeak for voice Chat! Join us by downloading teamspeak at https://www.teamspeak3.com/teamspeak-download.php and use server address: mad.kiwi`).catch(function(err){
-                                                    console.log(err)
-                                                }); 
-                                            break;
-                                            default:
-                                                // do nothing if the default fires  
-                                        }         
-                                }
-                                else {
-                                    console.log(colors.green('[CHAT]'), context.username, msg)
-                                }
-                    }
-                    else{
-                        if(otherChatShow){
-                            console.log(colors.grey('[CHAT]'), context.username, msg)
-                        }
-                        otherChatCount++;
-                    }
-                })
+                .catch(err => {
+                    console.error('Error body:', err);
+                    reject(false)
+                }); 
+            })          
         }
         CreatePubsubTopics = function(user_id){
             let templatetopics = [
@@ -805,13 +635,13 @@ class PubLib {
                     io.emit('ircd', {pTopic, msg})
                     //
                     switch(pTopic){
-                        case 'channel-bits-events-v2.22703261': // BITTIES
-                            console.log(colors.green('[BITS]'), msg)
-                            MKClient['twitchchat'].say('#mikethemadkiwi', `[${msg.data.user_name}] cheered ${msg.data.bits_used} bitties! Total[${msg.data.total_bits_used}]`)
-                        break;
-                        case 'channel-bits-badge-unlocks.22703261': // BITS BADGE UNLOCK
-                            console.log('Bits Badge Unlock Event', msg)
-                        break;
+                        // case 'channel-bits-events-v2.22703261': // BITTIES
+                        //     console.log(colors.green('[BITS]'), msg)
+                        //     MKClient['twitchchat'].say('#mikethemadkiwi', `[${msg.data.user_name}] cheered ${msg.data.bits_used} bitties! Total[${msg.data.total_bits_used}]`)
+                        // break;
+                        // case 'channel-bits-badge-unlocks.22703261': // BITS BADGE UNLOCK
+                        //     console.log('Bits Badge Unlock Event', msg)
+                        // break;
                         case 'channel-points-channel-v1.22703261': // CHANNEL POINTS
                             let _mk = new MKUtils;
                             let redeemer = msg.data.redemption.user;
@@ -832,26 +662,20 @@ class PubLib {
                                     let _mk = new MKUtils;
                                     let apiuser = await _mk.fetchUserByName(redeemer.display_name)
                                     // console.log(apiuser[0].created_at)                                                
-                                    MKClient['twitchchat'].say('#mikethemadkiwi', `Account Creation Date for ${apiuser[0].display_name}: ${apiuser[0].created_at}`).catch(function(err){
-                                        console.log(err)
-                                    }); 
+                                    _mk.SayInChat(`Account Creation Date for ${apiuser[0].display_name}: ${apiuser[0].created_at}`)
                                 break;
                                 case 'LurkMode':
                                     let _mkl = new MKUtils;
                                     let apiuserl = await _mkl.fetchUserByName(redeemer.display_name)
                                     // console.log(apiuser[0].created_at)                                                
-                                    MKClient['twitchchat'].say('#mikethemadkiwi', `Lurk Mode Activated for ${apiuserl[0].display_name}. Enjoy your Lurk! miketh101Love`).catch(function(err){
-                                        console.log(err)
-                                    }); 
+                                    _mk.SayInChat(`Lurk Mode Activated for ${apiuserl[0].display_name}. Enjoy your Lurk! miketh101Love`)
                                 break;
                                 case 'FollowAge':
                                     let _mk2 = new MKUtils;
                                     let apiuser2 = await _mk2.isUserFollower(redeemer.id)
                                     // console.log(apiuser2)
                                     if (apiuser2[0]!=null) {                                                
-                                        MKClient['twitchchat'].say('#mikethemadkiwi', `Account Follow Date for ${apiuser2[0].user_name}: ${apiuser2[0].followed_at}`).catch(function(err){
-                                            console.log(err)
-                                        }); 
+                                        _mk.SayInChat(`Account Follow Date for ${apiuser2[0].user_name}: ${apiuser2[0].followed_at}`)
                                     }
                                 break;
                                 case 'ProveSub':
@@ -888,22 +712,20 @@ class PubLib {
                                             }
                                         }
 
-                                        MKClient['twitchchat'].say('#mikethemadkiwi', `Sub Levelfor : ${subbed.user_name} = ${tier}`).catch(function(err){
-                                            console.log(err)
-                                        }); 
+                                        _mk3.SayInChat(`Sub Levelfor : ${subbed.user_name} = ${tier}`)
                                     }
                                     else {
-                                        MKClient['twitchchat'].say('#mikethemadkiwi', `Scrublord! ${redeemer.display_name}`).catch(function(err){
-                                            console.log(err)
-                                        }); 
+                                        _mk3.SayInChat(`Scrublord! ${redeemer.display_name}`)
                                     }
                                 break;
                                 case 'LookMa':
+                                    let _mk4 = new MKUtils;
                                     io.emit('LookMa', rewardData)  
-                                    MKClient['twitchchat'].say('#mikethemadkiwi', `Look @${redeemer.display_name} I'm a Dragon!!`)  
+                                    _mk4.SayInChat(`Look @${redeemer.display_name} I'm a Dragon!!`)  
                                 break;
                                 case 'Teamspeak':
-                                    MKClient['twitchchat'].say('#mikethemadkiwi', `Teamspeak Deets: ts3://mad.kiwi:9987`)  
+                                    let _mk5 = new MKUtils;
+                                    _mk5.SayInChat(`Teamspeak Deets: ts3://mad.kiwi:9987`)  
                                 break;
                                 case 'EffYou':
                                     io.emit('effyou', rewardData)
@@ -914,24 +736,28 @@ class PubLib {
                                 case 'DumbAnswer':
                                     io.emit('dumbanswer', rewardData)
                                 break;
-                                case 'Honk':                                
-                                    MKClient['twitchchat'].say('#mikethemadkiwi', `Honking for @${redeemer.display_name}`)
+                                case 'Honk': 
+                                let _mk6 = new MKUtils;                               
+                                    _mk6.SayInChat(`Honking for @${redeemer.display_name}`)
                                     io.emit('Honk', rewardData)
                                 break;
                                 case 'BunnySays':                
                                     let fs = require('fs');
+                                    let _mk7 = new MKUtils;
                                     let files = fs.readdirSync('public/sounds/host/');
                                     let rFile = Math.floor(Math.random() * files.length);
                                     let fileSTR = `${files[rFile]}`;
                                     io.emit('BunnySays', fileSTR)
-                                    MKClient['twitchchat'].say('#mikethemadkiwi', `Playing [${fileSTR.substring(0, fileSTR.length-4)}] for @${redeemer.display_name}`)
+                                    _mk7.SayInChat(`Playing [${fileSTR.substring(0, fileSTR.length-4)}] for @${redeemer.display_name}`)
                                 break;
                                 case 'Guildwars2':
-                                    MKClient['twitchchat'].say('#mikethemadkiwi', `|| mikethemadkiwi.6058 || plays on || Henge of Denravi - US ||`)
+                                    let _m8 = new MKUtils;
+                                    _mk8.SayInChat(`|| mikethemadkiwi.6058 || plays on || Henge of Denravi - US ||`)
                                 break;   
                                 case 'ShoutOut':
+                                    let _mk9 = new MKUtils;
                                     io.emit('ShoutOut', rewardData)  
-                                    MKClient['twitchchat'].say('#mikethemadkiwi', `You should all go follow ${redeemer.display_name} @ twitch.tv/${redeemer.display_name} because i fuggin said so. They are amazing. I'm a bot, i'm totally capable of making that observation.`)
+                                    _mk9.SayInChat(`You should all go follow ${redeemer.display_name} @ twitch.tv/${redeemer.display_name} because i fuggin said so. They are amazing. I'm a bot, i'm totally capable of making that observation.`)
                                 break;
                                 case 'KiwisWeather':
                                     let weatherurl = `http://api.openweathermap.org/data/2.5/weather?id=${weatherConf.wCityId}&units=${weatherConf.wDegreeKey}&APPID=${weatherConf.wAppKey}`
@@ -955,12 +781,9 @@ class PubLib {
                                         if(wNetwork.wind){
                                             currentweather += `Wind: ${wNetwork.wind.speed}m/s (dir: ${Math.floor(wNetwork.wind.deg)}°) `
                                         }
-                                        MKClient['twitchchat'].say('#mikethemadkiwi', currentweather).catch(function(err){
-                                            console.log(err)
-                                        });
-                                        MKClient['twitchchat'].say('#mikethemadkiwi', 'Find your weather code at https://openweathermap.org/city/ and use it  like this || `weather CITYID').catch(function(err){
-                                            console.log(err)
-                                        });                              
+                                        let _mk10 = new MKUtils;
+                                        _mk10.SayInChat(currentweather)
+                                        // _mk10.SayInChat('Find your weather code at https://openweathermap.org/city/ and use it  like this || `weather CITYID')
                                     })
                                 break;
                                 default:
@@ -979,9 +802,9 @@ class PubLib {
                                     }
                                     let sCumMonths = msg.cumulative_months;
                                     let subscriberStr = `[${sUser}] has subbed for [${sCumMonths}] months! Thanks [${sUser}] for the tier [${sPlan}] Subscription!`
-                                    MKClient['twitchchat'].say('#mikethemadkiwi', subscriberStr).catch(function(err){
-                                        console.log(err)
-                                    });                        
+                                    
+                                    let _mk11 = new MKUtils;
+                                    _mk11.SayInChat(subscriberStr)
                                 break;
                                 case'resub':
                                     console.log('resub', msg)
@@ -992,9 +815,8 @@ class PubLib {
                                     }
                                     let sCumMonths2 = msg.cumulative_months;
                                     let subscriberStr2 = `[${sUser2}] has subbed for [${sCumMonths2}] months! Thanks [${sUser2}] for the tier [${sPlan2}] Subscription!`
-                                    MKClient['twitchchat'].say('#mikethemadkiwi', subscriberStr2).catch(function(err){
-                                        console.log(err)
-                                    });                        
+                                    let _mk12 = new MKUtils;
+                                    _mk12.SayInChat(subscriberStr2)
                                 break;
                                 case'subgift':
                                     console.log('gift sub', msg)
@@ -1005,9 +827,8 @@ class PubLib {
                                     }
                                     let sRecipName3 = msg.recipient_display_name;
                                     let subscriberStr3 = `[${sUser3}] has given [${sRecipName3}] a Gift Sub! Thanks [${sUser3}] for the tier [${sPlan3}] Subscription!`
-                                    MKClient['twitchchat'].say('#mikethemadkiwi', subscriberStr3).catch(function(err){
-                                        console.log(err)
-                                    });                        
+                                    let _mk13 = new MKUtils;
+                                    _mk13.SayInChat(subscriberStr3)
                                 break;
                                 case'anonsubgift':
                                     console.log('anon gift sub', msg)
@@ -1017,9 +838,8 @@ class PubLib {
                                     }
                                     let sRecipName4 = msg.recipient_display_name;
                                     let subscriberStr4 = `[ANONYMOUS] has given [${sRecipName4}] a Gift Sub! Thanks [ANONYMOUS] for the tier [${sPlan4}] Subscription!`
-                                    MKClient['twitchchat'].say('#mikethemadkiwi', subscriberStr4).catch(function(err){
-                                        console.log(err)
-                                    });                        
+                                    let _mk14 = new MKUtils;
+                                    _mk14.SayInChat(subscriberStr4)
                                 break;
                                 default:
                                     console.log(`unhandled msg.context pubsub`, msg.context, msg);
@@ -1044,9 +864,10 @@ server.listen(port, () => {
 });
 let startNow = setTimeout(async () => {
     let auth = await _db.FetchAuth();
-    _mk.CreateChat(auth[1], kiwibotConf)
+    // _mk.CreateChat(auth[1], kiwibotConf)
     //
     mKiwi = await _mk.fetchUserByName(TwitchConf.username)
+    mKbot = await _mk.fetchUserByName(kiwibotConf.username)
     mStream = await _mk.fetchStreamById(TwitchConf.username)
     mAds = await _mk.fetchAdsSchedule(mKiwi[0].id)
     //
@@ -1061,16 +882,18 @@ let startNow = setTimeout(async () => {
         /////////////////////////////////////////////////
         /////////////////////////////////////////////////        
         _mk.SubscribeToTopic(id, 'user.update', '1', { user_id: mKiwi[0].id })
-        _mk.SubscribeToTopic(id, 'stream.online', '1', { broadcaster_user_id: mKiwi[0].id })
-        _mk.SubscribeToTopic(id, 'stream.offline', '1', { broadcaster_user_id: mKiwi[0].id })
+        // _mk.SubscribeToTopic(id, 'stream.online', '1', { broadcaster_user_id: mKiwi[0].id })
+        // _mk.SubscribeToTopic(id, 'stream.offline', '1', { broadcaster_user_id: mKiwi[0].id })
         _mk.SubscribeToTopic(id, 'channel.update', '2', { broadcaster_user_id: mKiwi[0].id })
         // firefox is totally telling the truth here.
         _mk.SubscribeToTopic(id, 'channel.follow', '2', { broadcaster_user_id: mKiwi[0].id, moderator_user_id: mKiwi[0].id })
         _mk.SubscribeToTopic(id, 'channel.raid', '1', { to_broadcaster_user_id: mKiwi[0].id })
         _mk.SubscribeToTopic(id, 'channel.subscribe', '1', { broadcaster_user_id: mKiwi[0].id })
         _mk.SubscribeToTopic(id, 'channel.subscription.gift', '1', { broadcaster_user_id: mKiwi[0].id })
-        // _mk.SubscribeToTopic(id, 'channel.subscription.message', '1', { broadcaster_user_id: mKiwi[0].id })
         _mk.SubscribeToTopic(id, 'channel.bits.use', '1', { broadcaster_user_id: mKiwi[0].id })
+        _mk.SubscribeToTopic(id, 'channel.chat.message', '1', { broadcaster_user_id: mKiwi[0].id, user_id: mKiwi[0].id })
+        _mk.SubscribeToTopic(id, 'channel.chat.notification', '1', { broadcaster_user_id: mKiwi[0].id, user_id: mKiwi[0].id })
+        _mk.SayInChat('Kiwisbot Online.')
         /////////////////////////////////////////////////
         /////////////////////////////////////////////////
     });
@@ -1092,7 +915,7 @@ let startNow = setTimeout(async () => {
     });
     // signal to noise in channels that not auth'ed in
     testSock.on('channel.chat.message', function({ payload }){
-        console.log(payload)
+        console.log("[CHAT]", `<${payload.event.chatter_user_name}>`, payload.event.message.text)
     });
 
     keyupdate = setInterval(async () => {
@@ -1110,18 +933,14 @@ let startNow = setTimeout(async () => {
                         _db.StoreAdData([mAds, ac])
                         io.emit('Ads', 120)
                         let adsStr = `Ads are Playing! Kiwisbot Runs between 1-2 minutes worth of ads every 20 mins to scare away Prerolls! I dont trigger them just to annoy you!! Thanks for your Patience!`
-                        MKClient['twitchchat'].say('#mikethemadkiwi', adsStr).catch(function(err){
-                            console.log(err)
-                        });
+                        _mk.SayInChat(adsStr)
                         let nextRuntime = Date.now()+(ac[2][0].retry_after*1000) //date.now+480000 == future tiume
                         let adtimer = (ac[2][0].length*1000) //90000
                         let dd = new Date(nextRuntime)
                         console.log(`Viewercount: ${mStream[0].viewer_count}`, `Running Ads`, ac[2][0].length, `Safe Ad Reload: ${dd}`)
                         let notifyadend = setTimeout(() => {
                             let adsStr = `Ads should be over. (${ac[2][0].length}seconds). Welcome Back!`
-                            MKClient['twitchchat'].say('#mikethemadkiwi', adsStr).catch(function(err){
-                                console.log(err)
-                            });
+                            _mk.SayInChat(adsStr)
                         }, adtimer);
                     }
                     if (ac[0] == 'NextRun'){
