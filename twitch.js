@@ -941,8 +941,15 @@ let startNow = setTimeout(async () => {
     });
     testSock.on('channel.raid', function({ payload }){
         console.log('channel.raid',payload.event.from_broadcaster_user_name, payload.event.viewers)
-        _mk.SayInChat(`Thanks for the Raid: ${payload.event.from_broadcaster_user_name}! What did your <${payload.event.viewers}> Viewers do to deserve this?!`)
-        _mk.ShoutoutUser(payload.event.from_broadcaster_user_id)
+        let shoutthresh = Number(payload.event.viewers)
+        if (shoutthresh>5) {
+            _mk.ShoutoutUser(payload.event.from_broadcaster_user_id)
+            _mk.SayInChat(`Thanks for the Raid: ${payload.event.from_broadcaster_user_name}! What did your <${payload.event.viewers}> Viewers do to deserve this?!`)
+        }
+        else {
+            _mk.SayInChat(`Thanks for the Raid: ${payload.event.from_broadcaster_user_name}!`)
+        }
+        
     });
     testSock.on('channel.subscribe', function({ payload }){
         console.log('channel.subscribe',payload)
