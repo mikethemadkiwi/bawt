@@ -695,14 +695,14 @@ class PubLib {
                                     let _mkl = new MKUtils;
                                     let apiuserl = await _mkl.fetchUserByName(redeemer.display_name)
                                     // console.log(apiuser[0].created_at)                                                
-                                    _mk.SayInChat(`Lurk Mode Activated for ${apiuserl[0].display_name}. Enjoy your Lurk! miketh101Love`)
+                                    _mk1.SayInChat(`Lurk Mode Activated for ${apiuserl[0].display_name}. Enjoy your Lurk! miketh101Love`)
                                 break;
                                 case 'FollowAge':
                                     let _mk2 = new MKUtils;
                                     let apiuser2 = await _mk2.isUserFollower(redeemer.id)
                                     // console.log(apiuser2)
                                     if (apiuser2[0]!=null) {                                                
-                                        _mk.SayInChat(`Account Follow Date for ${apiuser2[0].user_name}: ${apiuser2[0].followed_at}`)
+                                        _mk2.SayInChat(`Account Follow Date for ${apiuser2[0].user_name}: ${apiuser2[0].followed_at}`)
                                     }
                                 break;
                                 case 'ProveSub':
@@ -785,7 +785,7 @@ class PubLib {
                                     let _mk9 = new MKUtils;
                                     io.emit('ShoutOut', rewardData)  
                                     _mk9.SayInChat(`You should all go follow ${redeemer.display_name} @ twitch.tv/${redeemer.display_name} because i fuggin said so. They are amazing. I'm a bot, i'm totally capable of making that observation.`)
-                                    _mk.ShoutoutUser(redeemer.id)
+                                    _mk9.ShoutoutUser(redeemer.id)
                                 break;
                                 case 'KiwisWeather':
                                     let weatherurl = `http://api.openweathermap.org/data/2.5/weather?id=${weatherConf.wCityId}&units=${weatherConf.wDegreeKey}&APPID=${weatherConf.wAppKey}`
