@@ -15,6 +15,7 @@
         "clips:edit":                   "Manage a clip object.",
         "moderation:read":              "Get Moderators/Banned users (and mod/ban events) for a channel and perform AutoMod checks",
         "moderator:read:followers":      "Holy shit this lets me moderate follower list",
+        "moderator:manage:shoutouts":      "manage to shout the outs",
         "user:edit":                    "Manage a user object.",
         "user:edit:broadcast":          "Edit your channel’s broadcast configuration, including extension configuration. (This scope implies user:read:broadcast capability.)",
         "user:read:broadcast":          "View your broadcasting configuration, including extension configurations.",

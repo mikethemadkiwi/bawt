@@ -561,6 +561,33 @@ class MKUtils {
 
             })
         }
+        ShoutoutUser(targetID){
+            return new Promise((resolve, reject) => {
+                let tmpAuth = currentTokens.access_token;
+                got({
+                    "url": "https://api.twitch.tv/helix/chat/shoutouts",
+                    "method": 'POST',
+                    "headers": {                            
+                        "Client-ID": TwitchConf.client_id,
+                        "Authorization": "Bearer " + tmpAuth,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        from_broadcaster_id: mKiwi[0].id,
+                        to_broadcaster_id: targetID,
+                        moderator_id: mKiwi[0].id
+                    }),
+                    "responseType": 'json'
+                })
+                .then(resp => {
+                    resolve(resp.body.data)               
+                })
+                .catch(err => {
+                    console.error('Error body:', err);
+                    reject(false)
+                });      
+            })
+        }
 }
 ///////////////////////////////////////
 // PingLib
@@ -758,6 +785,7 @@ class PubLib {
                                     let _mk9 = new MKUtils;
                                     io.emit('ShoutOut', rewardData)  
                                     _mk9.SayInChat(`You should all go follow ${redeemer.display_name} @ twitch.tv/${redeemer.display_name} because i fuggin said so. They are amazing. I'm a bot, i'm totally capable of making that observation.`)
+                                    _mk.ShoutoutUser(redeemer.id)
                                 break;
                                 case 'KiwisWeather':
                                     let weatherurl = `http://api.openweathermap.org/data/2.5/weather?id=${weatherConf.wCityId}&units=${weatherConf.wDegreeKey}&APPID=${weatherConf.wAppKey}`
@@ -914,6 +942,7 @@ let startNow = setTimeout(async () => {
     testSock.on('channel.raid', function({ payload }){
         console.log('channel.raid',payload.event.from_broadcaster_user_name, payload.event.viewers)
         _mk.SayInChat(`Thanks for the Raid: ${payload.event.from_broadcaster_user_name}! What did your <${payload.event.viewers}> Viewers do to deserve this?!`)
+        _mk.ShoutoutUser(payload.event.from_broadcaster_user_id)
     });
     testSock.on('channel.subscribe', function({ payload }){
         console.log('channel.subscribe',payload)
@@ -934,9 +963,9 @@ let startNow = setTimeout(async () => {
     keyupdate = setInterval(async () => {
         let auth = await _db.FetchAuth();
         mKiwi = await _mk.fetchUserByName(TwitchConf.username)
+        mKbot = await _mk.fetchUserByName(kiwibotConf.username)
         mStream = await _mk.fetchStreamById(TwitchConf.username)
         mAds = await _mk.fetchAdsSchedule(mKiwi[0].id)
-
         if(mStream[0]!=null){
             if(mStream[0].type=='live'){
                 if (mAds.preroll_free_time<=600){
@@ -970,8 +999,7 @@ let startNow = setTimeout(async () => {
         }
     }, 60000);
     //
-}, 500); 
-
+}, 500);
 io.on('connection', (socket) => {
   socket.name = socket.id;
   console.log('SOCKETIO',`${socket.name} connected from : ${socket.handshake.address}`); 
