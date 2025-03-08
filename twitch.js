@@ -1,4 +1,3 @@
-// let MKAuth = require('./mk_twitchauth.js');
 let currentTokens = {};
 let botTokens = {};
 let currentMeta = {};
@@ -21,7 +20,6 @@ const currentCounts = function(){
     }
 }
 /////////////////////////
-// const tmi = require('tmi.js');
 const ws = require('ws');
 const got = require('got');
 const fetchUrl = require("fetch").fetchUrl
@@ -32,7 +30,7 @@ const DBAUTH = require('../kiwiauth/sql/dbconfig.json');
 const express = require('express');
 const socketapp = express();
 const http = require('http');
-const cookieParser = require('cookie-parser'); //COOOKIES!! NOM
+const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const server = http.createServer(socketapp);
 const { Server } = require("socket.io");
@@ -53,7 +51,7 @@ let mKiwi;
 let mKbot;
 let mStream;
 let mAds;
-let lastAds;
+let lastKeepAlive;
 const weathertimeout = [];
 const subscribedtopics = [];
 let DBConn_Server = null;
@@ -126,25 +124,9 @@ class DBObject {
         })
     }
 }
-//
-class MKGame {
-    checkPlayer = (twitchUser) => {
-        return new Promise((resolve, reject) => {
-            console.log(twitchUser[0].id)
-            let isin = playerBase.map(function(user) { return user.id; }).indexOf(twitchUser[0].id)
-            if(isin!=-1){
-                io.emit('playerUpdate', playerBase[isin].player)
-                resolve(isin)
-            }
-            else{
-                let player = new PlayerObj(twitchUser[0])
-                let position = playerBase.push(player)
-                io.emit('playerUpdate', player.player)  
-                resolve((position-1))              
-            }
-        })
-    }
-}
+  // INITSOCKET COURTESY OF BARRYCARLYON /////////////////////////////////////
+ //    https://github.com/BarryCarlyon/twitch_misc/tree/main/eventsub      //
+////////////////////////////////////////////////////////////////////////////
 class initSocket {
     counter = 0
     closeCodes = {
@@ -239,23 +221,22 @@ class initSocket {
         });
     }
     trigger() {
-        // this function lets you test the disconnect on send method
         this.eventsub.send('cat');
     }
     close() {
         this.eventsub.close();
     }
     silenceHandler = false;
-    silenceTime = 10;// default per docs is 10 so set that as a good default
+    silenceTime = 10;
     silence(keepalive_timeout_seconds) {
         if (keepalive_timeout_seconds) {
             this.silenceTime = keepalive_timeout_seconds;
-            this.silenceTime++;// add a little window as it's too anal
+            this.silenceTime++;
         }
         clearTimeout(this.silenceHandler);
         this.silenceHandler = setTimeout(() => {
-            this.emit('session_silenced');// -> self reconnecting
-            this.close();// close it and let it self loop
+            this.emit('session_silenced');
+            this.close();
         }, (this.silenceTime * 1000));
     }
     on(name, listener) {
@@ -274,6 +255,7 @@ class initSocket {
         this._events[name].forEach(fireCallbacks);
     }
 }
+// Mkutils ////////////////////////////////////////////////////////////////////
 class MKUtils {
         SayInChat = function(chatMessage){
             return new Promise((resolve, reject) => {
@@ -590,8 +572,7 @@ class PubLib {
                 let _mk = new MKUtils;
                 _mk.ListentoPubsubTopics(Ptopics);
             });
-            MKClient['pubsub'].on('message', async function(raw_data, flags) {
-                // fs.appendFileSync(__dirname + '/pubsub_messages.log', raw_data);    
+            MKClient['pubsub'].on('message', async function(raw_data, flags) { 
                 var data = JSON.parse(raw_data);
                 if (data.type == 'RECONNECT') {
                     console.log('PUBSUB','WS Got Reconnect');
@@ -605,17 +586,15 @@ class PubLib {
                 } else if (data.type == 'MESSAGE') {
                     var msg = JSON.parse(data.data.message);
                     let pTopic = data.data.topic;
-                    // send toconsole.logger/socket
                     io.emit('ircd', {pTopic, msg})
                     //
                     switch(pTopic){
-                        // case 'channel-bits-events-v2.22703261': // BITTIES
-                        //     console.log(colors.green('[BITS]'), msg)
-                        //     MKClient['twitchchat'].say('#mikethemadkiwi', `[${msg.data.user_name}] cheered ${msg.data.bits_used} bitties! Total[${msg.data.total_bits_used}]`)
-                        // break;
-                        // case 'channel-bits-badge-unlocks.22703261': // BITS BADGE UNLOCK
-                        //     console.log('Bits Badge Unlock Event', msg)
-                        // break;
+                        case 'channel-bits-events-v2.22703261': // BITTIES
+                            console.log(colors.green('[BITS]'), msg)
+                        break;
+                        case 'channel-bits-badge-unlocks.22703261': // BITS BADGE UNLOCK
+                            console.log('Bits Badge Unlock Event', msg)
+                        break;
                         case 'channel-points-channel-v1.22703261': // CHANNEL POINTS
                             let _mk = new MKUtils;
                             let redeemer = msg.data.redemption.user;
@@ -630,7 +609,9 @@ class PubLib {
                                         rewardData: rewardData
                                     }
                                     console.log('debug', redeemer)
-                                    // // io.emit('kiwisdebug', d)
+                                    let deb = new MKUtils;
+                                    let deb2 = await deb.isUserSubscribed(redeemer.id)
+                                    console.log(deb2)
                                                
                                 break;
                                 case 'TwitchAge':
@@ -846,10 +827,13 @@ let startNow = setTimeout(async () => {
     mStream = await _mk.fetchStreamById(TwitchConf.username)
     mAds = await _mk.fetchAdsSchedule(mKiwi[0].id)
     //
-    let topics = _mk.CreatePubsubTopics(mKiwi[0].id)    
-    _mk.RestartPub(topics, mKiwi[0].id)
+    // let topics = _mk.CreatePubsubTopics(mKiwi[0].id)    
+    // _mk.RestartPub(topics, mKiwi[0].id)
     //
     let testSock = new initSocket(true);
+    testSock.on('session_keepalive', () => {
+        lastKeepAlive = new Date();
+    });
     testSock.on('connected', (id) => {
         let twitchsocketID = id;
         console.log(`Connected to WebSocket with ${id}`, mKiwi[0].id);       
@@ -861,32 +845,25 @@ let startNow = setTimeout(async () => {
         _mk.SubscribeToTopic(id, 'channel.update', '2', { broadcaster_user_id: mKiwi[0].id })
         _mk.SubscribeToTopic(id, 'channel.follow', '2', { broadcaster_user_id: mKiwi[0].id, moderator_user_id: mKiwi[0].id })
         _mk.SubscribeToTopic(id, 'channel.raid', '1', { to_broadcaster_user_id: mKiwi[0].id })
-        // _mk.SubscribeToTopic(id, 'channel.subscribe', '1', { broadcaster_user_id: mKiwi[0].id })
-        // _mk.SubscribeToTopic(id, 'channel.subscription.gift', '1', { broadcaster_user_id: mKiwi[0].id })
         _mk.SubscribeToTopic(id, 'channel.bits.use', '1', { broadcaster_user_id: mKiwi[0].id })
         _mk.SubscribeToTopic(id, 'channel.chat.message', '1', { broadcaster_user_id: mKiwi[0].id, user_id: mKiwi[0].id })
         _mk.SubscribeToTopic(id, 'channel.chat.notification', '1', { broadcaster_user_id: mKiwi[0].id, user_id: mKiwi[0].id })
         /////////////////////////////////////////////////
         /////////////////////////////////////////////////
     });
-
     testSock.on('session_silenced', () => {
         let msg = 'Session mystery died due to silence detected';
         console.log(msg)
     });
-    // testSock.on('session_keepalive', () => {
-    //     let msg = new Date();
-    //     console.log("keepalive", msg)
-    // });
     testSock.on('channel.update', function({ payload }){
         // console.log('channel.update',payload)
-        _mk.SayInChat(`Updated: Category[${payload.event.category_name}] Title[${payload.event.title}]`)
+        _mk.SayInChat(`Updated: Category[ ${payload.event.category_name} ] Title[ ${payload.event.title} ]`)
     });
     testSock.on('user.update', function({ payload }){
         console.log('user.update',payload)
     });
     testSock.on('channel.follow', function({ payload }){
-        console.log('channel.follow', payload.event.username)
+        console.log('channel.follow', payload.event.user_name)
         _mk.SayInChat(`Thanks for the Follow: ${payload.event.user_name}! Please do not chew on the furniture.`)
     });
     testSock.on('channel.raid', function({ payload }){
@@ -901,20 +878,19 @@ let startNow = setTimeout(async () => {
         }
         
     });
-    testSock.on('channel.subscribe', function({ payload }){
-        console.log('channel.subscribe',payload)
-    });
-    testSock.on('channel.subscription.gift', function({ payload }){
-        console.log('channel.subscription.gift',payload)
-    });
     testSock.on('channel.chat.notification', function({ payload }){
         console.log('channel.chat.notification',payload)
+        console.log(colors.cyan("[Notification]"), `${payload.event.notice_type} || ${payload.event.system_message} ||`)
     });
     testSock.on('channel.bits.use', function({ payload }){
         console.log('channel.bits.use',payload)
     });
     testSock.on('channel.chat.message', function({ payload }){
-        console.log("[CHAT]", `<${payload.event.chatter_user_name}>`, payload.event.message.text)
+        // console.log("chatmessage", payload)
+        if (payload.event.reply != null){
+            console.log(colors.magenta("[Chat]"), colors.yellow(`reply to <${payload.event.reply.parent_user_name}>`))
+        }
+        console.log(colors.magenta("[Chat]"), colors.yellow(`<${payload.event.chatter_user_name}>`), payload.event.message.text)
     });
 
     keyupdate = setInterval(async () => {
@@ -927,8 +903,7 @@ let startNow = setTimeout(async () => {
             if(mStream[0].type=='live'){
                 if (mAds.preroll_free_time<=600){
                     let ac = await _mk.RunAds(mKiwi)   
-                    if (ac[0] == 'Ads'){ 
-                        console.log(`Viewercount: ${mStream[0].viewer_count}`, ac)            
+                    if (ac[0] == 'Ads'){
                         _db.StoreAdData([mAds, ac])
                         io.emit('Ads', 120)
                         let adsStr = `Ads are Playing! Kiwisbot Runs between 1-2 minutes worth of ads every 20 mins to scare away Prerolls! I dont trigger them just to annoy you!! Thanks for your Patience!`
@@ -957,6 +932,8 @@ let startNow = setTimeout(async () => {
     }, 60000);
     //
 }, 500);
+
+// Database and OBS Socket. DO NOT FUGG WITH.
 io.on('connection', (socket) => {
   socket.name = socket.id;
   console.log('SOCKETIO',`${socket.name} connected from : ${socket.handshake.address}`); 
