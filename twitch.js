@@ -624,7 +624,7 @@ class PubLib {
                                     let _mkl = new MKUtils;
                                     let apiuserl = await _mkl.fetchUserByName(redeemer.display_name)
                                     // console.log(apiuser[0].created_at)                                                
-                                    _mk1.SayInChat(`Lurk Mode Activated for ${apiuserl[0].display_name}. Enjoy your Lurk! miketh101Love`)
+                                    _mk1.SayInChat(`Lurk Mode Activated for ${apiuserl[0].display_name}. Enjoy your Lurk!  miketh101Heart`)
                                 break;
                                 case 'FollowAge':
                                     let _mk2 = new MKUtils;
@@ -640,10 +640,10 @@ class PubLib {
                                     if (apiuser3[0]!=null) { 
                                         let tier = (apiuser3[0].tier/1000)
                                         if (apiuser3[0].is_gift==true) {
-                                            _mk3.SayInChat(`Sub Levelfor : ${redeemer.display_name} = Gifted Tier: ${tier}`)
+                                            _mk3.SayInChat(`Sub Levelfor : ${redeemer.display_name} = Gifted Tier: ${tier}! Thanks miketh101Heart`)
                                         }
                                         else {
-                                            _mk3.SayInChat(`Sub Levelfor : ${redeemer.display_name} = Tier: ${tier}`)
+                                            _mk3.SayInChat(`Sub Levelfor : ${redeemer.display_name} = Tier: ${tier}. Thanks!! miketh101Heart`)
                                         }                                     
                                     }
                                     else {
@@ -840,17 +840,17 @@ let startNow = setTimeout(async () => {
     });
     testSock.on('channel.follow', function({ payload }){
         console.log('channel.follow', payload.event.user_name)
-        _mk.SayInChat(`Thanks for the Follow: ${payload.event.user_name}! Please do not chew on the furniture.`)
+        _mk.SayInChat(`Thanks for the Follow: ${payload.event.user_name}!  miketh101Heart Please do not chew on the furniture.  miketh101Heart`)
     });
     testSock.on('channel.raid', function({ payload }){
         console.log('channel.raid',payload.event.from_broadcaster_user_name, payload.event.viewers)
         let shoutthresh = Number(payload.event.viewers)
         if (shoutthresh>5) {
             _mk.ShoutoutUser(payload.event.from_broadcaster_user_id)
-            _mk.SayInChat(`Thanks for the Raid: ${payload.event.from_broadcaster_user_name}! What did your <${payload.event.viewers}> Viewers do to deserve this?!`)
+            _mk.SayInChat(`Thanks for the Raid: ${payload.event.from_broadcaster_user_name}!  miketh101Heart What did your <${payload.event.viewers}> Viewers do to deserve this?!`)
         }
         else {
-            _mk.SayInChat(`Thanks for the Raid: ${payload.event.from_broadcaster_user_name}!`)
+            _mk.SayInChat(`Thanks for the Raid: ${payload.event.from_broadcaster_user_name}!  miketh101Heart`)
         }
         
     });
@@ -882,7 +882,7 @@ let startNow = setTimeout(async () => {
                     if (ac[0] == 'Ads'){
                         _db.StoreAdData([mAds, ac])
                         io.emit('Ads', 120)
-                        let adsStr = `Ads are Playing! Kiwisbot Runs between 1-2 minutes worth of ads every 20 mins to scare away Prerolls! I dont trigger them just to annoy you!! Thanks for your Patience!`
+                        let adsStr = `Ads are Playing! Kiwisbot Runs between 1-2 minutes worth of ads every 20 mins to scare away Prerolls! I dont trigger them just to annoy you!!  miketh101Heart Thanks for your Patience!  miketh101Heart`
                         _mk.SayInChat(adsStr)
                         let nextRuntime = Date.now()+(ac[2][0].retry_after*1000) //date.now+480000 == future tiume
                         let adtimer = (ac[2][0].length*1000) //90000
