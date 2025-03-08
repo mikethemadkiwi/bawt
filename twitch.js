@@ -637,41 +637,18 @@ class PubLib {
                                 case 'ProveSub':
                                     let _mk3 = new MKUtils;
                                     let apiuser3 = await _mk3.isUserSubscribed(redeemer.id)
-                                    console.log(apiuser3)
-                                    // {
-                                    //     "broadcaster_id": "141981764",
-                                    //     "broadcaster_login": "twitchdev",
-                                    //     "broadcaster_name": "TwitchDev",
-                                        // "gifter_id": "12826",
-                                        // "gifter_login": "twitch",
-                                        // "gifter_name": "Twitch",
-                                    //     "is_gift": true,
-                                    //     "tier": "1000",
-                                    //     "plan_name": "Channel Subscription (twitchdev)",
-                                        // "user_id": "527115020",
-                                        // "user_name": "twitchgaming",
-                                        // "user_login": "twitchgaming"
-                                    //   }                        
+                                    // console.log(apiuser3)  
                                     if (apiuser3[0]!=null) { 
-                                        let gifter = null
-                                        let subbed = {
-                                            "user_id": apiuser3[0].user_id,
-                                            "user_name": apiuser3[0].user_name,
-                                            "user_login": apiuser3[0].user_login
-                                        }
-                                        let tier = apiuser3[0].tier
+                                        let tier = (apiuser3[0].tier/1000)
                                         if (apiuser3[0].is_gift==true) {
-                                            gifter = {
-                                                "gifter_id": apiuser3[0].gifter_id,
-                                                "gifter_login": apiuser3[0].gifter_login,
-                                                "gifter_name": apiuser3[0].gifter_name,
-                                            }
+                                            _mk3.SayInChat(`Sub Levelfor : ${apiuser3[0].display_name} = Gifted Tier: ${tier}`)
                                         }
-
-                                        _mk3.SayInChat(`Sub Levelfor : ${subbed.user_name} = ${tier}`)
+                                        else {
+                                            _mk3.SayInChat(`Sub Levelfor : ${apiuser3[0].display_name} = Tier: ${tier}`)
+                                        }                                     
                                     }
                                     else {
-                                        _mk3.SayInChat(`Scrublord! ${redeemer.display_name}`)
+                                        _mk3.SayInChat(`Scrublord! WTF ${redeemer.display_name}!! Someone get this person a Sub!!!`)
                                     }
                                 break;
                                 case 'LookMa':
