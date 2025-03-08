@@ -640,10 +640,10 @@ class PubLib {
                                     if (apiuser3[0]!=null) { 
                                         let tier = (apiuser3[0].tier/1000)
                                         if (apiuser3[0].is_gift==true) {
-                                            _mk3.SayInChat(`Sub Levelfor : ${redeemer.display_name} = Gifted Tier: ${tier}! Thanks miketh101Heart`)
+                                            _mk3.SayInChat(`${redeemer.display_name} = Gifted Tier: ${tier}! Thanks miketh101Heart`)
                                         }
                                         else {
-                                            _mk3.SayInChat(`Sub Levelfor : ${redeemer.display_name} = Tier: ${tier}. Thanks!! miketh101Heart`)
+                                            _mk3.SayInChat(`${redeemer.display_name} = Tier: ${tier}. Thanks!! miketh101Heart`)
                                         }                                     
                                     }
                                     else {
