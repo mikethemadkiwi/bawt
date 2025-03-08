@@ -827,8 +827,8 @@ let startNow = setTimeout(async () => {
     mStream = await _mk.fetchStreamById(TwitchConf.username)
     mAds = await _mk.fetchAdsSchedule(mKiwi[0].id)
     //
-    // let topics = _mk.CreatePubsubTopics(mKiwi[0].id)    
-    // _mk.RestartPub(topics, mKiwi[0].id)
+    let topics = _mk.CreatePubsubTopics(mKiwi[0].id)    
+    _mk.RestartPub(topics, mKiwi[0].id)
     //
     let testSock = new initSocket(true);
     testSock.on('session_keepalive', () => {
