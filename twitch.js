@@ -596,132 +596,132 @@ class PubLib {
                             console.log('Bits Badge Unlock Event', msg)
                         break;
                         case 'channel-points-channel-v1.22703261': // CHANNEL POINTS
-                            let _mk = new MKUtils;
-                            let redeemer = msg.data.redemption.user;
-                            let reward = msg.data.redemption.reward;
-                            let tUser = await _mk.fetchUserByName(redeemer.login)
-                            let rewardData = {redeemer: redeemer, reward: reward, user: tUser}
-                            console.log(colors.green('[POINTS]'), reward.title, redeemer.display_name) 
-                            switch(reward.title){
-                                case 'kiwisdebugbutton':
-                                    let d = {                                        
-                                        userinput: msg.data.redemption.user_input,
-                                        rewardData: rewardData
-                                    }
-                                    console.log('debug', redeemer)
-                                    let deb = new MKUtils;
-                                    let deb2 = await deb.isUserSubscribed(redeemer.id)
-                                    console.log(deb2)
+                            // let _mk = new MKUtils;
+                            // let redeemer = msg.data.redemption.user;
+                            // let reward = msg.data.redemption.reward;
+                            // let tUser = await _mk.fetchUserByName(redeemer.login)
+                            // let rewardData = {redeemer: redeemer, reward: reward, user: tUser}
+                            // console.log(colors.green('[POINTS]'), reward.title, redeemer.display_name) 
+                            // switch(reward.title){
+                            //     case 'kiwisdebugbutton':
+                            //         let d = {                                        
+                            //             userinput: msg.data.redemption.user_input,
+                            //             rewardData: rewardData
+                            //         }
+                            //         console.log('debug', redeemer)
+                            //         let deb = new MKUtils;
+                            //         let deb2 = await deb.isUserSubscribed(redeemer.id)
+                            //         console.log(deb2)
                                                
-                                break;
-                                case 'TwitchAge':
-                                    let _mk = new MKUtils;
-                                    let apiuser = await _mk.fetchUserByName(redeemer.display_name)
-                                    // console.log(apiuser[0].created_at)                                                
-                                    _mk.SayInChat(`Account Creation Date for ${apiuser[0].display_name}: ${apiuser[0].created_at}`)
-                                break;
-                                case 'LurkMode':
-                                    let _mkl = new MKUtils;
-                                    let apiuserl = await _mkl.fetchUserByName(redeemer.display_name)
-                                    // console.log(apiuser[0].created_at)                                                
-                                    _mk1.SayInChat(`Lurk Mode Activated for ${apiuserl[0].display_name}. Enjoy your Lurk!  miketh101Heart`)
-                                break;
-                                case 'FollowAge':
-                                    let _mk2 = new MKUtils;
-                                    let apiuser2 = await _mk2.isUserFollower(redeemer.id)
-                                    // console.log(apiuser2)
-                                    if (apiuser2[0]!=null) {                                                
-                                        _mk2.SayInChat(`Account Follow Date for ${apiuser2[0].user_name}: ${apiuser2[0].followed_at}`)
-                                    }
-                                break;
-                                case 'ProveSub':
-                                    let _mk3 = new MKUtils;
-                                    let apiuser3 = await _mk3.isUserSubscribed(redeemer.id)
-                                    if (apiuser3[0]!=null) { 
-                                        let tier = (apiuser3[0].tier/1000)
-                                        if (apiuser3[0].is_gift==true) {
-                                            _mk3.SayInChat(`${redeemer.display_name} = Gifted Tier: ${tier}! Thanks miketh101Heart`)
-                                        }
-                                        else {
-                                            _mk3.SayInChat(`${redeemer.display_name} = Tier: ${tier}. Thanks!! miketh101Heart`)
-                                        }                                     
-                                    }
-                                    else {
-                                        _mk3.SayInChat(`Scrublord! WTF ${redeemer.display_name}!! Someone get this person a Sub!!!`)
-                                    }
-                                break;
-                                case 'LookMa':
-                                    let _mk4 = new MKUtils;
-                                    io.emit('LookMa', rewardData)  
-                                    _mk4.SayInChat(`Look @${redeemer.display_name} I'm a Dragon!!`)  
-                                break;
-                                case 'Teamspeak':
-                                    let _mk5 = new MKUtils;
-                                    _mk5.SayInChat(`Teamspeak Deets: ts3://mad.kiwi:9987`)  
-                                break;
-                                case 'EffYou':
-                                    io.emit('effyou', rewardData)
-                                break;
-                                case 'TotalCunt':
-                                    io.emit('totalcunt', rewardData)
-                                break;
-                                case 'DumbAnswer':
-                                    io.emit('dumbanswer', rewardData)
-                                break;
-                                case 'Honk': 
-                                let _mk6 = new MKUtils;                               
-                                    _mk6.SayInChat(`Honking for @${redeemer.display_name}`)
-                                    io.emit('Honk', rewardData)
-                                break;
-                                case 'BunnySays':                
-                                    let fs = require('fs');
-                                    let _mk7 = new MKUtils;
-                                    let files = fs.readdirSync('public/sounds/host/');
-                                    let rFile = Math.floor(Math.random() * files.length);
-                                    let fileSTR = `${files[rFile]}`;
-                                    io.emit('BunnySays', fileSTR)
-                                    _mk7.SayInChat(`Playing [${fileSTR.substring(0, fileSTR.length-4)}] for @${redeemer.display_name}`)
-                                break;
-                                case 'Guildwars2':
-                                    let _m8 = new MKUtils;
-                                    _mk8.SayInChat(`|| mikethemadkiwi.6058 || plays on || Henge of Denravi - US ||`)
-                                break;   
-                                case 'ShoutOut':
-                                    let _mk9 = new MKUtils;
-                                    io.emit('ShoutOut', rewardData)  
-                                    _mk9.SayInChat(`You should all go follow ${redeemer.display_name} @ twitch.tv/${redeemer.display_name} because i fuggin said so. They are amazing. I'm a bot, i'm totally capable of making that observation.`)
-                                    _mk9.ShoutoutUser(redeemer.id)
-                                break;
-                                case 'KiwisWeather':
-                                    let weatherurl = `http://api.openweathermap.org/data/2.5/weather?id=${weatherConf.wCityId}&units=${weatherConf.wDegreeKey}&APPID=${weatherConf.wAppKey}`
-                                    fetchUrl(weatherurl, function(error, meta, body){
-                                        if(error){console.log('error', error)}
-                                        let wNetwork = JSON.parse(body);
-                                        let currentweather;
-                                        if (wNetwork.Code == 'ServiceUnavailable'){
-                                            wNetwork.WeatherText = json.Message;
-                                        }
-                                        // else{console.log(wNetwork)};
-                                        if (wNetwork.weather) {
-                                                currentweather = `Weather for ${wNetwork.name}, ${wNetwork.sys.country}: `                                                            
-                                            for (let i=0;i<wNetwork.weather.length;i++){
-                                                currentweather += `${wNetwork.weather[i].main} (${wNetwork.weather[i].description}) `
-                                            }
-                                        }
-                                        if (wNetwork.main){
-                                            currentweather += `Temp: ${wNetwork.main.temp}°c (High: ${wNetwork.main.temp_max} °c) Humidity: ${wNetwork.main.humidity}% `
-                                        }
-                                        if(wNetwork.wind){
-                                            currentweather += `Wind: ${wNetwork.wind.speed}m/s (dir: ${Math.floor(wNetwork.wind.deg)}°) `
-                                        }
-                                        let _mk10 = new MKUtils;
-                                        _mk10.SayInChat(currentweather)
-                                        // _mk10.SayInChat('Find your weather code at https://openweathermap.org/city/ and use it  like this || `weather CITYID')
-                                    })
-                                break;
-                                default:
-                                    console.log('UNREGISTERED CHANNEL POINT REDEEM', `${reward.title} [${redeemer.display_name}]`, reward)                
-                            }
+                            //     break;
+                            //     case 'TwitchAge':
+                            //         let _mk = new MKUtils;
+                            //         let apiuser = await _mk.fetchUserByName(redeemer.display_name)
+                            //         // console.log(apiuser[0].created_at)                                                
+                            //         _mk.SayInChat(`Account Creation Date for ${apiuser[0].display_name}: ${apiuser[0].created_at}`)
+                            //     break;
+                            //     case 'LurkMode':
+                            //         let _mkl = new MKUtils;
+                            //         let apiuserl = await _mkl.fetchUserByName(redeemer.display_name)
+                            //         // console.log(apiuser[0].created_at)                                                
+                            //         _mk1.SayInChat(`Lurk Mode Activated for ${apiuserl[0].display_name}. Enjoy your Lurk!  miketh101Heart`)
+                            //     break;
+                            //     case 'FollowAge':
+                            //         let _mk2 = new MKUtils;
+                            //         let apiuser2 = await _mk2.isUserFollower(redeemer.id)
+                            //         // console.log(apiuser2)
+                            //         if (apiuser2[0]!=null) {                                                
+                            //             _mk2.SayInChat(`Account Follow Date for ${apiuser2[0].user_name}: ${apiuser2[0].followed_at}`)
+                            //         }
+                            //     break;
+                            //     case 'ProveSub':
+                            //         let _mk3 = new MKUtils;
+                            //         let apiuser3 = await _mk3.isUserSubscribed(redeemer.id)
+                            //         if (apiuser3[0]!=null) { 
+                            //             let tier = (apiuser3[0].tier/1000)
+                            //             if (apiuser3[0].is_gift==true) {
+                            //                 _mk3.SayInChat(`${redeemer.display_name} = Gifted Tier: ${tier}! Thanks miketh101Heart`)
+                            //             }
+                            //             else {
+                            //                 _mk3.SayInChat(`${redeemer.display_name} = Tier: ${tier}. Thanks!! miketh101Heart`)
+                            //             }                                     
+                            //         }
+                            //         else {
+                            //             _mk3.SayInChat(`Scrublord! WTF ${redeemer.display_name}!! Someone get this person a Sub!!!`)
+                            //         }
+                            //     break;
+                            //     case 'LookMa':
+                            //         let _mk4 = new MKUtils;
+                            //         io.emit('LookMa', rewardData)  
+                            //         _mk4.SayInChat(`Look @${redeemer.display_name} I'm a Dragon!!`)  
+                            //     break;
+                            //     case 'Teamspeak':
+                            //         let _mk5 = new MKUtils;
+                            //         _mk5.SayInChat(`Teamspeak Deets: ts3://mad.kiwi:9987`)  
+                            //     break;
+                            //     case 'EffYou':
+                            //         io.emit('effyou', rewardData)
+                            //     break;
+                            //     case 'TotalCunt':
+                            //         io.emit('totalcunt', rewardData)
+                            //     break;
+                            //     case 'DumbAnswer':
+                            //         io.emit('dumbanswer', rewardData)
+                            //     break;
+                            //     case 'Honk': 
+                            //     let _mk6 = new MKUtils;                               
+                            //         _mk6.SayInChat(`Honking for @${redeemer.display_name}`)
+                            //         io.emit('Honk', rewardData)
+                            //     break;
+                            //     case 'BunnySays':                
+                            //         let fs = require('fs');
+                            //         let _mk7 = new MKUtils;
+                            //         let files = fs.readdirSync('public/sounds/host/');
+                            //         let rFile = Math.floor(Math.random() * files.length);
+                            //         let fileSTR = `${files[rFile]}`;
+                            //         io.emit('BunnySays', fileSTR)
+                            //         _mk7.SayInChat(`Playing [${fileSTR.substring(0, fileSTR.length-4)}] for @${redeemer.display_name}`)
+                            //     break;
+                            //     case 'Guildwars2':
+                            //         let _m8 = new MKUtils;
+                            //         _mk8.SayInChat(`|| mikethemadkiwi.6058 || plays on || Henge of Denravi - US ||`)
+                            //     break;   
+                            //     case 'ShoutOut':
+                            //         let _mk9 = new MKUtils;
+                            //         io.emit('ShoutOut', rewardData)  
+                            //         _mk9.SayInChat(`You should all go follow ${redeemer.display_name} @ twitch.tv/${redeemer.display_name} because i fuggin said so. They are amazing. I'm a bot, i'm totally capable of making that observation.`)
+                            //         _mk9.ShoutoutUser(redeemer.id)
+                            //     break;
+                            //     case 'KiwisWeather':
+                            //         let weatherurl = `http://api.openweathermap.org/data/2.5/weather?id=${weatherConf.wCityId}&units=${weatherConf.wDegreeKey}&APPID=${weatherConf.wAppKey}`
+                            //         fetchUrl(weatherurl, function(error, meta, body){
+                            //             if(error){console.log('error', error)}
+                            //             let wNetwork = JSON.parse(body);
+                            //             let currentweather;
+                            //             if (wNetwork.Code == 'ServiceUnavailable'){
+                            //                 wNetwork.WeatherText = json.Message;
+                            //             }
+                            //             // else{console.log(wNetwork)};
+                            //             if (wNetwork.weather) {
+                            //                     currentweather = `Weather for ${wNetwork.name}, ${wNetwork.sys.country}: `                                                            
+                            //                 for (let i=0;i<wNetwork.weather.length;i++){
+                            //                     currentweather += `${wNetwork.weather[i].main} (${wNetwork.weather[i].description}) `
+                            //                 }
+                            //             }
+                            //             if (wNetwork.main){
+                            //                 currentweather += `Temp: ${wNetwork.main.temp}°c (High: ${wNetwork.main.temp_max} °c) Humidity: ${wNetwork.main.humidity}% `
+                            //             }
+                            //             if(wNetwork.wind){
+                            //                 currentweather += `Wind: ${wNetwork.wind.speed}m/s (dir: ${Math.floor(wNetwork.wind.deg)}°) `
+                            //             }
+                            //             let _mk10 = new MKUtils;
+                            //             _mk10.SayInChat(currentweather)
+                            //             // _mk10.SayInChat('Find your weather code at https://openweathermap.org/city/ and use it  like this || `weather CITYID')
+                            //         })
+                            //     break;
+                            //     default:
+                            //         console.log('UNREGISTERED CHANNEL POINT REDEEM', `${reward.title} [${redeemer.display_name}]`, reward)                
+                            // }
                         break;
                         case 'channel-subscribe-events-v1.22703261': // CHANNEL SUB
                             console.log(colors.green('[SUBSCRIPTION]'), msg)
@@ -803,8 +803,8 @@ let startNow = setTimeout(async () => {
     mStream = await _mk.fetchStreamById(TwitchConf.username)
     mAds = await _mk.fetchAdsSchedule(mKiwi[0].id)
     //
-    let topics = _mk.CreatePubsubTopics(mKiwi[0].id)    
-    _mk.RestartPub(topics, mKiwi[0].id)
+    // let topics = _mk.CreatePubsubTopics(mKiwi[0].id)    
+    // _mk.RestartPub(topics, mKiwi[0].id)
     //
     let testSock = new initSocket(true);
     testSock.on('session_keepalive', () => {
@@ -824,6 +824,8 @@ let startNow = setTimeout(async () => {
         _mk.SubscribeToTopic(id, 'channel.bits.use', '1', { broadcaster_user_id: mKiwi[0].id })
         _mk.SubscribeToTopic(id, 'channel.chat.message', '1', { broadcaster_user_id: mKiwi[0].id, user_id: mKiwi[0].id })
         _mk.SubscribeToTopic(id, 'channel.chat.notification', '1', { broadcaster_user_id: mKiwi[0].id, user_id: mKiwi[0].id })
+        _mk.SubscribeToTopic(id, 'channel.channel_points_custom_reward_redemption.add', '1', { broadcaster_user_id: mKiwi[0].id })
+        _mk.SubscribeToTopic(id, 'channel.channel_points_automatic_reward_redemption.add', '2', { broadcaster_user_id: mKiwi[0].id })
         /////////////////////////////////////////////////
         /////////////////////////////////////////////////
     });
@@ -867,6 +869,145 @@ let startNow = setTimeout(async () => {
             console.log(colors.magenta("[Chat]"), colors.yellow(`reply to <${payload.event.reply.parent_user_name}>`))
         }
         console.log(colors.magenta("[Chat]"), colors.yellow(`<${payload.event.chatter_user_name}>`), payload.event.message.text)
+    });    
+    testSock.on('channel.channel_points_custom_reward_redemption.add', async function({ payload }){
+        // console.log("reward", payload)
+        let reward = payload.event.reward
+        let redeemer = {
+            display_name: payload.event.user_name,
+            login: payload.event.user_login,
+            id: payload.event.user_id,
+            user_input: payload.event.user_input
+        }
+        console.log(colors.green('[Points]'), `<${reward.title}> Cost:(${reward.cost})`, redeemer.display_name)
+        if (redeemer.user_input != ''){
+            console.log(colors.green('[Input]'), `${redeemer.display_name} || ${redeemer.user_input}`)
+        }
+        let tUser = await _mk.fetchUserByName(redeemer.login)
+        let rewardData = {redeemer: redeemer, reward: reward, user: tUser}
+        switch(reward.title){
+            case 'kiwisdebugbutton':
+                let d = {                                        
+                    userinput: redeemer.user_input,
+                    rewardData: rewardData
+                }
+                console.log('debug', redeemer)
+                let deb = new MKUtils;
+                let deb2 = await deb.isUserSubscribed(redeemer.id)
+                console.log(deb2)
+                           
+            break;
+            case 'TwitchAge':
+                let _mk = new MKUtils;
+                let apiuser = await _mk.fetchUserByName(redeemer.display_name)
+                // console.log(apiuser[0].created_at)                                                
+                _mk.SayInChat(`Account Creation Date for ${apiuser[0].display_name}: ${apiuser[0].created_at}`)
+            break;
+            case 'LurkMode':
+                let _mkl = new MKUtils;
+                let apiuserl = await _mkl.fetchUserByName(redeemer.display_name)
+                // console.log(apiuser[0].created_at)                                                
+                _mk1.SayInChat(`Lurk Mode Activated for ${apiuserl[0].display_name}. Enjoy your Lurk!  miketh101Heart`)
+            break;
+            case 'FollowAge':
+                let _mk2 = new MKUtils;
+                let apiuser2 = await _mk2.isUserFollower(redeemer.id)
+                // console.log(apiuser2)
+                if (apiuser2[0]!=null) {                                                
+                    _mk2.SayInChat(`Account Follow Date for ${apiuser2[0].user_name}: ${apiuser2[0].followed_at}`)
+                }
+            break;
+            case 'ProveSub':
+                let _mk3 = new MKUtils;
+                let apiuser3 = await _mk3.isUserSubscribed(redeemer.id)
+                if (apiuser3[0]!=null) { 
+                    let tier = (apiuser3[0].tier/1000)
+                    if (apiuser3[0].is_gift==true) {
+                        _mk3.SayInChat(`${redeemer.display_name} = Gifted Tier: ${tier}! Thanks miketh101Heart`)
+                    }
+                    else {
+                        _mk3.SayInChat(`${redeemer.display_name} = Tier: ${tier}. Thanks!! miketh101Heart`)
+                    }                                     
+                }
+                else {
+                    _mk3.SayInChat(`Scrublord! WTF ${redeemer.display_name}!! Someone get this person a Sub!!!`)
+                }
+            break;
+            case 'LookMa':
+                let _mk4 = new MKUtils;
+                io.emit('LookMa', rewardData)  
+                _mk4.SayInChat(`Look @${redeemer.display_name} I'm a Dragon!!`)  
+            break;
+            case 'Teamspeak':
+                let _mk5 = new MKUtils;
+                _mk5.SayInChat(`Teamspeak Deets: ts3://mad.kiwi:9987`)  
+            break;
+            case 'EffYou':
+                io.emit('effyou', rewardData)
+            break;
+            case 'TotalCunt':
+                io.emit('totalcunt', rewardData)
+            break;
+            case 'DumbAnswer':
+                io.emit('dumbanswer', rewardData)
+            break;
+            case 'Honk': 
+            let _mk6 = new MKUtils;                               
+                _mk6.SayInChat(`Honking for @${redeemer.display_name}`)
+                io.emit('Honk', rewardData)
+            break;
+            case 'BunnySays':                
+                let fs = require('fs');
+                let _mk7 = new MKUtils;
+                let files = fs.readdirSync('public/sounds/host/');
+                let rFile = Math.floor(Math.random() * files.length);
+                let fileSTR = `${files[rFile]}`;
+                io.emit('BunnySays', fileSTR)
+                _mk7.SayInChat(`Playing [${fileSTR.substring(0, fileSTR.length-4)}] for @${redeemer.display_name}`)
+            break;
+            case 'Guildwars2':
+                let _m8 = new MKUtils;
+                _mk8.SayInChat(`|| mikethemadkiwi.6058 || plays on || Henge of Denravi - US ||`)
+            break;   
+            case 'ShoutOut':
+                let _mk9 = new MKUtils;
+                io.emit('ShoutOut', rewardData)  
+                _mk9.SayInChat(`You should all go follow ${redeemer.display_name} @ twitch.tv/${redeemer.display_name} because i fuggin said so. They are amazing. I'm a bot, i'm totally capable of making that observation.`)
+                _mk9.ShoutoutUser(redeemer.id)
+            break;
+            case 'KiwisWeather':
+                let weatherurl = `http://api.openweathermap.org/data/2.5/weather?id=${weatherConf.wCityId}&units=${weatherConf.wDegreeKey}&APPID=${weatherConf.wAppKey}`
+                fetchUrl(weatherurl, function(error, meta, body){
+                    if(error){console.log('error', error)}
+                    let wNetwork = JSON.parse(body);
+                    let currentweather;
+                    if (wNetwork.Code == 'ServiceUnavailable'){
+                        wNetwork.WeatherText = json.Message;
+                    }
+                    // else{console.log(wNetwork)};
+                    if (wNetwork.weather) {
+                            currentweather = `Weather for ${wNetwork.name}, ${wNetwork.sys.country}: `                                                            
+                        for (let i=0;i<wNetwork.weather.length;i++){
+                            currentweather += `${wNetwork.weather[i].main} (${wNetwork.weather[i].description}) `
+                        }
+                    }
+                    if (wNetwork.main){
+                        currentweather += `Temp: ${wNetwork.main.temp}°c (High: ${wNetwork.main.temp_max} °c) Humidity: ${wNetwork.main.humidity}% `
+                    }
+                    if(wNetwork.wind){
+                        currentweather += `Wind: ${wNetwork.wind.speed}m/s (dir: ${Math.floor(wNetwork.wind.deg)}°) `
+                    }
+                    let _mk10 = new MKUtils;
+                    _mk10.SayInChat(currentweather)
+                    // _mk10.SayInChat('Find your weather code at https://openweathermap.org/city/ and use it  like this || `weather CITYID')
+                })
+            break;
+            default:
+                console.log('UNREGISTERED CHANNEL POINT REDEEM', `${rewardData.title} [${redeemer.display_name}]`, rewardData)                
+        }
+    });
+    testSock.on('channel.channel_points_automatic_reward_redemption.add', function({ payload }){
+        console.log('channel.channel_points_automatic_reward_redemption.add', payload)
     });
 
     keyupdate = setInterval(async () => {
