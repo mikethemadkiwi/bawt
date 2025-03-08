@@ -877,7 +877,7 @@ let startNow = setTimeout(async () => {
         mAds = await _mk.fetchAdsSchedule(mKiwi[0].id)
         if(mStream[0]!=null){
             if(mStream[0].type=='live'){
-                if (mAds.preroll_free_time<=600){
+                if (mAds.preroll_free_time<=900){
                     let ac = await _mk.RunAds(mKiwi)   
                     if (ac[0] == 'Ads'){
                         _db.StoreAdData([mAds, ac])
