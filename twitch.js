@@ -284,36 +284,36 @@ class MKUtils {
                 }); 
             })          
         }
-        CreatePubsubTopics = function(user_id){
-            let templatetopics = [
-                // 'whispers.',
-                // 'chat_moderator_actions.',
-                // 'channel-bits-events-v1.',
-                'channel-bits-events-v2.',
-                'channel-bits-badge-unlocks.',
-                'channel-points-channel-v1.',
-                'channel-subscribe-events-v1.'
-            ];
-            let listentopics = [];
-            templatetopics.forEach(topic => {
-                let tstr = `${topic}${user_id}`;
-                listentopics.push(tstr)
-            });
-            return listentopics
-        }
-        RestartPub = function(topics){                
-            let pBot = new PubLib;
-            pBot.startPub(topics);                
-        }
-        ListentoPubsubTopics = function (topics){
-            let pck = {}
-            pck.type = 'LISTEN';
-            pck.nonce = TwitchConf.username + '-' + new Date().getTime();
-            pck.data = {};
-            pck.data.topics = topics;
-            pck.data.auth_token = currentTokens.access_token;
-            MKClient['pubsub'].send(JSON.stringify(pck));
-        }       
+        // CreatePubsubTopics = function(user_id){
+        //     let templatetopics = [
+        //         // 'whispers.',
+        //         // 'chat_moderator_actions.',
+        //         // 'channel-bits-events-v1.',
+        //         'channel-bits-events-v2.',
+        //         'channel-bits-badge-unlocks.',
+        //         'channel-points-channel-v1.',
+        //         'channel-subscribe-events-v1.'
+        //     ];
+        //     let listentopics = [];
+        //     templatetopics.forEach(topic => {
+        //         let tstr = `${topic}${user_id}`;
+        //         listentopics.push(tstr)
+        //     });
+        //     return listentopics
+        // }
+        // RestartPub = function(topics){                
+        //     let pBot = new PubLib;
+        //     pBot.startPub(topics);                
+        // }
+        // ListentoPubsubTopics = function (topics){
+        //     let pck = {}
+        //     pck.type = 'LISTEN';
+        //     pck.nonce = TwitchConf.username + '-' + new Date().getTime();
+        //     pck.data = {};
+        //     pck.data.topics = topics;
+        //     pck.data.auth_token = currentTokens.access_token;
+        //     MKClient['pubsub'].send(JSON.stringify(pck));
+        // }       
         fetchUserByName(name){
             return new Promise((resolve, reject) => {
                 let tmpAuth = currentTokens.access_token;
@@ -518,275 +518,275 @@ class MKUtils {
             })
         }
 }
-///////////////////////////////////////
-// PingLib
-///////////////////////////////////////
-let ping = {};
-ping.pinger = false;
-ping.start = function() {
-    if (ping.pinger) {
-        clearInterval(ping.pinger);
-    }
-    ping.sendPing();
-    ping.pinger = setInterval(function() {
-        setTimeout(function() {
-            ping.sendPing();
-            //jitter
-        }, Math.floor((Math.random() * 1000) + 1));
-    }, (4 * 60 * 1000));
-}// at least ever 5 minutes
-ping.sendPing = function() {
-    try {
-        MKClient['pubsub'].send(JSON.stringify({
-            type: 'PING'
-        }));
-        ping.awaitPong();
-    } catch (e) {
-        console.log('pubsub error:',e);
-        MKClient['pubsub'].close();
-        ping.start();
-    }
-}
-ping.awaitPong = function() {
-    ping.pingtimeout = setTimeout(function() {
-        console.log('Pubsub Ping','WS Pong Timeout');
-        MKClient['pubsub'].close();
-        ping.start();
-    }, 10000)
-}
-ping.gotPong = function() {
-    clearTimeout(ping.pingtimeout);
-}
-///////////////////////////////////////
-// PUBSUB
-///////////////////////////////////////
-class PubLib {
-        async startPub(Ptopics){
-            MKClient['pubsub'] = new ws('wss://pubsub-edge.twitch.tv');
-            MKClient['pubsub'].on('close', function() {
-                console.log('PUBSUB','disconnected. Restarting Services');
-                let _mk = new MKUtils;
-                _mk.RestartPub(Ptopics);
-            }).on('open', function() {
-                ping.start();
-                let _mk = new MKUtils;
-                _mk.ListentoPubsubTopics(Ptopics);
-            });
-            MKClient['pubsub'].on('message', async function(raw_data, flags) { 
-                var data = JSON.parse(raw_data);
-                if (data.type == 'RECONNECT') {
-                    console.log('PUBSUB','WS Got Reconnect');
-                    // restart
-                    MKClient['pubsub'].close();
-                } else if (data.type == 'PONG') {
-                    ping.gotPong();
+// ///////////////////////////////////////
+// // PingLib
+// ///////////////////////////////////////
+// let ping = {};
+// ping.pinger = false;
+// ping.start = function() {
+//     if (ping.pinger) {
+//         clearInterval(ping.pinger);
+//     }
+//     ping.sendPing();
+//     ping.pinger = setInterval(function() {
+//         setTimeout(function() {
+//             ping.sendPing();
+//             //jitter
+//         }, Math.floor((Math.random() * 1000) + 1));
+//     }, (4 * 60 * 1000));
+// }// at least ever 5 minutes
+// ping.sendPing = function() {
+//     try {
+//         MKClient['pubsub'].send(JSON.stringify({
+//             type: 'PING'
+//         }));
+//         ping.awaitPong();
+//     } catch (e) {
+//         console.log('pubsub error:',e);
+//         MKClient['pubsub'].close();
+//         ping.start();
+//     }
+// }
+// ping.awaitPong = function() {
+//     ping.pingtimeout = setTimeout(function() {
+//         console.log('Pubsub Ping','WS Pong Timeout');
+//         MKClient['pubsub'].close();
+//         ping.start();
+//     }, 10000)
+// }
+// ping.gotPong = function() {
+//     clearTimeout(ping.pingtimeout);
+// }
+// ///////////////////////////////////////
+// // PUBSUB
+// ///////////////////////////////////////
+// class PubLib {
+//         async startPub(Ptopics){
+//             MKClient['pubsub'] = new ws('wss://pubsub-edge.twitch.tv');
+//             MKClient['pubsub'].on('close', function() {
+//                 console.log('PUBSUB','disconnected. Restarting Services');
+//                 let _mk = new MKUtils;
+//                 _mk.RestartPub(Ptopics);
+//             }).on('open', function() {
+//                 ping.start();
+//                 let _mk = new MKUtils;
+//                 _mk.ListentoPubsubTopics(Ptopics);
+//             });
+//             MKClient['pubsub'].on('message', async function(raw_data, flags) { 
+//                 var data = JSON.parse(raw_data);
+//                 if (data.type == 'RECONNECT') {
+//                     console.log('PUBSUB','WS Got Reconnect');
+//                     // restart
+//                     MKClient['pubsub'].close();
+//                 } else if (data.type == 'PONG') {
+//                     ping.gotPong();
         
-                } else if (data.type == 'RESPONSE') {
-                    console.log('PUBSUB','RESPONSE: ' + (data.error ? data.error : 'OK'));
-                } else if (data.type == 'MESSAGE') {
-                    var msg = JSON.parse(data.data.message);
-                    let pTopic = data.data.topic;
-                    io.emit('ircd', {pTopic, msg})
-                    //
-                    switch(pTopic){
-                        case 'channel-bits-events-v2.22703261': // BITTIES
-                            console.log(colors.green('[BITS]'), msg)
-                        break;
-                        case 'channel-bits-badge-unlocks.22703261': // BITS BADGE UNLOCK
-                            console.log('Bits Badge Unlock Event', msg)
-                        break;
-                        case 'channel-points-channel-v1.22703261': // CHANNEL POINTS
-                            // let _mk = new MKUtils;
-                            // let redeemer = msg.data.redemption.user;
-                            // let reward = msg.data.redemption.reward;
-                            // let tUser = await _mk.fetchUserByName(redeemer.login)
-                            // let rewardData = {redeemer: redeemer, reward: reward, user: tUser}
-                            // console.log(colors.green('[POINTS]'), reward.title, redeemer.display_name) 
-                            // switch(reward.title){
-                            //     case 'kiwisdebugbutton':
-                            //         let d = {                                        
-                            //             userinput: msg.data.redemption.user_input,
-                            //             rewardData: rewardData
-                            //         }
-                            //         console.log('debug', redeemer)
-                            //         let deb = new MKUtils;
-                            //         let deb2 = await deb.isUserSubscribed(redeemer.id)
-                            //         console.log(deb2)
+//                 } else if (data.type == 'RESPONSE') {
+//                     console.log('PUBSUB','RESPONSE: ' + (data.error ? data.error : 'OK'));
+//                 } else if (data.type == 'MESSAGE') {
+//                     var msg = JSON.parse(data.data.message);
+//                     let pTopic = data.data.topic;
+//                     io.emit('ircd', {pTopic, msg})
+//                     //
+//                     switch(pTopic){
+//                         case 'channel-bits-events-v2.22703261': // BITTIES
+//                             console.log(colors.green('[BITS]'), msg)
+//                         break;
+//                         case 'channel-bits-badge-unlocks.22703261': // BITS BADGE UNLOCK
+//                             console.log('Bits Badge Unlock Event', msg)
+//                         break;
+//                         case 'channel-points-channel-v1.22703261': // CHANNEL POINTS
+//                             // let _mk = new MKUtils;
+//                             // let redeemer = msg.data.redemption.user;
+//                             // let reward = msg.data.redemption.reward;
+//                             // let tUser = await _mk.fetchUserByName(redeemer.login)
+//                             // let rewardData = {redeemer: redeemer, reward: reward, user: tUser}
+//                             // console.log(colors.green('[POINTS]'), reward.title, redeemer.display_name) 
+//                             // switch(reward.title){
+//                             //     case 'kiwisdebugbutton':
+//                             //         let d = {                                        
+//                             //             userinput: msg.data.redemption.user_input,
+//                             //             rewardData: rewardData
+//                             //         }
+//                             //         console.log('debug', redeemer)
+//                             //         let deb = new MKUtils;
+//                             //         let deb2 = await deb.isUserSubscribed(redeemer.id)
+//                             //         console.log(deb2)
                                                
-                            //     break;
-                            //     case 'TwitchAge':
-                            //         let _mk = new MKUtils;
-                            //         let apiuser = await _mk.fetchUserByName(redeemer.display_name)
-                            //         // console.log(apiuser[0].created_at)                                                
-                            //         _mk.SayInChat(`Account Creation Date for ${apiuser[0].display_name}: ${apiuser[0].created_at}`)
-                            //     break;
-                            //     case 'LurkMode':
-                            //         let _mkl = new MKUtils;
-                            //         let apiuserl = await _mkl.fetchUserByName(redeemer.display_name)
-                            //         // console.log(apiuser[0].created_at)                                                
-                            //         _mk1.SayInChat(`Lurk Mode Activated for ${apiuserl[0].display_name}. Enjoy your Lurk!  miketh101Heart`)
-                            //     break;
-                            //     case 'FollowAge':
-                            //         let _mk2 = new MKUtils;
-                            //         let apiuser2 = await _mk2.isUserFollower(redeemer.id)
-                            //         // console.log(apiuser2)
-                            //         if (apiuser2[0]!=null) {                                                
-                            //             _mk2.SayInChat(`Account Follow Date for ${apiuser2[0].user_name}: ${apiuser2[0].followed_at}`)
-                            //         }
-                            //     break;
-                            //     case 'ProveSub':
-                            //         let _mk3 = new MKUtils;
-                            //         let apiuser3 = await _mk3.isUserSubscribed(redeemer.id)
-                            //         if (apiuser3[0]!=null) { 
-                            //             let tier = (apiuser3[0].tier/1000)
-                            //             if (apiuser3[0].is_gift==true) {
-                            //                 _mk3.SayInChat(`${redeemer.display_name} = Gifted Tier: ${tier}! Thanks miketh101Heart`)
-                            //             }
-                            //             else {
-                            //                 _mk3.SayInChat(`${redeemer.display_name} = Tier: ${tier}. Thanks!! miketh101Heart`)
-                            //             }                                     
-                            //         }
-                            //         else {
-                            //             _mk3.SayInChat(`Scrublord! WTF ${redeemer.display_name}!! Someone get this person a Sub!!!`)
-                            //         }
-                            //     break;
-                            //     case 'LookMa':
-                            //         let _mk4 = new MKUtils;
-                            //         io.emit('LookMa', rewardData)  
-                            //         _mk4.SayInChat(`Look @${redeemer.display_name} I'm a Dragon!!`)  
-                            //     break;
-                            //     case 'Teamspeak':
-                            //         let _mk5 = new MKUtils;
-                            //         _mk5.SayInChat(`Teamspeak Deets: ts3://mad.kiwi:9987`)  
-                            //     break;
-                            //     case 'EffYou':
-                            //         io.emit('effyou', rewardData)
-                            //     break;
-                            //     case 'TotalCunt':
-                            //         io.emit('totalcunt', rewardData)
-                            //     break;
-                            //     case 'DumbAnswer':
-                            //         io.emit('dumbanswer', rewardData)
-                            //     break;
-                            //     case 'Honk': 
-                            //     let _mk6 = new MKUtils;                               
-                            //         _mk6.SayInChat(`Honking for @${redeemer.display_name}`)
-                            //         io.emit('Honk', rewardData)
-                            //     break;
-                            //     case 'BunnySays':                
-                            //         let fs = require('fs');
-                            //         let _mk7 = new MKUtils;
-                            //         let files = fs.readdirSync('public/sounds/host/');
-                            //         let rFile = Math.floor(Math.random() * files.length);
-                            //         let fileSTR = `${files[rFile]}`;
-                            //         io.emit('BunnySays', fileSTR)
-                            //         _mk7.SayInChat(`Playing [${fileSTR.substring(0, fileSTR.length-4)}] for @${redeemer.display_name}`)
-                            //     break;
-                            //     case 'Guildwars2':
-                            //         let _m8 = new MKUtils;
-                            //         _mk8.SayInChat(`|| mikethemadkiwi.6058 || plays on || Henge of Denravi - US ||`)
-                            //     break;   
-                            //     case 'ShoutOut':
-                            //         let _mk9 = new MKUtils;
-                            //         io.emit('ShoutOut', rewardData)  
-                            //         _mk9.SayInChat(`You should all go follow ${redeemer.display_name} @ twitch.tv/${redeemer.display_name} because i fuggin said so. They are amazing. I'm a bot, i'm totally capable of making that observation.`)
-                            //         _mk9.ShoutoutUser(redeemer.id)
-                            //     break;
-                            //     case 'KiwisWeather':
-                            //         let weatherurl = `http://api.openweathermap.org/data/2.5/weather?id=${weatherConf.wCityId}&units=${weatherConf.wDegreeKey}&APPID=${weatherConf.wAppKey}`
-                            //         fetchUrl(weatherurl, function(error, meta, body){
-                            //             if(error){console.log('error', error)}
-                            //             let wNetwork = JSON.parse(body);
-                            //             let currentweather;
-                            //             if (wNetwork.Code == 'ServiceUnavailable'){
-                            //                 wNetwork.WeatherText = json.Message;
-                            //             }
-                            //             // else{console.log(wNetwork)};
-                            //             if (wNetwork.weather) {
-                            //                     currentweather = `Weather for ${wNetwork.name}, ${wNetwork.sys.country}: `                                                            
-                            //                 for (let i=0;i<wNetwork.weather.length;i++){
-                            //                     currentweather += `${wNetwork.weather[i].main} (${wNetwork.weather[i].description}) `
-                            //                 }
-                            //             }
-                            //             if (wNetwork.main){
-                            //                 currentweather += `Temp: ${wNetwork.main.temp}°c (High: ${wNetwork.main.temp_max} °c) Humidity: ${wNetwork.main.humidity}% `
-                            //             }
-                            //             if(wNetwork.wind){
-                            //                 currentweather += `Wind: ${wNetwork.wind.speed}m/s (dir: ${Math.floor(wNetwork.wind.deg)}°) `
-                            //             }
-                            //             let _mk10 = new MKUtils;
-                            //             _mk10.SayInChat(currentweather)
-                            //             // _mk10.SayInChat('Find your weather code at https://openweathermap.org/city/ and use it  like this || `weather CITYID')
-                            //         })
-                            //     break;
-                            //     default:
-                            //         console.log('UNREGISTERED CHANNEL POINT REDEEM', `${reward.title} [${redeemer.display_name}]`, reward)                
-                            // }
-                        break;
-                        case 'channel-subscribe-events-v1.22703261': // CHANNEL SUB
-                            console.log(colors.green('[SUBSCRIPTION]'), msg)
-                            switch(msg.context){
-                                case'sub':
-                                    console.log('sub', msg)
-                                    let sUser = msg.display_name;
-                                    let sPlan = msg.sub_plan;
-                                    if(sPlan!='Prime'){
-                                        sPlan = (sPlan/1000)
-                                    }
-                                    let sCumMonths = msg.cumulative_months;
-                                    let subscriberStr = `[${sUser}] has subbed for [${sCumMonths}] months! Thanks [${sUser}] for the tier [${sPlan}] Subscription!`
+//                             //     break;
+//                             //     case 'TwitchAge':
+//                             //         let _mk = new MKUtils;
+//                             //         let apiuser = await _mk.fetchUserByName(redeemer.display_name)
+//                             //         // console.log(apiuser[0].created_at)                                                
+//                             //         _mk.SayInChat(`Account Creation Date for ${apiuser[0].display_name}: ${apiuser[0].created_at}`)
+//                             //     break;
+//                             //     case 'LurkMode':
+//                             //         let _mkl = new MKUtils;
+//                             //         let apiuserl = await _mkl.fetchUserByName(redeemer.display_name)
+//                             //         // console.log(apiuser[0].created_at)                                                
+//                             //         _mk1.SayInChat(`Lurk Mode Activated for ${apiuserl[0].display_name}. Enjoy your Lurk!  miketh101Heart`)
+//                             //     break;
+//                             //     case 'FollowAge':
+//                             //         let _mk2 = new MKUtils;
+//                             //         let apiuser2 = await _mk2.isUserFollower(redeemer.id)
+//                             //         // console.log(apiuser2)
+//                             //         if (apiuser2[0]!=null) {                                                
+//                             //             _mk2.SayInChat(`Account Follow Date for ${apiuser2[0].user_name}: ${apiuser2[0].followed_at}`)
+//                             //         }
+//                             //     break;
+//                             //     case 'ProveSub':
+//                             //         let _mk3 = new MKUtils;
+//                             //         let apiuser3 = await _mk3.isUserSubscribed(redeemer.id)
+//                             //         if (apiuser3[0]!=null) { 
+//                             //             let tier = (apiuser3[0].tier/1000)
+//                             //             if (apiuser3[0].is_gift==true) {
+//                             //                 _mk3.SayInChat(`${redeemer.display_name} = Gifted Tier: ${tier}! Thanks miketh101Heart`)
+//                             //             }
+//                             //             else {
+//                             //                 _mk3.SayInChat(`${redeemer.display_name} = Tier: ${tier}. Thanks!! miketh101Heart`)
+//                             //             }                                     
+//                             //         }
+//                             //         else {
+//                             //             _mk3.SayInChat(`Scrublord! WTF ${redeemer.display_name}!! Someone get this person a Sub!!!`)
+//                             //         }
+//                             //     break;
+//                             //     case 'LookMa':
+//                             //         let _mk4 = new MKUtils;
+//                             //         io.emit('LookMa', rewardData)  
+//                             //         _mk4.SayInChat(`Look @${redeemer.display_name} I'm a Dragon!!`)  
+//                             //     break;
+//                             //     case 'Teamspeak':
+//                             //         let _mk5 = new MKUtils;
+//                             //         _mk5.SayInChat(`Teamspeak Deets: ts3://mad.kiwi:9987`)  
+//                             //     break;
+//                             //     case 'EffYou':
+//                             //         io.emit('effyou', rewardData)
+//                             //     break;
+//                             //     case 'TotalCunt':
+//                             //         io.emit('totalcunt', rewardData)
+//                             //     break;
+//                             //     case 'DumbAnswer':
+//                             //         io.emit('dumbanswer', rewardData)
+//                             //     break;
+//                             //     case 'Honk': 
+//                             //     let _mk6 = new MKUtils;                               
+//                             //         _mk6.SayInChat(`Honking for @${redeemer.display_name}`)
+//                             //         io.emit('Honk', rewardData)
+//                             //     break;
+//                             //     case 'BunnySays':                
+//                             //         let fs = require('fs');
+//                             //         let _mk7 = new MKUtils;
+//                             //         let files = fs.readdirSync('public/sounds/host/');
+//                             //         let rFile = Math.floor(Math.random() * files.length);
+//                             //         let fileSTR = `${files[rFile]}`;
+//                             //         io.emit('BunnySays', fileSTR)
+//                             //         _mk7.SayInChat(`Playing [${fileSTR.substring(0, fileSTR.length-4)}] for @${redeemer.display_name}`)
+//                             //     break;
+//                             //     case 'Guildwars2':
+//                             //         let _m8 = new MKUtils;
+//                             //         _mk8.SayInChat(`|| mikethemadkiwi.6058 || plays on || Henge of Denravi - US ||`)
+//                             //     break;   
+//                             //     case 'ShoutOut':
+//                             //         let _mk9 = new MKUtils;
+//                             //         io.emit('ShoutOut', rewardData)  
+//                             //         _mk9.SayInChat(`You should all go follow ${redeemer.display_name} @ twitch.tv/${redeemer.display_name} because i fuggin said so. They are amazing. I'm a bot, i'm totally capable of making that observation.`)
+//                             //         _mk9.ShoutoutUser(redeemer.id)
+//                             //     break;
+//                             //     case 'KiwisWeather':
+//                             //         let weatherurl = `http://api.openweathermap.org/data/2.5/weather?id=${weatherConf.wCityId}&units=${weatherConf.wDegreeKey}&APPID=${weatherConf.wAppKey}`
+//                             //         fetchUrl(weatherurl, function(error, meta, body){
+//                             //             if(error){console.log('error', error)}
+//                             //             let wNetwork = JSON.parse(body);
+//                             //             let currentweather;
+//                             //             if (wNetwork.Code == 'ServiceUnavailable'){
+//                             //                 wNetwork.WeatherText = json.Message;
+//                             //             }
+//                             //             // else{console.log(wNetwork)};
+//                             //             if (wNetwork.weather) {
+//                             //                     currentweather = `Weather for ${wNetwork.name}, ${wNetwork.sys.country}: `                                                            
+//                             //                 for (let i=0;i<wNetwork.weather.length;i++){
+//                             //                     currentweather += `${wNetwork.weather[i].main} (${wNetwork.weather[i].description}) `
+//                             //                 }
+//                             //             }
+//                             //             if (wNetwork.main){
+//                             //                 currentweather += `Temp: ${wNetwork.main.temp}°c (High: ${wNetwork.main.temp_max} °c) Humidity: ${wNetwork.main.humidity}% `
+//                             //             }
+//                             //             if(wNetwork.wind){
+//                             //                 currentweather += `Wind: ${wNetwork.wind.speed}m/s (dir: ${Math.floor(wNetwork.wind.deg)}°) `
+//                             //             }
+//                             //             let _mk10 = new MKUtils;
+//                             //             _mk10.SayInChat(currentweather)
+//                             //             // _mk10.SayInChat('Find your weather code at https://openweathermap.org/city/ and use it  like this || `weather CITYID')
+//                             //         })
+//                             //     break;
+//                             //     default:
+//                             //         console.log('UNREGISTERED CHANNEL POINT REDEEM', `${reward.title} [${redeemer.display_name}]`, reward)                
+//                             // }
+//                         break;
+//                         case 'channel-subscribe-events-v1.22703261': // CHANNEL SUB
+//                             console.log(colors.green('[SUBSCRIPTION]'), msg)
+//                             switch(msg.context){
+//                                 case'sub':
+//                                     console.log('sub', msg)
+//                                     let sUser = msg.display_name;
+//                                     let sPlan = msg.sub_plan;
+//                                     if(sPlan!='Prime'){
+//                                         sPlan = (sPlan/1000)
+//                                     }
+//                                     let sCumMonths = msg.cumulative_months;
+//                                     let subscriberStr = `[${sUser}] has subbed for [${sCumMonths}] months! Thanks [${sUser}] for the tier [${sPlan}] Subscription!`
                                     
-                                    let _mk11 = new MKUtils;
-                                    _mk11.SayInChat(subscriberStr)
-                                break;
-                                case'resub':
-                                    console.log('resub', msg)
-                                    let sUser2 = msg.display_name;
-                                    let sPlan2 = msg.sub_plan;
-                                    if(sPlan2!='Prime'){
-                                        sPlan2 = (sPlan2/1000)
-                                    }
-                                    let sCumMonths2 = msg.cumulative_months;
-                                    let subscriberStr2 = `[${sUser2}] has subbed for [${sCumMonths2}] months! Thanks [${sUser2}] for the tier [${sPlan2}] Subscription!`
-                                    let _mk12 = new MKUtils;
-                                    _mk12.SayInChat(subscriberStr2)
-                                break;
-                                case'subgift':
-                                    console.log('gift sub', msg)
-                                    let sUser3 = msg.display_name;
-                                    let sPlan3 = msg.sub_plan;
-                                    if(sPlan3!='Prime'){
-                                        sPlan3 = (sPlan3/1000)
-                                    }
-                                    let sRecipName3 = msg.recipient_display_name;
-                                    let subscriberStr3 = `[${sUser3}] has given [${sRecipName3}] a Gift Sub! Thanks [${sUser3}] for the tier [${sPlan3}] Subscription!`
-                                    let _mk13 = new MKUtils;
-                                    _mk13.SayInChat(subscriberStr3)
-                                break;
-                                case'anonsubgift':
-                                    console.log('anon gift sub', msg)
-                                    let sPlan4 = msg.sub_plan;
-                                    if(sPlan4!='Prime'){
-                                        sPlan4 = (sPlan4/1000)
-                                    }
-                                    let sRecipName4 = msg.recipient_display_name;
-                                    let subscriberStr4 = `[ANONYMOUS] has given [${sRecipName4}] a Gift Sub! Thanks [ANONYMOUS] for the tier [${sPlan4}] Subscription!`
-                                    let _mk14 = new MKUtils;
-                                    _mk14.SayInChat(subscriberStr4)
-                                break;
-                                default:
-                                    console.log(`unhandled msg.context pubsub`, msg.context, msg);
-                            }
-                        break;
-                        default:
-                            // console.log('unhandled topic', pTopic, msg)
-                    }
-                } else {
-                    console.log('bottomofpubsubmsgneverfired', data);
-                }
-            });
-        }
-}
+//                                     let _mk11 = new MKUtils;
+//                                     _mk11.SayInChat(subscriberStr)
+//                                 break;
+//                                 case'resub':
+//                                     console.log('resub', msg)
+//                                     let sUser2 = msg.display_name;
+//                                     let sPlan2 = msg.sub_plan;
+//                                     if(sPlan2!='Prime'){
+//                                         sPlan2 = (sPlan2/1000)
+//                                     }
+//                                     let sCumMonths2 = msg.cumulative_months;
+//                                     let subscriberStr2 = `[${sUser2}] has subbed for [${sCumMonths2}] months! Thanks [${sUser2}] for the tier [${sPlan2}] Subscription!`
+//                                     let _mk12 = new MKUtils;
+//                                     _mk12.SayInChat(subscriberStr2)
+//                                 break;
+//                                 case'subgift':
+//                                     console.log('gift sub', msg)
+//                                     let sUser3 = msg.display_name;
+//                                     let sPlan3 = msg.sub_plan;
+//                                     if(sPlan3!='Prime'){
+//                                         sPlan3 = (sPlan3/1000)
+//                                     }
+//                                     let sRecipName3 = msg.recipient_display_name;
+//                                     let subscriberStr3 = `[${sUser3}] has given [${sRecipName3}] a Gift Sub! Thanks [${sUser3}] for the tier [${sPlan3}] Subscription!`
+//                                     let _mk13 = new MKUtils;
+//                                     _mk13.SayInChat(subscriberStr3)
+//                                 break;
+//                                 case'anonsubgift':
+//                                     console.log('anon gift sub', msg)
+//                                     let sPlan4 = msg.sub_plan;
+//                                     if(sPlan4!='Prime'){
+//                                         sPlan4 = (sPlan4/1000)
+//                                     }
+//                                     let sRecipName4 = msg.recipient_display_name;
+//                                     let subscriberStr4 = `[ANONYMOUS] has given [${sRecipName4}] a Gift Sub! Thanks [ANONYMOUS] for the tier [${sPlan4}] Subscription!`
+//                                     let _mk14 = new MKUtils;
+//                                     _mk14.SayInChat(subscriberStr4)
+//                                 break;
+//                                 default:
+//                                     console.log(`unhandled msg.context pubsub`, msg.context, msg);
+//                             }
+//                         break;
+//                         default:
+//                             // console.log('unhandled topic', pTopic, msg)
+//                     }
+//                 } else {
+//                     console.log('bottomofpubsubmsgneverfired', data);
+//                 }
+//             });
+//         }
+// }
 ///////////////////////////////////////
 // START ENGINE
 ///////////////////////////////////////
@@ -829,6 +829,47 @@ let startNow = setTimeout(async () => {
         /////////////////////////////////////////////////
         /////////////////////////////////////////////////
     });
+
+    
+
+    keyupdate = setInterval(async () => {
+        let auth = await _db.FetchAuth();
+        mKiwi = await _mk.fetchUserByName(TwitchConf.username)
+        mKbot = await _mk.fetchUserByName(kiwibotConf.username)
+        mStream = await _mk.fetchStreamById(TwitchConf.username)
+        mAds = await _mk.fetchAdsSchedule(mKiwi[0].id)
+        if(mStream[0]!=null){
+            if(mStream[0].type=='live'){
+                if (mAds.preroll_free_time<=900){
+                    let ac = await _mk.RunAds(mKiwi)   
+                    if (ac[0] == 'Ads'){
+                        _db.StoreAdData([mAds, ac])
+                        io.emit('Ads', 120)
+                        let adsStr = `Ads are Playing! Kiwisbot Runs between 1-2 minutes worth of ads every 20 mins to scare away Prerolls! I dont trigger them just to annoy you!!  miketh101Heart Thanks for your Patience!  miketh101Heart`
+                        _mk.SayInChat(adsStr)
+                        let nextRuntime = Date.now()+(ac[2][0].retry_after*1000) //date.now+480000 == future tiume
+                        let adtimer = (ac[2][0].length*1000) //90000
+                        let dd = new Date(nextRuntime)
+                        console.log(`Viewercount: ${mStream[0].viewer_count}`, `Running Ads`, ac[2][0].length, `Safe Ad Reload: ${dd}`)
+                        let notifyadend = setTimeout(() => {
+                            let adsStr = `Ads should be over. (${ac[2][0].length}seconds). Welcome Back!`
+                            _mk.SayInChat(adsStr)
+                        }, adtimer);
+                    }
+                    if (ac[0] == 'NextRun'){
+                        if (ac[2] < 5){
+                            console.log(`Viewercount: ${mStream[0].viewer_count}`, ac)
+                        }              
+                    }
+                }
+                else{
+                    let prtimeclean = Math.floor((mAds.preroll_free_time/60))
+                    console.log(`Viewercount: ${mStream[0].viewer_count} PreRoll Clear Time: ${prtimeclean}`)
+                }
+            }
+        }
+    }, 60000);
+
     testSock.on('session_silenced', () => {
         let msg = 'Session mystery died due to silence detected';
         console.log(msg)
@@ -1009,44 +1050,6 @@ let startNow = setTimeout(async () => {
     testSock.on('channel.channel_points_automatic_reward_redemption.add', function({ payload }){
         console.log('channel.channel_points_automatic_reward_redemption.add', payload)
     });
-
-    keyupdate = setInterval(async () => {
-        let auth = await _db.FetchAuth();
-        mKiwi = await _mk.fetchUserByName(TwitchConf.username)
-        mKbot = await _mk.fetchUserByName(kiwibotConf.username)
-        mStream = await _mk.fetchStreamById(TwitchConf.username)
-        mAds = await _mk.fetchAdsSchedule(mKiwi[0].id)
-        if(mStream[0]!=null){
-            if(mStream[0].type=='live'){
-                if (mAds.preroll_free_time<=900){
-                    let ac = await _mk.RunAds(mKiwi)   
-                    if (ac[0] == 'Ads'){
-                        _db.StoreAdData([mAds, ac])
-                        io.emit('Ads', 120)
-                        let adsStr = `Ads are Playing! Kiwisbot Runs between 1-2 minutes worth of ads every 20 mins to scare away Prerolls! I dont trigger them just to annoy you!!  miketh101Heart Thanks for your Patience!  miketh101Heart`
-                        _mk.SayInChat(adsStr)
-                        let nextRuntime = Date.now()+(ac[2][0].retry_after*1000) //date.now+480000 == future tiume
-                        let adtimer = (ac[2][0].length*1000) //90000
-                        let dd = new Date(nextRuntime)
-                        console.log(`Viewercount: ${mStream[0].viewer_count}`, `Running Ads`, ac[2][0].length, `Safe Ad Reload: ${dd}`)
-                        let notifyadend = setTimeout(() => {
-                            let adsStr = `Ads should be over. (${ac[2][0].length}seconds). Welcome Back!`
-                            _mk.SayInChat(adsStr)
-                        }, adtimer);
-                    }
-                    if (ac[0] == 'NextRun'){
-                        if (ac[2] < 5){
-                            console.log(`Viewercount: ${mStream[0].viewer_count}`, ac)
-                        }              
-                    }
-                }
-                else{
-                    let prtimeclean = Math.floor((mAds.preroll_free_time/60))
-                    console.log(`Viewercount: ${mStream[0].viewer_count} PreRoll Clear Time: ${prtimeclean}`)
-                }
-            }
-        }
-    }, 60000);
     //
 }, 500);
 
