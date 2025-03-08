@@ -637,14 +637,13 @@ class PubLib {
                                 case 'ProveSub':
                                     let _mk3 = new MKUtils;
                                     let apiuser3 = await _mk3.isUserSubscribed(redeemer.id)
-                                    // console.log(apiuser3)  
                                     if (apiuser3[0]!=null) { 
                                         let tier = (apiuser3[0].tier/1000)
                                         if (apiuser3[0].is_gift==true) {
-                                            _mk3.SayInChat(`Sub Levelfor : ${apiuser3[0].display_name} = Gifted Tier: ${tier}`)
+                                            _mk3.SayInChat(`Sub Levelfor : ${redeemer.display_name} = Gifted Tier: ${tier}`)
                                         }
                                         else {
-                                            _mk3.SayInChat(`Sub Levelfor : ${apiuser3[0].display_name} = Tier: ${tier}`)
+                                            _mk3.SayInChat(`Sub Levelfor : ${redeemer.display_name} = Tier: ${tier}`)
                                         }                                     
                                     }
                                     else {
