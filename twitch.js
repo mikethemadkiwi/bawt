@@ -416,7 +416,7 @@ class MKUtils {
                         resolve(['Ads', checkDT, resp.body.data])                    
                     })
                     .catch(err => {
-                        console.error('Error body:', err.response.body);
+                        console.error('Error body:', err);
                     });
                 }
                 else {
@@ -628,11 +628,7 @@ let startNow = setTimeout(async () => {
                     userinput: redeemer.user_input,
                     rewardData: rewardData
                 }
-                console.log('debug', redeemer)
-                let deb = new MKUtils;
-                let deb2 = await deb.isUserSubscribed(redeemer.id)
-                console.log(deb2)
-                           
+                console.log('debug', redeemer)                           
             break;
             case 'TwitchAge':
                 let _mk = new MKUtils;
