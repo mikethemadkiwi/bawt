@@ -260,257 +260,251 @@ class initSocket {
 }
 // Mkutils ////////////////////////////////////////////////////////////////////
 class MKUtils {
-        SayInChat = function(chatMessage){
-            return new Promise((resolve, reject) => {
-                let tmpAuth = botTokens.access_token;
-                got({
-                    "url": "https://api.twitch.tv/helix/chat/messages",
-                    "method": 'POST',
-                    "headers": {                            
-                        "Client-ID": kiwibotConf.client_id,
-                        "Authorization": "Bearer " + tmpAuth,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        "broadcaster_id": mKiwi[0].id,
-                        "sender_id": mKbot[0].id,
-                        "message": chatMessage
-                    }),
-                    "responseType": 'json'
-                })
-                .then(resp => {
-                    resolve(resp.body.data)               
-                })
-                .catch(err => {
-                    console.error('Error body:', err);
-                    reject(false)
-                }); 
-            })          
-        }
-        fetchUserByName(name){
-            return new Promise((resolve, reject) => {
-                let tmpAuth = currentTokens.access_token;
-                let fetchu = fetchUrl(`https://api.twitch.tv/helix/users?login=${name}`,
-                {"headers": {
-                        "Client-ID": TwitchConf.client_id,
-                        "Authorization": "Bearer " + tmpAuth
-                        }
+    SayInChat = function(chatMessage){
+        return new Promise((resolve, reject) => {
+            let tmpAuth = botTokens.access_token;
+            got({
+                "url": "https://api.twitch.tv/helix/chat/messages",
+                "method": 'POST',
+                "headers": {                            
+                    "Client-ID": kiwibotConf.client_id,
+                    "Authorization": "Bearer " + tmpAuth,
+                    'Content-Type': 'application/json'
                 },
-                function(error, meta, body){
-                    // console.log('fetchuser:', body)
-                        let bs = JSON.parse(body);
-                        resolve(bs.data)
-                })
+                body: JSON.stringify({
+                    "broadcaster_id": mKiwi[0].id,
+                    "sender_id": mKbot[0].id,
+                    "message": chatMessage
+                }),
+                "responseType": 'json'
             })
-        }
-        fetchUserById(uId){
-            return new Promise((resolve, reject) => {
-                let tmpAuth = currentTokens.access_token;
-                let fetchu = fetchUrl(`https://api.twitch.tv/helix/users?id=${uId}`,
-                {"headers": {
-                        "Client-ID": TwitchConf.client_id,
-                        "Authorization": "Bearer " + tmpAuth
-                        }
-                },
-                function(error, meta, body){
-                    // console.log('fetchuser:', body)
-                        let bs = JSON.parse(body);
-                        resolve(bs.data)
-                })
+            .then(resp => {
+                resolve(resp.body.data)               
             })
-        }
-        fetchStreamById(uId){
-            return new Promise((resolve, reject) => {
-                let tmpAuth = currentTokens.access_token;
-                let fetchu = fetchUrl(`https://api.twitch.tv/helix/streams?user_login=${uId}`,
-                {"headers": {
-                        "Client-ID": TwitchConf.client_id,
-                        "Authorization": "Bearer " + tmpAuth
-                        }
-                },
-                function(error, meta, body){
-                    // console.log('fetchuser:', body)
-                        let bs = JSON.parse(body);
-                        resolve(bs.data)
-                })
-            })
-        }
-        fetchAdsSchedule(uId){            
-            return new Promise((resolve, reject) => {
-                let tmpAuth = currentTokens.access_token;
-                let fetchu = fetchUrl(`https://api.twitch.tv/helix/channels/ads?broadcaster_id=${mKiwi[0].id}`,
-                {"headers": {
-                        "Client-ID": TwitchConf.client_id,
-                        "Authorization": "Bearer " + tmpAuth
-                        }
-                },
-                function(error, meta, body){
+            .catch(err => {
+                console.error('Error body:', err);
+                reject(false)
+            }); 
+        })          
+    }
+    fetchUserByName(name){
+        return new Promise((resolve, reject) => {
+            let tmpAuth = currentTokens.access_token;
+            let fetchu = fetchUrl(`https://api.twitch.tv/helix/users?login=${name}`,
+            {"headers": {
+                    "Client-ID": TwitchConf.client_id,
+                    "Authorization": "Bearer " + tmpAuth
+                    }
+            },
+            function(error, meta, body){
                     let bs = JSON.parse(body);
-                    resolve(bs.data[0])
-                })
+                    resolve(bs.data)
             })
-        }
-        isUserSubscribed(userid){
-            return new Promise((resolve, reject) => {
-                let tmpAuth = currentTokens.access_token;
-                let fetchu = fetchUrl(`https://api.twitch.tv/helix/subscriptions/user?broadcaster_id=${mKiwi[0].id}&user_id=${userid}`,
-                {"headers": {
-                        "Client-ID": TwitchConf.client_id,
-                        "Authorization": "Bearer " + tmpAuth
-                        }
-                },
-                function(error, meta, body){
-                        let bs = JSON.parse(body);
-                        // console.log(bs)
-                        if(bs.data){
-                            resolve(bs.data)
-                        }
-                        else{
-                            resolve({})
-                        }
-                })
+        })
+    }
+    fetchUserById(uId){
+        return new Promise((resolve, reject) => {
+            let tmpAuth = currentTokens.access_token;
+            let fetchu = fetchUrl(`https://api.twitch.tv/helix/users?id=${uId}`,
+            {"headers": {
+                    "Client-ID": TwitchConf.client_id,
+                    "Authorization": "Bearer " + tmpAuth
+                    }
+            },
+            function(error, meta, body){
+                    let bs = JSON.parse(body);
+                    resolve(bs.data)
             })
-        }
-        isUserFollower(userid){
-            return new Promise((resolve, reject)=> {
-                let tmpAuth = currentTokens.access_token;
-                let fetchu = fetchUrl(`https://api.twitch.tv/helix/channels/followers?broadcaster_id=${mKiwi[0].id}&user_id=${userid}`,
-                {"headers": {
-                        "Client-ID": TwitchConf.client_id,
-                        "Authorization": "Bearer " + tmpAuth
-                        }
-                },
-                function(error, meta, body){
-                        let bs = JSON.parse(body);
-                        // console.log(bs)
-                        if(bs.data){
-                            resolve(bs.data)
-                        }
-                        else{
-                            resolve({})
-                        }
-                }) 
+        })
+    }
+    fetchStreamById(uId){
+        return new Promise((resolve, reject) => {
+            let tmpAuth = currentTokens.access_token;
+            let fetchu = fetchUrl(`https://api.twitch.tv/helix/streams?user_login=${uId}`,
+            {"headers": {
+                    "Client-ID": TwitchConf.client_id,
+                    "Authorization": "Bearer " + tmpAuth
+                    }
+            },
+            function(error, meta, body){
+                    let bs = JSON.parse(body);
+                    resolve(bs.data)
             })
-        }
-        RunAds(account){
-            return new Promise((resolve, reject) => {
-                let checkDT = Date.now()
-                if (checkDT >= tDate){
-                    //
-                    tDate = (Date.now()+1200000)
-                    //
-                    let tmpAuth = currentTokens.access_token;
-                    got({
-                        "url": "https://api.twitch.tv/helix/channels/commercial",
-                        "method": 'POST',
-                        "headers": {                            
-                            "Client-ID": TwitchConf.client_id,
-                            "Authorization": "Bearer " + tmpAuth
-                        },
-                        "form": {
-                            "broadcaster_id": mKiwi[0].id,
-                            "length": 90
-                        },
-                        "responseType": 'json'
-                    })
-                    .then(resp => {
-                        lastAds = resp.body.data
-                        // console.log('ad data', lastAds)
-                        resolve(['Ads', checkDT, resp.body.data])                    
-                    })
-                    .catch(err => {
-                        console.error('Error body:', err);
-                    });
-                }
-                else {
-                    let diff = (tDate-checkDT)
-                    let diffm = Math.floor((diff/1000)/60)
-                    resolve(['NextRun', checkDT, diffm])
-                }
-            })    
-        }            
-        SubscribeToTopic(session_id, type, version, condition){
-            return new Promise((resolve, reject) => {
-                console.log("Eventsocket Topic:", session_id, type)
+        })
+    }
+    fetchAdsSchedule(uId){            
+        return new Promise((resolve, reject) => {
+            let tmpAuth = currentTokens.access_token;
+            let fetchu = fetchUrl(`https://api.twitch.tv/helix/channels/ads?broadcaster_id=${mKiwi[0].id}`,
+            {"headers": {
+                    "Client-ID": TwitchConf.client_id,
+                    "Authorization": "Bearer " + tmpAuth
+                    }
+            },
+            function(error, meta, body){
+                let bs = JSON.parse(body);
+                resolve(bs.data[0])
+            })
+        })
+    }
+    isUserSubscribed(userid){
+        return new Promise((resolve, reject) => {
+            let tmpAuth = currentTokens.access_token;
+            let fetchu = fetchUrl(`https://api.twitch.tv/helix/subscriptions/user?broadcaster_id=${mKiwi[0].id}&user_id=${userid}`,
+            {"headers": {
+                    "Client-ID": TwitchConf.client_id,
+                    "Authorization": "Bearer " + tmpAuth
+                    }
+            },
+            function(error, meta, body){
+                    let bs = JSON.parse(body);
+                    if(bs.data){
+                        resolve(bs.data)
+                    }
+                    else{
+                        resolve({})
+                    }
+            })
+        })
+    }
+    isUserFollower(userid){
+        return new Promise((resolve, reject)=> {
+            let tmpAuth = currentTokens.access_token;
+            let fetchu = fetchUrl(`https://api.twitch.tv/helix/channels/followers?broadcaster_id=${mKiwi[0].id}&user_id=${userid}`,
+            {"headers": {
+                    "Client-ID": TwitchConf.client_id,
+                    "Authorization": "Bearer " + tmpAuth
+                    }
+            },
+            function(error, meta, body){
+                    let bs = JSON.parse(body);
+                    if(bs.data){
+                        resolve(bs.data)
+                    }
+                    else{
+                        resolve({})
+                    }
+            }) 
+        })
+    }
+    RunAds(account){
+        return new Promise((resolve, reject) => {
+            let checkDT = Date.now()
+            if (checkDT >= tDate){
+                //
+                tDate = (Date.now()+1200000)
+                //
                 let tmpAuth = currentTokens.access_token;
                 got({
-                    "url": "https://api.twitch.tv/helix/eventsub/subscriptions",
+                    "url": "https://api.twitch.tv/helix/channels/commercial",
                     "method": 'POST',
                     "headers": {                            
                         "Client-ID": TwitchConf.client_id,
-                        "Authorization": "Bearer " + tmpAuth,
-                        'Content-Type': 'application/json'
+                        "Authorization": "Bearer " + tmpAuth
                     },
-                    body: JSON.stringify({
-                        type,
-                        version,
-                        condition,
-                        transport: {
-                            method: "websocket",
-                            session_id
-                        }
-                    }),
+                    "form": {
+                        "broadcaster_id": mKiwi[0].id,
+                        "length": 90
+                    },
                     "responseType": 'json'
                 })
                 .then(resp => {
-                    let msgData = resp.body.data;
-                    console.log(msgData[0].type, msgData[0].status)
-                    resolve(resp.body.data)               
+                    lastAds = resp.body.data
+                    // console.log('ad data', lastAds)
+                    resolve(['Ads', checkDT, resp.body.data])                    
                 })
                 .catch(err => {
                     console.error('Error body:', err);
-                    reject(false)
                 });
-
-            })
-        }
-        ShoutoutUser(targetID){
-            return new Promise((resolve, reject) => {
-                let tmpAuth = currentTokens.access_token;
-                got({
-                    "url": "https://api.twitch.tv/helix/chat/shoutouts",
-                    "method": 'POST',
-                    "headers": {                            
-                        "Client-ID": TwitchConf.client_id,
-                        "Authorization": "Bearer " + tmpAuth,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        from_broadcaster_id: mKiwi[0].id,
-                        to_broadcaster_id: targetID,
-                        moderator_id: mKiwi[0].id
-                    })
-                })
-                .then(resp => {
-                    resolve(resp.body.data)               
-                })
-                .catch(err => {
-                    console.error('Error body:', err);
-                    reject(false)
-                });      
-            })
-        }
-        getChatters(){
-            return new Promise((resolve, reject)=> {
-                let tmpAuth = currentTokens.access_token;
-                let fetchu = fetchUrl(`https://api.twitch.tv/helix/chat/chatters?broadcaster_id=${mKiwi[0].id}&moderator_id=${mKiwi[0].id}`,
-                {"headers": {
-                        "Client-ID": TwitchConf.client_id,
-                        "Authorization": "Bearer " + tmpAuth
-                        }
+            }
+            else {
+                let diff = (tDate-checkDT)
+                let diffm = Math.floor((diff/1000)/60)
+                resolve(['NextRun', checkDT, diffm])
+            }
+        })    
+    }            
+    SubscribeToTopic(session_id, type, version, condition){
+        return new Promise((resolve, reject) => {
+            console.log("Eventsocket Topic:", session_id, type)
+            let tmpAuth = currentTokens.access_token;
+            got({
+                "url": "https://api.twitch.tv/helix/eventsub/subscriptions",
+                "method": 'POST',
+                "headers": {                            
+                    "Client-ID": TwitchConf.client_id,
+                    "Authorization": "Bearer " + tmpAuth,
+                    'Content-Type': 'application/json'
                 },
-                function(error, meta, body){
-                        let bs = JSON.parse(body);
-                        // console.log(bs)
-                        if(bs.data){
-                            resolve(bs.data)
-                        }
-                        else{
-                            resolve({})
-                        }
-                }) 
+                body: JSON.stringify({
+                    type,
+                    version,
+                    condition,
+                    transport: {
+                        method: "websocket",
+                        session_id
+                    }
+                }),
+                "responseType": 'json'
             })
-        }
+            .then(resp => {
+                let msgData = resp.body.data;
+                console.log(msgData[0].type, msgData[0].status)
+                resolve(resp.body.data)               
+            })
+            .catch(err => {
+                console.error('Error body:', err);
+                reject(false)
+            });
+
+        })
+    }
+    ShoutoutUser(targetID){
+        return new Promise((resolve, reject) => {
+            let tmpAuth = currentTokens.access_token;
+            got({
+                "url": "https://api.twitch.tv/helix/chat/shoutouts",
+                "method": 'POST',
+                "headers": {                            
+                    "Client-ID": TwitchConf.client_id,
+                    "Authorization": "Bearer " + tmpAuth,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    from_broadcaster_id: mKiwi[0].id,
+                    to_broadcaster_id: targetID,
+                    moderator_id: mKiwi[0].id
+                })
+            })
+            .then(resp => {
+                resolve(resp.body.data)               
+            })
+            .catch(err => {
+                console.error('Error body:', err);
+                reject(false)
+            });      
+        })
+    }
+    getChatters(){
+        return new Promise((resolve, reject)=> {
+            let tmpAuth = currentTokens.access_token;
+            let fetchu = fetchUrl(`https://api.twitch.tv/helix/chat/chatters?broadcaster_id=${mKiwi[0].id}&moderator_id=${mKiwi[0].id}`,
+            {"headers": {
+                    "Client-ID": TwitchConf.client_id,
+                    "Authorization": "Bearer " + tmpAuth
+                    }
+            },
+            function(error, meta, body){
+                    let bs = JSON.parse(body);
+                    if(bs.data){
+                        resolve(bs.data)
+                    }
+                    else{
+                        resolve({})
+                    }
+            }) 
+        })
+    }
 }
 ///////////////////////////////////////
 // START ENGINE
@@ -652,7 +646,6 @@ let startNow = setTimeout(async () => {
         console.log(currentDT, colors.blue("[Chat]"), colors.yellow(`<${payload.event.chatter_user_name}>`), payload.event.message.text)
     });    
     eventSub.on('channel.channel_points_custom_reward_redemption.add', async function({ payload }){
-        // console.log("reward", payload)
         let reward = payload.event.reward
         let redeemer = {
             display_name: payload.event.user_name,
@@ -786,7 +779,13 @@ let startNow = setTimeout(async () => {
         }
     });
     eventSub.on('channel.channel_points_automatic_reward_redemption.add', function({ payload }){
-        console.log('channel.channel_points_automatic_reward_redemption.add', payload)
+        console.log(colors.green('[Points]'), `<${payload.event.reward.type}> Cost:(${payload.event.reward.channel_points})`, payload.event.user_name)
+        switch(payload.event.reward.type){
+            case 'send_highlighted_message':
+                console.log(colors.green('Highlighted Text'), payload.event.message.text)
+            break;
+            default:
+        }
     });
     //
 }, 500);
