@@ -94,7 +94,6 @@ class DBObject {
                     DBConn_Server.connect();
                 }, 5000);              
             });
-            // resolve(currentTokens)
         })
     }    
     StoreAdData(addata){
@@ -673,19 +672,16 @@ let startNow = setTimeout(async () => {
             case 'TwitchAge':
                 let _mk = new MKUtils;
                 let apiuser = await _mk.fetchUserByName(redeemer.display_name)
-                // console.log(apiuser[0].created_at)                                                
                 _mk.SayInChat(`Account Creation Date for ${apiuser[0].display_name}: ${apiuser[0].created_at}`)
             break;
             case 'LurkMode':
                 let _mkl = new MKUtils;
                 let apiuserl = await _mkl.fetchUserByName(redeemer.display_name)
-                // console.log(apiuser[0].created_at)                                                
                 _mk1.SayInChat(`Lurk Mode Activated for ${apiuserl[0].display_name}. Enjoy your Lurk!  miketh101Heart`)
             break;
             case 'FollowAge':
                 let _mk2 = new MKUtils;
                 let apiuser2 = await _mk2.isUserFollower(redeemer.id)
-                // console.log(apiuser2)
                 if (apiuser2[0]!=null) {                                                
                     _mk2.SayInChat(`Account Follow Date for ${apiuser2[0].user_name}: ${apiuser2[0].followed_at}`)
                 }
@@ -757,7 +753,6 @@ let startNow = setTimeout(async () => {
                     if (wNetwork.Code == 'ServiceUnavailable'){
                         wNetwork.WeatherText = json.Message;
                     }
-                    // else{console.log(wNetwork)};
                     if (wNetwork.weather) {
                             currentweather = `Weather for ${wNetwork.name}, ${wNetwork.sys.country}: `                                                            
                         for (let i=0;i<wNetwork.weather.length;i++){
