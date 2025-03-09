@@ -54,6 +54,7 @@ let mAds;
 let lastKeepAlive;
 let lastAds;
 let viewer_count = 0;
+let TwitchUsers;
 const weathertimeout = [];
 const subscribedtopics = [];
 let DBConn_Server = null;
@@ -489,6 +490,27 @@ class MKUtils {
                 });      
             })
         }
+        getChatters(){
+            return new Promise((resolve, reject)=> {
+                let tmpAuth = currentTokens.access_token;
+                let fetchu = fetchUrl(`https://api.twitch.tv/helix/chat/chatters?broadcaster_id=${mKiwi[0].id}&moderator_id=${mKiwi[0].id}`,
+                {"headers": {
+                        "Client-ID": TwitchConf.client_id,
+                        "Authorization": "Bearer " + tmpAuth
+                        }
+                },
+                function(error, meta, body){
+                        let bs = JSON.parse(body);
+                        // console.log(bs)
+                        if(bs.data){
+                            resolve(bs.data)
+                        }
+                        else{
+                            resolve({})
+                        }
+                }) 
+            })
+        }
 }
 ///////////////////////////////////////
 // START ENGINE
@@ -537,9 +559,20 @@ let startNow = setTimeout(async () => {
         mStream = await _mk.fetchStreamById(TwitchConf.username)
         mAds = await _mk.fetchAdsSchedule(mKiwi[0].id)
         if (mStream[0].viewer_count != viewer_count){
-            viewer_count = mStream[0].viewer_count
-            //
-
+            let deb = new MKUtils;
+            let chatters = await deb.getChatters()
+            TwitchUsers = {
+                stream: mStream[0].viewer_count,
+                chat: chatters.length,
+                chatArray: chatters
+            }
+            let stringusers = ''
+            for (let index = 0; index < TwitchUsers.chatArray.length; index++) {
+                const element = TwitchUsers.chatArray[index];
+                stringusers += `${element.user_name} `;
+            }
+            console.log(colors.gray('[Users]'), `${stringusers}` )
+            console.log(colors.gray('[Users]'), `Stream: ${TwitchUsers.stream} Chat: ${TwitchUsers.chat} `)
             //
         }
         if(mStream[0]!=null){
@@ -554,7 +587,7 @@ let startNow = setTimeout(async () => {
                         let nextRuntime = Date.now()+(ac[2][0].retry_after*1000) //date.now+480000 == future tiume
                         let adtimer = (ac[2][0].length*1000) //90000
                         let dd = new Date(nextRuntime)
-                        console.log(`Viewercount: ${viewer_count}`, `Running Ads`, ac[2][0].length, `Safe Ad Reload: ${dd}`)
+                        console.log(colors.gray('Ads'),`Running Ads`, ac[2][0].length, `Safe Ad Reload: ${dd}`)
                         let notifyadend = setTimeout(() => {
                             let adsStr = `Ads should be over. (${ac[2][0].length}seconds). Welcome Back!`
                             _mk.SayInChat(adsStr)
@@ -562,13 +595,15 @@ let startNow = setTimeout(async () => {
                     }
                     if (ac[0] == 'NextRun'){
                         if (ac[2] < 5){
-                            console.log(`Viewercount: ${viewer_count}`, ac)
+                            console.log(ac)
                         }              
                     }
                 }
                 else{
                     let prtimeclean = Math.floor((mAds.preroll_free_time/60))
-                    console.log(`Viewercount: ${viewer_count} PreRoll Clear Time: ${prtimeclean}`)
+                    let unixtsdate = mAds.next_ad_at*1000;
+                    let nextad = new Date(unixtsdate)
+                    console.log(colors.gray('Ads'),`PreRoll Clear Time: ${prtimeclean}`, 'Next Ad:', nextad, mAds.duration)
                 }
             }
         }
@@ -610,10 +645,11 @@ let startNow = setTimeout(async () => {
     });
     eventSub.on('channel.chat.message', function({ payload }){
         // console.log("chatmessage", payload)
+        let currentDT = new Date();
         if (payload.event.reply != null){
-            console.log(colors.magenta("[Chat]"), colors.yellow(`reply to <${payload.event.reply.parent_user_name}>`))
+            console.log(currentDT, colors.blue("[Chat]"), colors.yellow(`reply to <${payload.event.reply.parent_user_name}>`))
         }
-        console.log(colors.magenta("[Chat]"), colors.yellow(`<${payload.event.chatter_user_name}>`), payload.event.message.text)
+        console.log(currentDT, colors.blue("[Chat]"), colors.yellow(`<${payload.event.chatter_user_name}>`), payload.event.message.text)
     });    
     eventSub.on('channel.channel_points_custom_reward_redemption.add', async function({ payload }){
         // console.log("reward", payload)
@@ -636,8 +672,10 @@ let startNow = setTimeout(async () => {
                     userinput: redeemer.user_input,
                     rewardData: rewardData
                 }
+                let deb = new MKUtils;                
                 console.log('debug', redeemer)
-                                          
+
+
             break;
             case 'TwitchAge':
                 let _mk = new MKUtils;
