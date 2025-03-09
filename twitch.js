@@ -52,6 +52,8 @@ let mKbot;
 let mStream;
 let mAds;
 let lastKeepAlive;
+let lastAds;
+let viewer_count = 0;
 const weathertimeout = [];
 const subscribedtopics = [];
 let DBConn_Server = null;
@@ -504,11 +506,11 @@ let startNow = setTimeout(async () => {
     mStream = await _mk.fetchStreamById(TwitchConf.username)
     mAds = await _mk.fetchAdsSchedule(mKiwi[0].id)
     //
-    let testSock = new initSocket(true);
-    testSock.on('session_keepalive', () => {
+    let eventSub = new initSocket(true);
+    eventSub.on('session_keepalive', () => {
         lastKeepAlive = new Date();
     });
-    testSock.on('connected', (id) => {
+    eventSub.on('connected', (id) => {
         let twitchsocketID = id;
         console.log(`Connected to WebSocket with ${id}`, mKiwi[0].id);       
         /////////////////////////////////////////////////
@@ -534,6 +536,12 @@ let startNow = setTimeout(async () => {
         mKbot = await _mk.fetchUserByName(kiwibotConf.username)
         mStream = await _mk.fetchStreamById(TwitchConf.username)
         mAds = await _mk.fetchAdsSchedule(mKiwi[0].id)
+        if (mStream[0].viewer_count != viewer_count){
+            viewer_count = mStream[0].viewer_count
+            //
+
+            //
+        }
         if(mStream[0]!=null){
             if(mStream[0].type=='live'){
                 if (mAds.preroll_free_time<=900){
@@ -546,7 +554,7 @@ let startNow = setTimeout(async () => {
                         let nextRuntime = Date.now()+(ac[2][0].retry_after*1000) //date.now+480000 == future tiume
                         let adtimer = (ac[2][0].length*1000) //90000
                         let dd = new Date(nextRuntime)
-                        console.log(`Viewercount: ${mStream[0].viewer_count}`, `Running Ads`, ac[2][0].length, `Safe Ad Reload: ${dd}`)
+                        console.log(`Viewercount: ${viewer_count}`, `Running Ads`, ac[2][0].length, `Safe Ad Reload: ${dd}`)
                         let notifyadend = setTimeout(() => {
                             let adsStr = `Ads should be over. (${ac[2][0].length}seconds). Welcome Back!`
                             _mk.SayInChat(adsStr)
@@ -554,60 +562,60 @@ let startNow = setTimeout(async () => {
                     }
                     if (ac[0] == 'NextRun'){
                         if (ac[2] < 5){
-                            console.log(`Viewercount: ${mStream[0].viewer_count}`, ac)
+                            console.log(`Viewercount: ${viewer_count}`, ac)
                         }              
                     }
                 }
                 else{
                     let prtimeclean = Math.floor((mAds.preroll_free_time/60))
-                    console.log(`Viewercount: ${mStream[0].viewer_count} PreRoll Clear Time: ${prtimeclean}`)
+                    console.log(`Viewercount: ${viewer_count} PreRoll Clear Time: ${prtimeclean}`)
                 }
             }
         }
     }, 60000);
     //
-    testSock.on('session_silenced', () => {
+    eventSub.on('session_silenced', () => {
         let msg = 'Session mystery died due to silence detected';
         console.log(msg)
     });
-    testSock.on('channel.update', function({ payload }){
+    eventSub.on('channel.update', function({ payload }){
         // console.log('channel.update',payload)
         _mk.SayInChat(`Updated: Category[ ${payload.event.category_name} ] Title[ ${payload.event.title} ]`)
     });
-    testSock.on('user.update', function({ payload }){
+    eventSub.on('user.update', function({ payload }){
         console.log('user.update',payload)
     });
-    testSock.on('channel.follow', function({ payload }){
+    eventSub.on('channel.follow', function({ payload }){
         console.log('channel.follow', payload.event.user_name)
-        _mk.SayInChat(`Thanks for the Follow: ${payload.event.user_name}!  miketh101Heart Please do not chew on the furniture.  miketh101Heart`)
+        _mk.SayInChat(`Thanks for the Follow: ${payload.event.user_name}! miketh101Heart Please do not chew on the furniture.  miketh101Heart`)
     });
-    testSock.on('channel.raid', function({ payload }){
+    eventSub.on('channel.raid', function({ payload }){
         console.log('channel.raid',payload.event.from_broadcaster_user_name, payload.event.viewers)
         let shoutthresh = Number(payload.event.viewers)
         if (shoutthresh>5) {
             _mk.ShoutoutUser(payload.event.from_broadcaster_user_id)
-            _mk.SayInChat(`Thanks for the Raid: ${payload.event.from_broadcaster_user_name}!  miketh101Heart What did your <${payload.event.viewers}> Viewers do to deserve this?!`)
+            _mk.SayInChat(`Thanks for the Raid: ${payload.event.from_broadcaster_user_name}! miketh101Heart What did your <${payload.event.viewers}> Viewers do to deserve this?!`)
         }
         else {
-            _mk.SayInChat(`Thanks for the Raid: ${payload.event.from_broadcaster_user_name}!  miketh101Heart`)
+            _mk.SayInChat(`Thanks for the Raid: ${payload.event.from_broadcaster_user_name}! miketh101Heart`)
         }
         
     });
-    testSock.on('channel.chat.notification', function({ payload }){
+    eventSub.on('channel.chat.notification', function({ payload }){
         console.log('channel.chat.notification',payload)
         console.log(colors.cyan("[Notification]"), `${payload.event.notice_type} || ${payload.event.system_message} ||`)
     });
-    testSock.on('channel.bits.use', function({ payload }){
+    eventSub.on('channel.bits.use', function({ payload }){
         console.log('channel.bits.use',payload)
     });
-    testSock.on('channel.chat.message', function({ payload }){
+    eventSub.on('channel.chat.message', function({ payload }){
         // console.log("chatmessage", payload)
         if (payload.event.reply != null){
             console.log(colors.magenta("[Chat]"), colors.yellow(`reply to <${payload.event.reply.parent_user_name}>`))
         }
         console.log(colors.magenta("[Chat]"), colors.yellow(`<${payload.event.chatter_user_name}>`), payload.event.message.text)
     });    
-    testSock.on('channel.channel_points_custom_reward_redemption.add', async function({ payload }){
+    eventSub.on('channel.channel_points_custom_reward_redemption.add', async function({ payload }){
         // console.log("reward", payload)
         let reward = payload.event.reward
         let redeemer = {
@@ -628,7 +636,8 @@ let startNow = setTimeout(async () => {
                     userinput: redeemer.user_input,
                     rewardData: rewardData
                 }
-                console.log('debug', redeemer)                           
+                console.log('debug', redeemer)
+                                          
             break;
             case 'TwitchAge':
                 let _mk = new MKUtils;
@@ -738,7 +747,7 @@ let startNow = setTimeout(async () => {
                 console.log('UNREGISTERED CHANNEL POINT REDEEM', `${rewardData.title} [${redeemer.display_name}]`, rewardData)                
         }
     });
-    testSock.on('channel.channel_points_automatic_reward_redemption.add', function({ payload }){
+    eventSub.on('channel.channel_points_automatic_reward_redemption.add', function({ payload }){
         console.log('channel.channel_points_automatic_reward_redemption.add', payload)
     });
     //
