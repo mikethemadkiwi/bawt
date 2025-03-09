@@ -587,7 +587,7 @@ let startNow = setTimeout(async () => {
                         let nextRuntime = Date.now()+(ac[2][0].retry_after*1000) //date.now+480000 == future tiume
                         let adtimer = (ac[2][0].length*1000) //90000
                         let dd = new Date(nextRuntime)
-                        console.log(colors.gray('Ads'),`Running Ads`, ac[2][0].length, `Safe Ad Reload: ${dd}`)
+                        console.log(colors.gray('[Ads]'),`Running Ads`, ac[2][0].length, `Safe Ad Reload: ${dd}`)
                         let notifyadend = setTimeout(() => {
                             let adsStr = `Ads should be over. (${ac[2][0].length}seconds). Welcome Back!`
                             _mk.SayInChat(adsStr)
@@ -603,7 +603,7 @@ let startNow = setTimeout(async () => {
                     let prtimeclean = Math.floor((mAds.preroll_free_time/60))
                     let unixtsdate = mAds.next_ad_at*1000;
                     let nextad = new Date(unixtsdate)
-                    console.log(colors.gray('Ads'),`PreRoll Clear Time: ${prtimeclean}`, 'Next Ad:', nextad, mAds.duration)
+                    console.log(colors.gray('[Ads]'),`PreRoll Clear Time: ${prtimeclean}`, 'Next Ad:', nextad, mAds.duration)
                 }
             }
         }
