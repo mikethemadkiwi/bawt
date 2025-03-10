@@ -184,8 +184,7 @@ socket.on('ShoutOut', function(msgData) {
 
 
 socket.on('BunnySays', function(soundfile) {
-    // console.log()
-    let audSrc = `../sounds/host/${soundfile}`;
+    let audSrc = `../sounds/bunny/${soundfile}`;
     const audio = document.createElement('audio');
     audio.src = audSrc;
     audio.autoplay = true;
@@ -217,17 +216,6 @@ socket.on('Honk', function(honk) {
     const box = document.getElementById('AudContainer');
     box.appendChild(audio2);
 });
-
-
-
-
-
-
-
-
-
-
-
 socket.on('kiwisdebug', function(msgData) {
-    console.log('gandaulf is cool', msgData)
+
 });

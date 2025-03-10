@@ -731,7 +731,7 @@ let startNow = setTimeout(async () => {
             break;
             case 'BunnySays':                
                 let _mk7 = new MKUtils;
-                let files = fs.readdirSync('public/sounds/host/');
+                let files = fs.readdirSync('public/sounds/bunny/');
                 let rFile = Math.floor(Math.random() * files.length);
                 let fileSTR = `${files[rFile]}`;
                 io.emit('BunnySays', fileSTR)
