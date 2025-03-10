@@ -201,14 +201,14 @@ socket.on('BunnySays', function(soundfile) {
     box.appendChild(audio);
 });
 
-socket.on('Honk', function(soundfile) {
-    let audSrc2 = `../sounds/TSYouWhereKickedFromTheServer.mp3`;
+socket.on('Honk', function(honk) {
+    let audSrc2 = `../sounds/honk/${honk.soundfile}`;
     const audio2 = document.createElement('audio');
     audio2.src = audSrc2;
     audio2.autoplay = true;
     audio2.controls = false;
     audio2.muted = false;
-    audio2.volume = 0.25;
+    audio2.volume = 0.50;
     audio2.addEventListener("ended", function(){
         console.log('audio2ended');
         document.getElementById('AudContainer').innerHTML = null;

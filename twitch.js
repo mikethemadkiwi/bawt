@@ -37,6 +37,7 @@ const { Server } = require("socket.io");
 const path = require('path')
 const colors = require('colors');
 const mysql = require('mysql');
+const fs = require('fs');
 ////
 const io = new Server(server);
 socketapp.use(bodyParser.json());
@@ -588,7 +589,7 @@ let startNow = setTimeout(async () => {
                     }
                     if (ac[0] == 'NextRun'){
                         if (ac[2] < 5){
-                            console.log(ac)
+                            console.log(colors.cyan('[Ad Incoming]'), ac)
                         }              
                     }
                 }
@@ -626,8 +627,7 @@ let startNow = setTimeout(async () => {
         }
         else {
             _mk.SayInChat(`Thanks for the Raid: ${payload.event.from_broadcaster_user_name}! miketh101Heart`)
-        }
-        
+        }        
     });
     eventSub.on('channel.chat.notification', function({ payload }){
         console.log('channel.chat.notification',payload)
@@ -720,13 +720,16 @@ let startNow = setTimeout(async () => {
             case 'DumbAnswer':
                 io.emit('dumbanswer', rewardData)
             break;
-            case 'Honk': 
-            let _mk6 = new MKUtils;                               
+            case 'Honk':
+                let _mk6 = new MKUtils;
                 _mk6.SayInChat(`Honking for @${redeemer.display_name}`)
+                let files2 = fs.readdirSync('public/sounds/honk/');
+                let rFile2 = Math.floor(Math.random() * files2.length);
+                let fileSTR2 = `${files2[rFile2]}`;
+                rewardData.soundfile = fileSTR2
                 io.emit('Honk', rewardData)
             break;
             case 'BunnySays':                
-                let fs = require('fs');
                 let _mk7 = new MKUtils;
                 let files = fs.readdirSync('public/sounds/host/');
                 let rFile = Math.floor(Math.random() * files.length);
