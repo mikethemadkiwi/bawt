@@ -723,7 +723,7 @@ let startNow = setTimeout(async () => {
             case 'Honk':
                 let _mk6 = new MKUtils;
                 _mk6.SayInChat(`Honking for @${redeemer.display_name}`)
-                let files2 = fs.readdirSync('public/sounds/honk/');
+                let files2 = fs.readdirSync('socket-www/sounds/honk/');
                 let rFile2 = Math.floor(Math.random() * files2.length);
                 let fileSTR2 = `${files2[rFile2]}`;
                 rewardData.soundfile = fileSTR2
@@ -731,7 +731,7 @@ let startNow = setTimeout(async () => {
             break;
             case 'BunnySays':                
                 let _mk7 = new MKUtils;
-                let files = fs.readdirSync('public/sounds/bunny/');
+                let files = fs.readdirSync('socket-www/sounds/bunny/');
                 let rFile = Math.floor(Math.random() * files.length);
                 let fileSTR = `${files[rFile]}`;
                 io.emit('BunnySays', fileSTR)
