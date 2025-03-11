@@ -677,7 +677,7 @@ let startNow = setTimeout(async () => {
             case 'LurkMode':
                 let _mkl = new MKUtils;
                 let apiuserl = await _mkl.fetchUserByName(redeemer.display_name)
-                _mk1.SayInChat(`Lurk Mode Activated for ${apiuserl[0].display_name}. Enjoy your Lurk!  miketh101Heart`)
+                _mkl.SayInChat(`Lurk Mode Activated for ${apiuserl[0].display_name}. Enjoy your Lurk!  miketh101Heart`)
             break;
             case 'FollowAge':
                 let _mk2 = new MKUtils;
