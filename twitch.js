@@ -552,25 +552,27 @@ let startNow = setTimeout(async () => {
         mKbot = await _mk.fetchUserByName(kiwibotConf.username)
         mStream = await _mk.fetchStreamById(TwitchConf.username)
         mAds = await _mk.fetchAdsSchedule(mKiwi[0].id)
-        if (mStream[0].viewer_count != viewer_count){
-            let deb = new MKUtils;
-            let chatters = await deb.getChatters()
-            TwitchUsers = {
-                stream: mStream[0].viewer_count,
-                chat: chatters.length,
-                chatArray: chatters
-            }
-            let stringusers = ''
-            for (let index = 0; index < TwitchUsers.chatArray.length; index++) {
-                const element = TwitchUsers.chatArray[index];
-                stringusers += `${element.user_name} `;
-            }
-            console.log(colors.gray('[Users]'), `${stringusers}` )
-            console.log(colors.gray('[Users]'), `Stream: ${TwitchUsers.stream} Chat: ${TwitchUsers.chat} `)
-            //
-        }
         if(mStream[0]!=null){
-            if(mStream[0].type=='live'){
+            if(mStream[0].type=='live'){                
+                if (mStream[0].viewer_count != viewer_count){
+                    let deb = new MKUtils;
+                    let chatters = await deb.getChatters()
+                    TwitchUsers = {
+                        stream: mStream[0].viewer_count,
+                        chat: chatters.length,
+                        chatArray: chatters
+                    }
+                    let stringusers = ''
+                    for (let index = 0; index < TwitchUsers.chatArray.length; index++) {
+                        const element = TwitchUsers.chatArray[index];
+                        stringusers += `${element.user_name} `;
+                        let tUser = await deb.fetchUserById(element.user_id)
+                        io.emit('twitchgameusers', tUser[0])
+                    }                    
+                    console.log(colors.gray('[Users]'), `${stringusers}` )
+                    console.log(colors.gray('[Users]'), `Stream: ${TwitchUsers.stream} Chat: ${TwitchUsers.chat} `)
+                    //
+                }
                 if (mAds.preroll_free_time<=900){
                     let ac = await _mk.RunAds(mKiwi)   
                     if (ac[0] == 'Ads'){
@@ -666,7 +668,7 @@ let startNow = setTimeout(async () => {
                 }
                 let deb = new MKUtils;                
                 console.log('debug', redeemer)
-
+                io.emit('gamedebug', rewardData)
 
             break;
             case 'TwitchAge':

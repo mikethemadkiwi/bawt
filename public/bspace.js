@@ -58,8 +58,8 @@ class PlayerObj {
     constructor(player) {
         this.id = player.user.id;
         this.img = new Image;
-        // this.img.src = './img/player.png';
-        this.img.src = player.user.profile_image_url
+        this.img.src = './img/hero.png';
+        // this.img.src = player.user.profile_image_url
         this.player = player;
         this.actpos = player.actpos;
         this.tarpos = player.tarpos;
