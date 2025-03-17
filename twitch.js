@@ -56,19 +56,26 @@ let lastKeepAlive;
 let lastAds;
 let viewer_count = 0;
 let TwitchUsers;
+let tGamePlayer = [];
 const weathertimeout = [];
 const subscribedtopics = [];
 let DBConn_Server = null;
 let DBConn_ads = null;
 let tDate = Date.now();
-Date.prototype.addHours = function(h) {
-    this.setTime(this.getTime() + (h*60*60*1000));
-    return this;
+
+
+class PlayerObj {
+    constructor(tuser) {
+        this.id = tuser.id;
+        this.profile = tuser.profile_image_url;
+        this.name = tuser.display_name;
+        this.loc = 0;
+        this.att = 1;
+        this.def = 1;
+        this.agi = 1;
+    }
 }
-Date.prototype.subHours = function(h) {
-    this.setTime(this.getTime() - (h*60*60*1000));
-    return this;
-}
+
 // Database
 class DBObject {
     FetchAuth(){
@@ -559,12 +566,24 @@ let startNow = setTimeout(async () => {
         mKiwi = await _mk.fetchUserByName(TwitchConf.username)
         mKbot = await _mk.fetchUserByName(kiwibotConf.username)
         mStream = await _mk.fetchStreamById(TwitchConf.username)
-        mAds = await _mk.fetchAdsSchedule(mKiwi[0].id)
+        mAds = await _mk.fetchAdsSchedule(mKiwi[0].id)        
         let chatters = await _mk.getChatters()
         for (let index = 0; index < chatters.length; index++) {
             const element = chatters[index];
             let tUser = await _mk.fetchUserById(element.user_id)
-            io.emit('twitchgameusers', tUser[0])
+            let isGamePlayer = tGamePlayer.map(function(obj) { return obj[0].id; }).indexOf(element.user_id)
+            if(isGamePlayer == -1) {
+                let prepuser = [new PlayerObj(tUser[0]), tUser[0]];
+                io.emit('twitchgameusers', prepuser)
+                tGamePlayer.push(prepuser)
+            }else{
+                // console.log(tGamePlayer[isGamePlayer])
+                io.emit('twitchgameusers', tGamePlayer[isGamePlayer])
+            }
+            // 
+
+            // let player = [pObj,tUser[0]]
+            // io.emit('twitchgameusers', player)
         }
         if(mStream[0]!=null){
             if(mStream[0].type=='live'){                
@@ -608,12 +627,13 @@ let startNow = setTimeout(async () => {
                 }
                 else{
                     let prtimeclean = Math.floor((mAds.preroll_free_time/60))
-                    // console.log("kk",mAds)
                     let unixtsdate = mAds.next_ad_at*1000;
                     let nextad = new Date(unixtsdate);
                     let nextaddiff = (((unixtsdate - Date.now())/1000)/60)
                     let ndr = Math.round(nextaddiff)
                     console.log(colors.gray('[Ads]'),`PreRoll Clear Time: ${prtimeclean} Mins || MidRoll Clear Time: ${ndr} Mins (${nextad})`)
+                    let adObj = [unixtsdate,nextaddiff]
+                    io.emit('AdObj', adObj)
                 }
             }
         }
@@ -687,11 +707,23 @@ let startNow = setTimeout(async () => {
                     rewardData: rewardData
                 }
                 let deb = new MKUtils;                
-                console.log('debug', redeemer)
-                io.emit('gamedebug', rewardData)
+                console.log('debug', redeemer);
+                io.emit('gamedebug', rewardData);
 
-                // if player wishes to trigger an ingame raid, they also trigger ads WHILE the game is on, assuming one hasnt just run.
-
+            break;            
+            case 'Travel-Mines':
+                // console.log('debug', redeemer);
+                // io.emit('gamedebug', rewardData);
+                let isGamePlayer2 = tGamePlayer.map(function(obj) { return obj[0].id; }).indexOf(redeemer.id);
+                tGamePlayer[isGamePlayer2][0].loc = 1;
+                io.emit('newplayertarget', tGamePlayer[isGamePlayer2]);
+            break;
+            case 'Travel-Training':
+                // console.log('debug', redeemer);
+                // io.emit('gamedebug', rewardData);
+                let isGamePlayer3 = tGamePlayer.map(function(obj) { return obj[0].id; }).indexOf(redeemer.id);
+                tGamePlayer[isGamePlayer3][0].loc = 2;
+                io.emit('newplayertarget', tGamePlayer[isGamePlayer3]);
             break;
             case 'TwitchAge':
                 let _mk = new MKUtils;
