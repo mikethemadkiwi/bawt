@@ -61,6 +61,14 @@ const subscribedtopics = [];
 let DBConn_Server = null;
 let DBConn_ads = null;
 let tDate = Date.now();
+Date.prototype.addHours = function(h) {
+    this.setTime(this.getTime() + (h*60*60*1000));
+    return this;
+}
+Date.prototype.subHours = function(h) {
+    this.setTime(this.getTime() - (h*60*60*1000));
+    return this;
+}
 // Database
 class DBObject {
     FetchAuth(){
@@ -552,11 +560,16 @@ let startNow = setTimeout(async () => {
         mKbot = await _mk.fetchUserByName(kiwibotConf.username)
         mStream = await _mk.fetchStreamById(TwitchConf.username)
         mAds = await _mk.fetchAdsSchedule(mKiwi[0].id)
+        let chatters = await _mk.getChatters()
+        for (let index = 0; index < chatters.length; index++) {
+            const element = chatters[index];
+            let tUser = await _mk.fetchUserById(element.user_id)
+            io.emit('twitchgameusers', tUser[0])
+        }
         if(mStream[0]!=null){
             if(mStream[0].type=='live'){                
                 if (mStream[0].viewer_count != viewer_count){
                     let deb = new MKUtils;
-                    let chatters = await deb.getChatters()
                     TwitchUsers = {
                         stream: mStream[0].viewer_count,
                         chat: chatters.length,
@@ -566,8 +579,6 @@ let startNow = setTimeout(async () => {
                     for (let index = 0; index < TwitchUsers.chatArray.length; index++) {
                         const element = TwitchUsers.chatArray[index];
                         stringusers += `${element.user_name} `;
-                        let tUser = await deb.fetchUserById(element.user_id)
-                        io.emit('twitchgameusers', tUser[0])
                     }                    
                     console.log(colors.gray('[Users]'), `${stringusers}` )
                     console.log(colors.gray('[Users]'), `Stream: ${TwitchUsers.stream} Chat: ${TwitchUsers.chat} `)
@@ -577,7 +588,7 @@ let startNow = setTimeout(async () => {
                     let ac = await _mk.RunAds(mKiwi)   
                     if (ac[0] == 'Ads'){
                         _db.StoreAdData([mAds, ac])
-                        io.emit('Ads', 120)
+                        io.emit('Ads', ac[2][0].length)
                         let adsStr = `Ads are Playing! Kiwisbot Runs between 1-2 minutes worth of ads every 20 mins to scare away Prerolls! I dont trigger them just to annoy you!!  miketh101Heart Thanks for your Patience!  miketh101Heart`
                         _mk.SayInChat(adsStr)
                         let nextRuntime = Date.now()+(ac[2][0].retry_after*1000) //date.now+480000 == future tiume
@@ -597,9 +608,12 @@ let startNow = setTimeout(async () => {
                 }
                 else{
                     let prtimeclean = Math.floor((mAds.preroll_free_time/60))
+                    // console.log("kk",mAds)
                     let unixtsdate = mAds.next_ad_at*1000;
-                    let nextad = new Date(unixtsdate)
-                    console.log(colors.gray('[Ads]'),`PreRoll Clear Time: ${prtimeclean}`, 'Next Ad:', nextad, mAds.duration)
+                    let nextad = new Date(unixtsdate);
+                    let nextaddiff = (((unixtsdate - Date.now())/1000)/60)
+                    let ndr = Math.round(nextaddiff)
+                    console.log(colors.gray('[Ads]'),`PreRoll Clear Time: ${prtimeclean} Mins || MidRoll Clear Time: ${ndr} Mins (${nextad})`)
                 }
             }
         }
@@ -612,6 +626,12 @@ let startNow = setTimeout(async () => {
     eventSub.on('channel.update', function({ payload }){
         // console.log('channel.update',payload)
         _mk.SayInChat(`Updated: Category[ ${payload.event.category_name} ] Title[ ${payload.event.title} ]`)
+    });
+    eventSub.on('stream.online', function({ payload }){
+        console.log('stream.online',payload)
+    });
+    eventSub.on('stream.offline', function({ payload }){
+        console.log('stream.offline',payload)
     });
     eventSub.on('user.update', function({ payload }){
         console.log('user.update',payload)
@@ -628,7 +648,7 @@ let startNow = setTimeout(async () => {
             _mk.SayInChat(`Thanks for the Raid: ${payload.event.from_broadcaster_user_name}! miketh101Heart What did your <${payload.event.viewers}> Viewers do to deserve this?!`)
         }
         else {
-            _mk.SayInChat(`Thanks for the Raid: ${payload.event.from_broadcaster_user_name}! miketh101Heart`)
+            _mk.SayInChat(`Thanks for the Raid: ${payload.event.from_broadcaster_user_name}! miketh101Heart What did your <${payload.event.viewers}> Viewers do to deserve this?!`)
         }        
     });
     eventSub.on('channel.chat.notification', function({ payload }){
@@ -669,6 +689,8 @@ let startNow = setTimeout(async () => {
                 let deb = new MKUtils;                
                 console.log('debug', redeemer)
                 io.emit('gamedebug', rewardData)
+
+                // if player wishes to trigger an ingame raid, they also trigger ads WHILE the game is on, assuming one hasnt just run.
 
             break;
             case 'TwitchAge':

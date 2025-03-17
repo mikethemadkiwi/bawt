@@ -133,6 +133,9 @@ persec = setInterval(function () {
 socket.on('gamedebug', async function(msgData) { 
     console.log(`gamedebug`, msgData)
 });
+socket.on('Ads', async function(msgData) { 
+    console.log(`Ads`, msgData)
+});
 socket.on('twitchgameusers', async function(msgData) { 
     let isin = Players.map(function(obj) { return obj.id; }).indexOf(msgData.id)
     if(isin == -1) {
