@@ -52,6 +52,7 @@ let mKiwi;
 let mKbot;
 let mStream;
 let mAds;
+let chatters
 let lastKeepAlive;
 let lastAds;
 let viewer_count = 0;
@@ -70,9 +71,14 @@ class PlayerObj {
         this.profile = tuser.profile_image_url;
         this.name = tuser.display_name;
         this.loc = 0;
+        this.xp = 0;
+        this.level = 0;
         this.att = 1;
         this.def = 1;
         this.agi = 1;
+        this.arm = 0;
+        this.wea = 0;
+        this.currency = 0;
     }
 }
 
@@ -536,6 +542,19 @@ let startNow = setTimeout(async () => {
     mKbot = await _mk.fetchUserByName(kiwibotConf.username)
     mStream = await _mk.fetchStreamById(TwitchConf.username)
     mAds = await _mk.fetchAdsSchedule(mKiwi[0].id)
+    chatters = await _mk.getChatters()
+    for (let index = 0; index < chatters.length; index++) {
+        const element = chatters[index];
+        let tUser = await _mk.fetchUserById(element.user_id)
+        let isGamePlayer = tGamePlayer.map(function(obj) { return obj[0].id; }).indexOf(element.user_id)
+        if(isGamePlayer == -1) {
+            let prepuser = [new PlayerObj(tUser[0]), tUser[0]];
+            tGamePlayer.push(prepuser)
+            io.emit('twitchgameusers', prepuser)
+        }else{
+            io.emit('twitchgameusers', tGamePlayer[isGamePlayer])
+        }
+    }
     //
     let eventSub = new initSocket(true);
     eventSub.on('session_keepalive', () => {
@@ -566,8 +585,9 @@ let startNow = setTimeout(async () => {
         mKiwi = await _mk.fetchUserByName(TwitchConf.username)
         mKbot = await _mk.fetchUserByName(kiwibotConf.username)
         mStream = await _mk.fetchStreamById(TwitchConf.username)
-        mAds = await _mk.fetchAdsSchedule(mKiwi[0].id)        
-        let chatters = await _mk.getChatters()
+        mAds = await _mk.fetchAdsSchedule(mKiwi[0].id) 
+        //       
+        chatters = await _mk.getChatters()
         for (let index = 0; index < chatters.length; index++) {
             const element = chatters[index];
             let tUser = await _mk.fetchUserById(element.user_id)
@@ -580,10 +600,6 @@ let startNow = setTimeout(async () => {
                 // console.log(tGamePlayer[isGamePlayer])
                 io.emit('twitchgameusers', tGamePlayer[isGamePlayer])
             }
-            // 
-
-            // let player = [pObj,tUser[0]]
-            // io.emit('twitchgameusers', player)
         }
         if(mStream[0]!=null){
             if(mStream[0].type=='live'){                
@@ -709,21 +725,63 @@ let startNow = setTimeout(async () => {
                 let deb = new MKUtils;                
                 console.log('debug', redeemer);
                 io.emit('gamedebug', rewardData);
-
             break;            
             case 'Travel-Mines':
-                // console.log('debug', redeemer);
-                // io.emit('gamedebug', rewardData);
-                let isGamePlayer2 = tGamePlayer.map(function(obj) { return obj[0].id; }).indexOf(redeemer.id);
-                tGamePlayer[isGamePlayer2][0].loc = 1;
-                io.emit('newplayertarget', tGamePlayer[isGamePlayer2]);
+                let mkmines = new MKUtils;
+                let tUser = await mkmines.fetchUserById(redeemer.id)
+                let isin = tGamePlayer.map(function(obj) { return obj[0].id; }).indexOf(redeemer.id)
+                if(isin == -1) {
+                    let prepuser = [new PlayerObj(tUser[0]), tUser[0]];
+                    prepuser[0].loc = 1
+                    tGamePlayer.push(prepuser)
+                    io.emit('twitchgameusers', prepuser)
+                }else{
+                    tGamePlayer[isin][0].loc = 1;
+                    io.emit('newplayertarget', tGamePlayer[isin]);
+                }
+            break;
+            case 'PlayerInfo':
+                let mkplayerinfo = new MKUtils;
+                let piuser = await mkplayerinfo.fetchUserById(redeemer.id)
+                let isinpi = tGamePlayer.map(function(obj) { return obj[0].id; }).indexOf(redeemer.id)
+                if(isinpi == -1) {
+                    let prepuser = [new PlayerObj(piuser[0]), piuser[0]];
+                    tGamePlayer.push(prepuser)
+                    io.emit('twitchgameusers', prepuser)
+                    mkplayerinfo.SayInChat(`Stats for ${redeemer.display_name}: [Att:${prepuser[0].att} Agi:${prepuser[0].agi} Def:${prepuser[0].def}] Wearing: ${prepuser[0].arm} Weilding: ${prepuser[0].wea} miketh101Heart`)
+                    //
+                    //tell stats                    
+                }else{
+                    mkplayerinfo.SayInChat(`Stats for ${redeemer.display_name}: [Att:${tGamePlayer[isinpi][0].att} Agi:${tGamePlayer[isinpi][0].agi} Def:${tGamePlayer[isinpi][0].def}] Wearing: ${tGamePlayer[isinpi][0].arm} Weilding: ${tGamePlayer[isinpi][0].wea} miketh101Heart`) 
+                }
             break;
             case 'Travel-Training':
-                // console.log('debug', redeemer);
-                // io.emit('gamedebug', rewardData);
-                let isGamePlayer3 = tGamePlayer.map(function(obj) { return obj[0].id; }).indexOf(redeemer.id);
-                tGamePlayer[isGamePlayer3][0].loc = 2;
-                io.emit('newplayertarget', tGamePlayer[isGamePlayer3]);
+                let mktt = new MKUtils;
+                let ttuser = await mktt.fetchUserById(redeemer.id)
+                let isintt = tGamePlayer.map(function(obj) { return obj[0].id; }).indexOf(redeemer.id)
+                if(isintt == -1) {
+                    let prepuser = [new PlayerObj(ttuser[0]), ttuser[0]];
+                    prepuser[0].loc = 2
+                    tGamePlayer.push(prepuser)
+                    io.emit('twitchgameusers', prepuser)
+                }else{
+                    tGamePlayer[isintt][0].loc = 2;
+                    io.emit('newplayertarget', tGamePlayer[isintt]);
+                }
+            break;
+            case 'Travel-Fort':
+                let mktf = new MKUtils;
+                let tfuser = await mktf.fetchUserById(redeemer.id)
+                let isintf = tGamePlayer.map(function(obj) { return obj[0].id; }).indexOf(redeemer.id)
+                if(isintf == -1) {
+                    let prepuser = [new PlayerObj(tfuser[0]), tfuser[0]];
+                    prepuser[0].loc = 3
+                    tGamePlayer.push(prepuser)
+                    io.emit('twitchgameusers', prepuser)
+                }else{
+                    tGamePlayer[isintf][0].loc = 3;
+                    io.emit('newplayertarget', tGamePlayer[isintf]);
+                }
             break;
             case 'TwitchAge':
                 let _mk = new MKUtils;
@@ -794,7 +852,7 @@ let startNow = setTimeout(async () => {
                 _mk7.SayInChat(`Playing [${fileSTR.substring(0, fileSTR.length-4)}] for @${redeemer.display_name}`)
             break;
             case 'Guildwars2':
-                let _m8 = new MKUtils;
+                let _mk8 = new MKUtils;
                 _mk8.SayInChat(`|| mikethemadkiwi.6058 || plays on || Henge of Denravi - US ||`)
             break;   
             case 'ShoutOut':
@@ -847,8 +905,30 @@ let startNow = setTimeout(async () => {
 // Database and OBS Socket. DO NOT FUGG WITH.
 io.on('connection', (socket) => {
   socket.name = socket.id;
-  console.log('SOCKETIO',`${socket.name} connected from : ${socket.handshake.address}`); 
+  console.log('SOCKETIO',`${socket.name} connected.`); 
   sockets[socket.id] = socket;
+  socket.on("playerlist", async (arg, callback) => {
+    let chatters = await _mk.getChatters()
+    for (let index = 0; index < chatters.length; index++) {
+        const element = chatters[index];
+        let tUser = await _mk.fetchUserById(element.user_id)
+        let isGamePlayer = tGamePlayer.map(function(obj) { return obj[0].id; }).indexOf(element.user_id)
+        if(isGamePlayer == -1) {
+            let prepuser = [new PlayerObj(tUser[0]), tUser[0]];
+            io.emit('twitchgameusers', prepuser)
+            tGamePlayer.push(prepuser)
+        }else{
+            // console.log(tGamePlayer[isGamePlayer])
+            io.emit('twitchgameusers', tGamePlayer[isGamePlayer])
+        }
+    }
+    console.log(`[Game] Playerlist Requested by Socket`); // "world"
+    callback("Sent Player List");
+  });
+//   socket.on('playerlist', async function () {
+//     let chatters = await _mk.getChatters()
+
+//   });
   socket.on('disconnect', function () {
     console.log('SOCKETIO',`${socket.name} disconnected`); 
   });

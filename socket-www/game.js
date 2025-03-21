@@ -46,6 +46,9 @@ function resizelayout() {
 //
 window.onload = function () {
     resizelayout();
+    socket.emit("playerlist", "request", (response) => {
+        console.log(response); // "got it"
+      });
 };
 //
 window.onresize = function () {
@@ -67,10 +70,11 @@ function randoFromTo(from, to){
 /////////////////////////
 const ImageFarm = [];
 ImageFarm["BG"] = './img/background.png';
-ImageFarm["townhall"] = './img/townhall.png';
-ImageFarm["mines"] = './img/mines.jpg';
-ImageFarm["training"] = './img/gym.jpg';
+ImageFarm["townhall"] = './img/village.jpg';
+ImageFarm["mines"] = './img/mines.png';
+ImageFarm["training"] = './img/arena.png';
 ImageFarm["hero"] = './img/hero.png';
+ImageFarm['fortifications'] = './img/fort.png';
 //
 function imagefromfarm(name){
     let tImg = new Image;
@@ -134,7 +138,7 @@ class Player {
         this.img = new Image;
         this.img.src = this.twitch.profile;
         this.actpos = { x:x, y:y };
-        this.tarpos = { x:Locations[0].actpos.x, y:Locations[0].actpos.y };
+        this.tarpos = { x:Locations[this.twitch.loc].actpos.x, y:Locations[this.twitch.loc].actpos.y };
         this.idleWander = true;
         this.UpdateMe = function() {
             if (this.img.src != this.twitch.profile){
@@ -144,22 +148,18 @@ class Player {
             let diffY = (this.actpos.y-this.tarpos.y);
             this.idleWander = true;
             if (diffX>50){ 
-                // console.log(this.id, 'larger diffx');
                 this.actpos.x = (this.actpos.x - 1)
                 this.idleWander = false;
             }
             if (diffX<-50){ 
-                // console.log(this.id, 'smaller diffx') 
                 this.actpos.x = (this.actpos.x + 1)
                 this.idleWander = false;
             }
             if (diffY>50){ 
-                // console.log(this.id, 'larger diffY') 
                 this.actpos.y = (this.actpos.y - 1)
                 this.idleWander = false;
             }
             if (diffY<-50){ 
-                // console.log(this.id, 'smaller diffY')
                 this.actpos.y = (this.actpos.y + 1)
                 this.idleWander = false;
             }
@@ -203,14 +203,14 @@ class Player {
                 ctx.font = '12px Lucida Console';
                 ctx.fillStyle = '#000000';
                 if (this.idleWander == true){
-                    ctx.fillText('Idle', (this.actpos.x-5), (this.actpos.y-5));
+                    ctx.fillText('Idle', (this.actpos.x-10), (this.actpos.y-10));
                 }
                 else{
-                    ctx.fillText('Pathing', (this.actpos.x-5), (this.actpos.y-5));
+                    ctx.fillText('Pathing', (this.actpos.x-10), (this.actpos.y-10));
                 }
                 
             }
-            ctx.drawImage(this.img, (this.actpos.x-5), (this.actpos.y-5), 10, 10);
+            ctx.drawImage(this.img, (this.actpos.x-10), (this.actpos.y-10), 20, 20);
         }
     }
 }
@@ -226,10 +226,15 @@ let ms = new Image;
 ms.src = ImageFarm['mines'];
 let tr = new Image;
 tr.src = ImageFarm['training'];
+let fr = new Image;
+fr.src = ImageFarm['fortifications'];
+//
 PlayFeilds[0] = new Playfeild('BG', 0, bg)
-Locations[0] = new PlayLocation('Town Hall', th, 50, 150, 150)
+//
+Locations[0] = new PlayLocation('Town of Madhaus', th, 100, 150, 150)
 Locations[1] = new PlayLocation('Fartington Mines', ms, 50, 850, 250)
 Locations[2] = new PlayLocation('Freds Training', tr, 50, 550, 400)
+Locations[3] = new PlayLocation('Fortifications', fr, 50, 1024, 600)
 
 
 //
