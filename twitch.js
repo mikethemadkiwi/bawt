@@ -82,6 +82,91 @@ class PlayerObj {
     }
 }
 
+execQuery = async function(querystr, parameters){
+    if(DBConn_Server==null){ 
+        DBConn_Server = new mysql.createConnection(DBAUTH);
+        DBConn_Server.connect(function(err) {
+            if (err) throw err;    
+        });        
+        DBConn_Server.on('error', function(err) {
+            console.log('DB CONNECTION ERROR', err.code); // 'ER_BAD_DB_ERROR'
+            DBConn_Server.end();
+            let reconn = setTimeout(() => {
+                DBConn_Server.connect();
+            }, 5000);              
+        });
+    }
+    DBConn_Server.query(querystr, function (error, results, fields) {
+        if (error) {
+            console.log(error)
+            return;
+        };
+        if (results) {
+            // console.log('mysql results',results)
+            return results;
+        };
+        if (fields) {
+            console.log('feilds', fields)
+            return;
+        };
+    });
+}
+// ---
+
+        //
+                
+        // let isGamePlayer = tGamePlayer.map(function(obj) { return obj[0].id; }).indexOf(element.user_id)
+        // if(isGamePlayer == -1) {
+        //     let prepuser = [new PlayerObj(tUser[0]), tUser[0]];
+        //     tGamePlayer.push(prepuser)
+        //     io.emit('twitchgameusers', prepuser)
+        // }else{
+        //     io.emit('twitchgameusers', tGamePlayer[isGamePlayer])
+        // }
+
+
+
+ 
+function CheckPlayerExists(tuser){
+    return new Promise((resolve, reject)=>{
+        if(DBConn_Server==null){ 
+            DBConn_Server = new mysql.createConnection(DBAUTH);
+            DBConn_Server.connect(function(err) {
+                if (err) throw err;    
+            });        
+            DBConn_Server.on('error', function(err) {
+                console.log('DB CONNECTION ERROR', err.code); // 'ER_BAD_DB_ERROR'
+                DBConn_Server.end();
+                let reconn = setTimeout(() => {
+                    DBConn_Server.connect();
+                }, 5000);              
+            });
+        }
+        let msqlstr = `SELECT * FROM twitchgame WHERE twitchid = ${tuser.id}`;
+        DBConn_Server.query(msqlstr, function (error, results, fields) {
+            if (error) {
+                console.log(error)
+                reject()
+            };
+            if (results) {
+                // console.log('mysql results',results)
+                resolve(results)
+            };
+            if (fields) {
+                // console.log('feilds', fields)
+                reject()
+            };
+        });
+        // let existsuuid = execQuery(msqlstr)
+        // resolve(existsuuid)
+    })
+}
+function AddGamePlayer(tuser){
+    return new Promise((resolve, reject)=>{
+        let existsuuid = execQuery(`INSERT INTO twitchgame(twitchid, name, profile) VALUES ('${tuser.id}', '${tuser.display_name}', '${tuser.profile_image_url}')`)
+        resolve(true)
+    })
+}
 // Database
 class DBObject {
     FetchAuth(){
@@ -541,20 +626,7 @@ let startNow = setTimeout(async () => {
     mKiwi = await _mk.fetchUserByName(TwitchConf.username)
     mKbot = await _mk.fetchUserByName(kiwibotConf.username)
     mStream = await _mk.fetchStreamById(TwitchConf.username)
-    mAds = await _mk.fetchAdsSchedule(mKiwi[0].id)
-    chatters = await _mk.getChatters()
-    for (let index = 0; index < chatters.length; index++) {
-        const element = chatters[index];
-        let tUser = await _mk.fetchUserById(element.user_id)
-        let isGamePlayer = tGamePlayer.map(function(obj) { return obj[0].id; }).indexOf(element.user_id)
-        if(isGamePlayer == -1) {
-            let prepuser = [new PlayerObj(tUser[0]), tUser[0]];
-            tGamePlayer.push(prepuser)
-            io.emit('twitchgameusers', prepuser)
-        }else{
-            io.emit('twitchgameusers', tGamePlayer[isGamePlayer])
-        }
-    }
+    mAds = await _mk.fetchAdsSchedule(mKiwi[0].id)    
     //
     let eventSub = new initSocket(true);
     eventSub.on('session_keepalive', () => {
@@ -580,6 +652,24 @@ let startNow = setTimeout(async () => {
         /////////////////////////////////////////////////
     });
     //
+    chatters = await _mk.getChatters()
+    for (let index = 0; index < chatters.length; index++) {
+        const element = chatters[index];
+        let tUser = await _mk.fetchUserById(element.user_id)
+        let yesindb = await CheckPlayerExists(tUser[0])
+        if (yesindb[0] == null){
+            let newPlayer = await AddGamePlayer(tUser[0]);
+            yesindb = await CheckPlayerExists(tUser[0])
+        }
+        let isGamePlayer = tGamePlayer.map(function(obj) { return obj.id; }).indexOf(tUser[0].id)
+        if(isGamePlayer == -1) {
+            io.emit('twitchgameusers', yesindb[0])
+            tGamePlayer.push(yesindb[0])
+        }else{
+            io.emit('twitchgameusers', tGamePlayer[isGamePlayer])
+        }
+    }
+    //
     keyupdate = setInterval(async () => {
         let auth = await _db.FetchAuth();
         mKiwi = await _mk.fetchUserByName(TwitchConf.username)
@@ -591,13 +681,16 @@ let startNow = setTimeout(async () => {
         for (let index = 0; index < chatters.length; index++) {
             const element = chatters[index];
             let tUser = await _mk.fetchUserById(element.user_id)
-            let isGamePlayer = tGamePlayer.map(function(obj) { return obj[0].id; }).indexOf(element.user_id)
+            let yesindb = await CheckPlayerExists(tUser[0])
+            if (yesindb[0] == null){
+                let newPlayer = await AddGamePlayer(tUser[0]);
+                yesindb = await CheckPlayerExists(tUser[0])
+            }
+            let isGamePlayer = tGamePlayer.map(function(obj) { return obj.id; }).indexOf(tUser[0].id)
             if(isGamePlayer == -1) {
-                let prepuser = [new PlayerObj(tUser[0]), tUser[0]];
-                io.emit('twitchgameusers', prepuser)
-                tGamePlayer.push(prepuser)
+                io.emit('twitchgameusers', yesindb[0])
+                tGamePlayer.push(yesindb[0])
             }else{
-                // console.log(tGamePlayer[isGamePlayer])
                 io.emit('twitchgameusers', tGamePlayer[isGamePlayer])
             }
         }
@@ -729,57 +822,49 @@ let startNow = setTimeout(async () => {
             case 'Travel-Mines':
                 let mkmines = new MKUtils;
                 let tUser = await mkmines.fetchUserById(redeemer.id)
-                let isin = tGamePlayer.map(function(obj) { return obj[0].id; }).indexOf(redeemer.id)
+                let isin = tGamePlayer.map(function(obj) { return obj.twitchid; }).indexOf(redeemer.id)
+                console.log(isin)
                 if(isin == -1) {
-                    let prepuser = [new PlayerObj(tUser[0]), tUser[0]];
-                    prepuser[0].loc = 1
-                    tGamePlayer.push(prepuser)
-                    io.emit('twitchgameusers', prepuser)
                 }else{
-                    tGamePlayer[isin][0].loc = 1;
+                    tGamePlayer[isin].tarposx = 850;
+                    tGamePlayer[isin].tarposy = 250;
                     io.emit('newplayertarget', tGamePlayer[isin]);
                 }
             break;
             case 'PlayerInfo':
-                let mkplayerinfo = new MKUtils;
-                let piuser = await mkplayerinfo.fetchUserById(redeemer.id)
-                let isinpi = tGamePlayer.map(function(obj) { return obj[0].id; }).indexOf(redeemer.id)
-                if(isinpi == -1) {
-                    let prepuser = [new PlayerObj(piuser[0]), piuser[0]];
-                    tGamePlayer.push(prepuser)
-                    io.emit('twitchgameusers', prepuser)
-                    mkplayerinfo.SayInChat(`Stats for ${redeemer.display_name}: [Att:${prepuser[0].att} Agi:${prepuser[0].agi} Def:${prepuser[0].def}] Wearing: ${prepuser[0].arm} Weilding: ${prepuser[0].wea} miketh101Heart`)
-                    //
-                    //tell stats                    
-                }else{
-                    mkplayerinfo.SayInChat(`Stats for ${redeemer.display_name}: [Att:${tGamePlayer[isinpi][0].att} Agi:${tGamePlayer[isinpi][0].agi} Def:${tGamePlayer[isinpi][0].def}] Wearing: ${tGamePlayer[isinpi][0].arm} Weilding: ${tGamePlayer[isinpi][0].wea} miketh101Heart`) 
-                }
+                // let mkplayerinfo = new MKUtils;
+                // let piuser = await mkplayerinfo.fetchUserById(redeemer.id)
+                // let isinpi = tGamePlayer.map(function(obj) { return obj[0].id; }).indexOf(redeemer.id)
+                // if(isinpi == -1) {
+                //     let prepuser = [new PlayerObj(piuser[0]), piuser[0]];
+                //     tGamePlayer.push(prepuser)
+                //     io.emit('twitchgameusers', prepuser)
+                //     mkplayerinfo.SayInChat(`Stats for ${redeemer.display_name}: [Att:${prepuser[0].att} Agi:${prepuser[0].agi} Def:${prepuser[0].def}] Wearing: ${prepuser[0].arm} Weilding: ${prepuser[0].wea} miketh101Heart`)
+                //     //
+                //     //tell stats                    
+                // }else{
+                //     mkplayerinfo.SayInChat(`Stats for ${redeemer.display_name}: [Att:${tGamePlayer[isinpi][0].att} Agi:${tGamePlayer[isinpi][0].agi} Def:${tGamePlayer[isinpi][0].def}] Wearing: ${tGamePlayer[isinpi][0].arm} Weilding: ${tGamePlayer[isinpi][0].wea} miketh101Heart`) 
+                // }
             break;
             case 'Travel-Training':
                 let mktt = new MKUtils;
                 let ttuser = await mktt.fetchUserById(redeemer.id)
-                let isintt = tGamePlayer.map(function(obj) { return obj[0].id; }).indexOf(redeemer.id)
+                let isintt = tGamePlayer.map(function(obj) { return obj.twitchid; }).indexOf(redeemer.id)
                 if(isintt == -1) {
-                    let prepuser = [new PlayerObj(ttuser[0]), ttuser[0]];
-                    prepuser[0].loc = 2
-                    tGamePlayer.push(prepuser)
-                    io.emit('twitchgameusers', prepuser)
                 }else{
-                    tGamePlayer[isintt][0].loc = 2;
+                    tGamePlayer[isintt].tarposx = 550;
+                    tGamePlayer[isintt].tarposy = 400;
                     io.emit('newplayertarget', tGamePlayer[isintt]);
                 }
             break;
             case 'Travel-Fort':
                 let mktf = new MKUtils;
                 let tfuser = await mktf.fetchUserById(redeemer.id)
-                let isintf = tGamePlayer.map(function(obj) { return obj[0].id; }).indexOf(redeemer.id)
+                let isintf = tGamePlayer.map(function(obj) { return obj.twitchid; }).indexOf(redeemer.id)
                 if(isintf == -1) {
-                    let prepuser = [new PlayerObj(tfuser[0]), tfuser[0]];
-                    prepuser[0].loc = 3
-                    tGamePlayer.push(prepuser)
-                    io.emit('twitchgameusers', prepuser)
                 }else{
-                    tGamePlayer[isintf][0].loc = 3;
+                    tGamePlayer[isintf].tarposx = 1024;
+                    tGamePlayer[isintf].tarposy = 600;
                     io.emit('newplayertarget', tGamePlayer[isintf]);
                 }
             break;
@@ -912,13 +997,16 @@ io.on('connection', (socket) => {
     for (let index = 0; index < chatters.length; index++) {
         const element = chatters[index];
         let tUser = await _mk.fetchUserById(element.user_id)
-        let isGamePlayer = tGamePlayer.map(function(obj) { return obj[0].id; }).indexOf(element.user_id)
+        let yesindb = await CheckPlayerExists(tUser[0])
+        if (yesindb[0] == null){
+            let newPlayer = await AddGamePlayer(tUser[0]);
+            yesindb = await CheckPlayerExists(tUser[0])
+        }
+        let isGamePlayer = tGamePlayer.map(function(obj) { return obj.id; }).indexOf(tUser[0].id)
         if(isGamePlayer == -1) {
-            let prepuser = [new PlayerObj(tUser[0]), tUser[0]];
-            io.emit('twitchgameusers', prepuser)
-            tGamePlayer.push(prepuser)
+            io.emit('twitchgameusers', yesindb[0])
+            tGamePlayer.push(yesindb[0])
         }else{
-            // console.log(tGamePlayer[isGamePlayer])
             io.emit('twitchgameusers', tGamePlayer[isGamePlayer])
         }
     }

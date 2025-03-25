@@ -131,18 +131,19 @@ class PlayLocation {
 }
 //
 class Player {
-    constructor(twitch, api, x, y) {
-        this.id = twitch.id
-        this.twitch = twitch;
-        this.api = api;
+    constructor(twitchid, tuser, bubble, actposx, actposy, tarposx, tarposy, profile) {
+        this.twitchid = twitchid;
+        this.twitch = tuser;
         this.img = new Image;
-        this.img.src = this.twitch.profile;
-        this.actpos = { x:x, y:y };
-        this.tarpos = { x:Locations[this.twitch.loc].actpos.x, y:Locations[this.twitch.loc].actpos.y };
+        this.img.src = profile;
+        this.size = 20;
+        this.bubble = bubble;
+        this.actpos = { x:actposx, y:actposy };
+        this.tarpos = { x:tarposx, y:tarposy };
         this.idleWander = true;
         this.UpdateMe = function() {
-            if (this.img.src != this.twitch.profile){
-                this.img.src = this.twitch.profile;
+            if (this.img.src != profile){
+                this.img.src = profile;
             }
             let diffX = (this.actpos.x-this.tarpos.x);
             let diffY = (this.actpos.y-this.tarpos.y);
@@ -203,14 +204,14 @@ class Player {
                 ctx.font = '12px Lucida Console';
                 ctx.fillStyle = '#000000';
                 if (this.idleWander == true){
-                    ctx.fillText('Idle', (this.actpos.x-10), (this.actpos.y-10));
+                    ctx.fillText('Idle', (this.actpos.x-(this.size/2)), (this.actpos.y-(this.size/2)));
                 }
                 else{
-                    ctx.fillText('Pathing', (this.actpos.x-10), (this.actpos.y-10));
+                    ctx.fillText('Pathing', (this.actpos.x-(this.size/2)), (this.actpos.y-(this.size/2)));
                 }
                 
             }
-            ctx.drawImage(this.img, (this.actpos.x-10), (this.actpos.y-10), 20, 20);
+            ctx.drawImage(this.img, (this.actpos.x-(this.size/2)), (this.actpos.y-(this.size/2)), this.size, this.size);
         }
     }
 }
@@ -299,32 +300,32 @@ socket.on('Ads', async function(msgData) {
     console.log(`Ads`, msgData)
 });
 socket.on('twitchgameusers', async function(msgData) {
-    let isin = Players.map(function(obj) { return obj.id; }).indexOf(msgData[0].id)
+    console.log(msgData)
+    let isin = Players.map(function(obj) { return obj.twitchid; }).indexOf(msgData.twitchid)
     if(isin == -1) {
         let w2 = (canvas.width/2) 
         let h2 = (canvas.height/2) 
-        let cuPObj = new Player(msgData[0], msgData[1], w2, h2)
+        let cuPObj = new Player(msgData.twitchid, msgData.tuser, msgData.bubble, msgData.actposx, msgData.actposy, msgData.tarposx, msgData.tarposy, msgData.profile)
         Players.push(cuPObj)
-        // console.log(`New`, cuPObj)
+        console.log(`New`, cuPObj)
     }
     else {
-        Players[isin].twitch = msgData[0];
-        Players[isin].api = msgData[1];
-        // console.log(`Existing`, Players[isin])
+        Players[isin].twitch = msgData.tuser;
+        console.log(`Existing`, Players[isin])
     }
 });
 
 
 socket.on('newplayertarget', async function(msgData) {
-    let isin = Players.map(function(obj) { return obj.id; }).indexOf(msgData[0].id)
+    let isin = Players.map(function(obj) { return obj.twitchid; }).indexOf(msgData.twitchid)
     if(isin == -1) {
     }
     else {
-        Players[isin].twitch = msgData[0];
-        Players[isin].api = msgData[1];
-        console.log('loc',Players[isin].api.display_name, Players[isin].twitch.loc)
-        Players[isin].tarpos.x = Locations[Players[isin].twitch.loc].actpos.x
-        Players[isin].tarpos.y = Locations[Players[isin].twitch.loc].actpos.y
+        // Players[isin].twitch = msgData[0];
+        // Players[isin].api = msgData[1];
+        // console.log('loc',Players[isin].api.display_name, Players[isin].twitch.loc)
+        Players[isin].tarpos.x = msgData.tarposx
+        Players[isin].tarpos.y = msgData.tarposy
     }
 });
 
