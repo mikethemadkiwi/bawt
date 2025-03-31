@@ -2,7 +2,7 @@ const bigBang = new Date();
 console.log('Setting Up Playfeild', bigBang)
 const socket = io(); // Socket.io
 ///////
-var debugshow = true;
+var debugshow = false;
 var canvas = document.getElementById('gameCanvas');
 var ctx = canvas.getContext("2d");
 canvas.oncontextmenu = handler;
@@ -15,6 +15,7 @@ let pft = 0;
 let pfvcenter = 0;
 let pfhcenter = 0;
 let pfb = 0;
+let gamefieldshow = false;
 //
 var viewer = {
     window: { w: window.innerWidth, h: window.innerHeight, hw: 0, hh: 0 },
@@ -131,12 +132,12 @@ class PlayLocation {
 }
 //
 class Player {
-    constructor(twitchid, tuser, bubble, actposx, actposy, tarposx, tarposy, profile) {
+    constructor(twitchid, tuser, bubble, actposx, actposy, tarposx, tarposy, profile, level) {
         this.twitchid = twitchid;
         this.twitch = tuser;
         this.img = new Image;
         this.img.src = profile;
-        this.size = 20;
+        this.size = (20+level);
         this.bubble = bubble;
         this.actpos = { x:actposx, y:actposy };
         this.tarpos = { x:tarposx, y:tarposy };
@@ -259,27 +260,26 @@ update = setInterval(function () {
 //
 render = setInterval(function () {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    /////
-    // Debug Objects
-    /////
-    PlayFeilds.forEach(bsObj => {
-        bsObj.RenderMe();
-    });
-    //
-    Locations.forEach(bsObj => {
-        bsObj.RenderMe();
-    });
-    //
-    Players.forEach(bsObj => {
-        bsObj.RenderMe();
-    });
-    ////
-    if (debugshow == true) {
-        ctx.font = '12px Lucida Console';
-        ctx.fillStyle = '#000000';
-        ctx.fillText('twitch game', 50, 22);
-        ctx.fillText('TPS| av:' + viewer.tick.tickpersec + ' current:' + viewer.tick.tickcurrent + ' total:' + viewer.tick.ticktotal, 50, 40);
-        ctx.fillText('Res|' + viewer.window.w + 'x' + viewer.window.h + ' (Midpoint:' + viewer.window.hw + 'x' + viewer.window.hh + ')| FPS| av:' + viewer.frame.framepersec + ' current: ' + viewer.frame.framecurrent + ' total: ' + viewer.frame.frametotal + ' | ', 50, 58);
+    if (gamefieldshow == true){
+        PlayFeilds.forEach(bsObj => {
+            bsObj.RenderMe();
+        });
+        //
+        Locations.forEach(bsObj => {
+            bsObj.RenderMe();
+        });
+        //
+        Players.forEach(bsObj => {
+            bsObj.RenderMe();
+        });
+        ////
+        if (debugshow == true) {
+            ctx.font = '12px Lucida Console';
+            ctx.fillStyle = '#000000';
+            ctx.fillText('twitch game', 50, 22);
+            ctx.fillText('TPS| av:' + viewer.tick.tickpersec + ' current:' + viewer.tick.tickcurrent + ' total:' + viewer.tick.ticktotal, 50, 40);
+            ctx.fillText('Res|' + viewer.window.w + 'x' + viewer.window.h + ' (Midpoint:' + viewer.window.hw + 'x' + viewer.window.hh + ')| FPS| av:' + viewer.frame.framepersec + ' current: ' + viewer.frame.framecurrent + ' total: ' + viewer.frame.frametotal + ' | ', 50, 58);
+        }
     }
    viewer.frame.framecurrent++;
    viewer.frame.frametotal++;
@@ -293,25 +293,25 @@ persec = setInterval(function () {
     viewer.tick.tickcurrent = 0;
 }, 1000);
 
-socket.on('gamedebug', async function(msgData) { 
-    console.log(`gamedebug`, msgData)
+socket.on('showfield', async function(msgData) { 
+    gamefieldshow = msgData.show;
 });
 socket.on('Ads', async function(msgData) { 
     console.log(`Ads`, msgData)
 });
 socket.on('twitchgameusers', async function(msgData) {
-    console.log(msgData)
+    // console.log(msgData)
     let isin = Players.map(function(obj) { return obj.twitchid; }).indexOf(msgData.twitchid)
     if(isin == -1) {
         let w2 = (canvas.width/2) 
         let h2 = (canvas.height/2) 
-        let cuPObj = new Player(msgData.twitchid, msgData.tuser, msgData.bubble, msgData.actposx, msgData.actposy, msgData.tarposx, msgData.tarposy, msgData.profile)
+        let cuPObj = new Player(msgData.twitchid, msgData.tuser, msgData.bubble, msgData.actposx, msgData.actposy, msgData.tarposx, msgData.tarposy, msgData.profile, msgData.level)
         Players.push(cuPObj)
-        console.log(`New`, cuPObj)
+        // console.log(`New`, cuPObj)
     }
     else {
         Players[isin].twitch = msgData.tuser;
-        console.log(`Existing`, Players[isin])
+        // console.log(`Existing`, Players[isin])
     }
 });
 

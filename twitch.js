@@ -117,7 +117,7 @@ execQuery = async function(querystr, parameters){
                 
         // let isGamePlayer = tGamePlayer.map(function(obj) { return obj[0].id; }).indexOf(element.user_id)
         // if(isGamePlayer == -1) {
-        //     let prepuser = [new PlayerObj(tUser[0]), tUser[0]];
+        //     let yesindbpi = [new PlayerObj(tUser[0]), tUser[0]];
         //     tGamePlayer.push(prepuser)
         //     io.emit('twitchgameusers', prepuser)
         // }else{
@@ -228,6 +228,29 @@ class DBObject {
                     return;
                 };               
                 console.log(`[Storing Ad Data]`, results.message)
+                resolve(results)
+            });
+        })
+    }
+    StorePlayerData(addata){
+        return new Promise((resolve, reject)=>{            
+            if(DBConn_ads!=null){                
+                DBConn_ads.end();
+                DBConn_ads = null;
+            }
+            DBConn_ads = new mysql.createConnection(DBAUTH);
+            DBConn_ads.connect(function(err) {
+                if (err) throw err;    
+            });  
+            //         
+            // let prepadData = JSON.stringify(addata)
+            // 
+            let qStr = `UPDATE twitchgame SET name = '${addata.name}', profile = '${addata.profile}', tuser = null, task = '${addata.task}', bubble = '${addata.bubble}', actposx = '${addata.actposx}', actposy = '${addata.actposy}', tarposx = '${addata.tarposx}', tarposy = '${addata.tarposy}', xp = '${addata.xp}', level = '${addata.level}', attack = '${addata.attack}', defense = '${addata.defense}', agility = '${addata.agility}', armour = '${addata.armour}', weapon = '${addata.weapon}', currency = '${addata.currency}' WHERE twitchid='${addata.twitchid}'`;
+            DBConn_ads.query(qStr, function (error, results, fields) {
+                if (error) {
+                    reject(error)
+                    return;
+                };                         
                 resolve(results)
             });
         })
@@ -611,6 +634,89 @@ class MKUtils {
             }) 
         })
     }
+    ResetGamePlayers(){
+        return new Promise((resolve, reject)=> {
+            // tGamePlayer
+            tGamePlayer.forEach(gPlayer => {
+                console.log('endround', gPlayer.name)
+                if (gPlayer.bubble != 0){
+                    switch(gPlayer.bubble){
+                        case(0): // home
+
+                        break;
+                        case(1): // mines attack strength
+                            switch(gPlayer.task){
+                                case(0): // idle / wander
+                                    gPlayer.attack = (gPlayer.attack + 1);
+                                break;
+                                case(1): // work
+
+                                break;
+                                default:
+                                    //
+                            }
+                        break;
+                        case(2): // training agi
+                            switch(gPlayer.task){
+                                case(0): // idle / wander
+                                    gPlayer.agility = (gPlayer.agility + 1);
+                                break;
+                                case(1): // work
+
+                                break;
+                                default:
+                                    //
+                            }
+                        break;
+                        case(3): // fort def
+                            switch(gPlayer.task){
+                                case(0): // idle / wander
+                                    gPlayer.defense = (gPlayer.defense + 1);
+                                break;
+                                case(1): // work
+
+                                break;
+                                default:
+                                    //
+                            }
+                        break;
+                        case(4): // forest
+                            switch(gPlayer.task){
+                                case(0): // idle / wander
+
+                                break;
+                                case(1): // work
+
+                                break;
+                                default:
+                                    //
+                            }
+                        break;
+                        default:
+                            //
+                    }
+                    gPlayer.bubble = 0; // wander
+                    gPlayer.tarposx = 150;
+                    gPlayer.tarposy = 150;                    
+                    let pXp = ((1 + gPlayer.level) * Math.random(0,2));
+                    let pReward = ((5 + gPlayer.level) * Math.random(0,5));
+                    gPlayer.currency = (gPlayer.currency + pReward)
+                    gPlayer.xp = (gPlayer.xp + pXp)
+                }
+                // save player to db
+                let db = new DBObject;
+                let saveplayer = db.StorePlayerData(gPlayer)
+                io.emit('newplayertarget', gPlayer);
+            });
+            resolve(true);
+        }) 
+    }
+    BeginBossBattle(){
+        return new Promise((resolve, reject)=> {
+            console.log('bbb')
+            resolve(true)
+        })
+    }
 }
 ///////////////////////////////////////
 // START ENGINE
@@ -661,7 +767,7 @@ let startNow = setTimeout(async () => {
             let newPlayer = await AddGamePlayer(tUser[0]);
             yesindb = await CheckPlayerExists(tUser[0])
         }
-        let isGamePlayer = tGamePlayer.map(function(obj) { return obj.id; }).indexOf(tUser[0].id)
+        let isGamePlayer = tGamePlayer.map(function(obj) { return obj.twitchid; }).indexOf(tUser[0].id)
         if(isGamePlayer == -1) {
             io.emit('twitchgameusers', yesindb[0])
             tGamePlayer.push(yesindb[0])
@@ -686,7 +792,7 @@ let startNow = setTimeout(async () => {
                 let newPlayer = await AddGamePlayer(tUser[0]);
                 yesindb = await CheckPlayerExists(tUser[0])
             }
-            let isGamePlayer = tGamePlayer.map(function(obj) { return obj.id; }).indexOf(tUser[0].id)
+            let isGamePlayer = tGamePlayer.map(function(obj) { return obj.twitchid; }).indexOf(tUser[0].id)
             if(isGamePlayer == -1) {
                 io.emit('twitchgameusers', yesindb[0])
                 tGamePlayer.push(yesindb[0])
@@ -723,9 +829,16 @@ let startNow = setTimeout(async () => {
                         let adtimer = (ac[2][0].length*1000) //90000
                         let dd = new Date(nextRuntime)
                         console.log(colors.gray('[Ads]'),`Running Ads`, ac[2][0].length, `Safe Ad Reload: ${dd}`)
-                        let notifyadend = setTimeout(() => {
-                            let adsStr = `Ads should be over. (${ac[2][0].length}seconds). Welcome Back!`
-                            _mk.SayInChat(adsStr)
+                        // begin gameplay
+                        io.emit('showfield', {show:true});
+                        let notifyadend = setTimeout(async () => {
+                            let adsStr = `Ads should be over. (${ac[2][0].length}seconds). Welcome Back!`;
+                            await _mk.SayInChat(adsStr);
+                            await _mk.ResetGamePlayers();
+                            //
+                            await _mk.BeginBossBattle();
+                            //
+                            io.emit('showfield', {show:false})
                         }, adtimer);
                     }
                     if (ac[0] == 'NextRun'){
@@ -735,6 +848,9 @@ let startNow = setTimeout(async () => {
                     }
                 }
                 else{
+                    if (mAds.preroll_free_time <= 1080){
+                        console.log(colors.cyan('[Ad Incoming]'), (mAds.preroll_free_time-900))
+                    }
                     let prtimeclean = Math.floor((mAds.preroll_free_time/60))
                     let unixtsdate = mAds.next_ad_at*1000;
                     let nextad = new Date(unixtsdate);
@@ -811,61 +927,122 @@ let startNow = setTimeout(async () => {
         let rewardData = {redeemer: redeemer, reward: reward, user: tUser}
         switch(reward.title){
             case 'kiwisdebugbutton':
-                let d = {                                        
-                    userinput: redeemer.user_input,
-                    rewardData: rewardData
+                if (redeemer.login == 'mikethemadkiwi'){
+                    io.emit('showfield', {show:true})
+                    setTimeout(async () => {
+                        let deb = new MKUtils;
+                        await deb.ResetGamePlayers();
+                        io.emit('showfield', {show:false})
+                    }, 90000);
                 }
-                let deb = new MKUtils;                
-                console.log('debug', redeemer);
-                io.emit('gamedebug', rewardData);
+            break;            
+            case 'Travel-Home':
+                // let mkhome = new MKUtils;
+                // let thUser = await mkhome.fetchUserById(redeemer.id)
+                // let isinh = tGamePlayer.map(function(obj) { return obj.twitchid; }).indexOf(redeemer.id)
+                // if(isinh == -1) {
+                //     //refund points and tell them no.
+                // }else{
+                //     tGamePlayer[isinh].bubble = 0;
+                //     tGamePlayer[isinh].tarposx = 150;
+                //     tGamePlayer[isinh].tarposy = 150;
+                //     // save player to db
+                //     let homedb = new DBObject;
+                //     let saveplayer = homedb.StorePlayerData(tGamePlayer[isinh])
+                //     // console.log('Saved Player', tGamePlayer[isinh])
+                //     io.emit('newplayertarget', tGamePlayer[isinh]);
+                // }
             break;            
             case 'Travel-Mines':
                 let mkmines = new MKUtils;
                 let tUser = await mkmines.fetchUserById(redeemer.id)
+                let yesindb = await CheckPlayerExists(tUser[0])
+                if (yesindb[0] == null){
+                    let newPlayer = await AddGamePlayer(tUser[0]);
+                    yesindb = await CheckPlayerExists(tUser[0])
+                }
                 let isin = tGamePlayer.map(function(obj) { return obj.twitchid; }).indexOf(redeemer.id)
-                console.log(isin)
-                if(isin == -1) {
+                if(isin == -1) {                    
+                    yesindb[0].bubble = 1;
+                    yesindb[0].tarposx = 850;
+                    yesindb[0].tarposy = 250;
+                    tGamePlayer.push(yesindb[0])
                 }else{
+                    tGamePlayer[isin].bubble = 1;
                     tGamePlayer[isin].tarposx = 850;
                     tGamePlayer[isin].tarposy = 250;
-                    io.emit('newplayertarget', tGamePlayer[isin]);
                 }
-            break;
-            case 'PlayerInfo':
-                // let mkplayerinfo = new MKUtils;
-                // let piuser = await mkplayerinfo.fetchUserById(redeemer.id)
-                // let isinpi = tGamePlayer.map(function(obj) { return obj[0].id; }).indexOf(redeemer.id)
-                // if(isinpi == -1) {
-                //     let prepuser = [new PlayerObj(piuser[0]), piuser[0]];
-                //     tGamePlayer.push(prepuser)
-                //     io.emit('twitchgameusers', prepuser)
-                //     mkplayerinfo.SayInChat(`Stats for ${redeemer.display_name}: [Att:${prepuser[0].att} Agi:${prepuser[0].agi} Def:${prepuser[0].def}] Wearing: ${prepuser[0].arm} Weilding: ${prepuser[0].wea} miketh101Heart`)
-                //     //
-                //     //tell stats                    
-                // }else{
-                //     mkplayerinfo.SayInChat(`Stats for ${redeemer.display_name}: [Att:${tGamePlayer[isinpi][0].att} Agi:${tGamePlayer[isinpi][0].agi} Def:${tGamePlayer[isinpi][0].def}] Wearing: ${tGamePlayer[isinpi][0].arm} Weilding: ${tGamePlayer[isinpi][0].wea} miketh101Heart`) 
-                // }
+                // save player to db
+                let minesdb = new DBObject;
+                let saveplayer = minesdb.StorePlayerData(tGamePlayer[isin])
+                // console.log('Saved Player', tGamePlayer[isin])
+                io.emit('newplayertarget', tGamePlayer[isin]);
             break;
             case 'Travel-Training':
                 let mktt = new MKUtils;
-                let ttuser = await mktt.fetchUserById(redeemer.id)
+                let ttuser = await mktt.fetchUserById(redeemer.id)     
+                let yesindbtt = await CheckPlayerExists(ttuser[0])
+                if (yesindbtt[0] == null){
+                    let newPlayer = await AddGamePlayer(ttuser[0]);
+                    yesindbtt = await CheckPlayerExists(ttuser[0])
+                }
                 let isintt = tGamePlayer.map(function(obj) { return obj.twitchid; }).indexOf(redeemer.id)
-                if(isintt == -1) {
+                if(isintt == -1) {                    
+                    yesindbtt[0].bubble = 2;
+                    yesindbtt[0].tarposx = 550;
+                    yesindbtt[0].tarposy = 400;
+                    tGamePlayer.push(yesindbtt[0])
                 }else{
+                    tGamePlayer[isintt].bubble = 2;
                     tGamePlayer[isintt].tarposx = 550;
                     tGamePlayer[isintt].tarposy = 400;
-                    io.emit('newplayertarget', tGamePlayer[isintt]);
                 }
+                let ttdb = new DBObject;
+                let saveplayertt = ttdb.StorePlayerData(tGamePlayer[isintt])
+                io.emit('newplayertarget', tGamePlayer[isintt]);
             break;
             case 'Travel-Fort':
                 let mktf = new MKUtils;
-                let tfuser = await mktf.fetchUserById(redeemer.id)
+                let tfuser = await mktf.fetchUserById(redeemer.id)          
+                let yesindbtf = await CheckPlayerExists(tfuser[0])
+                if (yesindbtf[0] == null){
+                    let newPlayer = await AddGamePlayer(tfuser[0]);
+                    yesindbtf = await CheckPlayerExists(tfuser[0])
+                }
                 let isintf = tGamePlayer.map(function(obj) { return obj.twitchid; }).indexOf(redeemer.id)
-                if(isintf == -1) {
+                if(isintf == -1) {                    
+                    yesindbtf[0].bubble = 3;
+                    yesindbtf[0].tarposx = 1024;
+                    yesindbtf[0].tarposy = 600;
+                    tGamePlayer.push(yesindbtf[0])
                 }else{
+                    tGamePlayer[isintf].bubble = 3;
                     tGamePlayer[isintf].tarposx = 1024;
                     tGamePlayer[isintf].tarposy = 600;
-                    io.emit('newplayertarget', tGamePlayer[isintf]);
+                }
+                // save player to db
+                let tfdb = new DBObject;
+                let saveplayerfort = tfdb.StorePlayerData(tGamePlayer[isintf])
+                io.emit('newplayertarget', tGamePlayer[isintf]);
+                
+            break;
+            case 'PlayerInfo':
+                let mkplayerinfo = new MKUtils;
+                let piuser = await mkplayerinfo.fetchUserById(redeemer.id)         
+                let yesindbpi = await CheckPlayerExists(piuser[0])
+                if (yesindbpi[0] == null){
+                    let newPlayer = await AddGamePlayer(piuser[0]);
+                    yesindbpi = await CheckPlayerExists(piuser[0])
+                }
+                let isinpi = tGamePlayer.map(function(obj) { return obj.twitchid; }).indexOf(redeemer.id)
+                if(isinpi == -1) {
+                    tGamePlayer.push(yesindbpi)
+                    io.emit('twitchgameusers', yesindbpi)
+                    mkplayerinfo.SayInChat(`Stats for ${redeemer.display_name}: [Att:${yesindbpi.attack} Agi:${yesindbpi.agility} Def:${yesindbpi.defense}] Wearing: ${yesindbpi.armour} Weilding: ${yesindbpi.weapon} Currency:${yesindbpi.currency}  XP:${yesindbpi.xp} miketh101Heart`)
+                    //
+                    //tell stats                    
+                }else{
+                    mkplayerinfo.SayInChat(`Stats for ${redeemer.display_name}: [Att:${tGamePlayer[isinpi].attack} Agi:${tGamePlayer[isinpi].agility} Def:${tGamePlayer[isinpi].defense}] Wearing: ${tGamePlayer[isinpi].armour} Weilding: ${tGamePlayer[isinpi].weapon} Currency:${tGamePlayer[isinpi].currency}  XP:${tGamePlayer[isinpi].xp}  miketh101Heart`) 
                 }
             break;
             case 'TwitchAge':
@@ -1002,7 +1179,7 @@ io.on('connection', (socket) => {
             let newPlayer = await AddGamePlayer(tUser[0]);
             yesindb = await CheckPlayerExists(tUser[0])
         }
-        let isGamePlayer = tGamePlayer.map(function(obj) { return obj.id; }).indexOf(tUser[0].id)
+        let isGamePlayer = tGamePlayer.map(function(obj) { return obj.twitchid; }).indexOf(tUser[0].id)
         if(isGamePlayer == -1) {
             io.emit('twitchgameusers', yesindb[0])
             tGamePlayer.push(yesindb[0])
