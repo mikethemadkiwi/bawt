@@ -143,6 +143,8 @@ function CheckPlayerExists(tuser){
                 }, 5000);              
             });
         }
+        let newid = tuser.id.replace(/[\u0800-\uFFFF]/g, '')
+        console.log(tuser, tuser.id, newid)
         let msqlstr = `SELECT * FROM twitchgame WHERE twitchid = ${tuser.id}`;
         DBConn_Server.query(msqlstr, function (error, results, fields) {
             if (error) {
@@ -1096,6 +1098,9 @@ let startNow = setTimeout(async () => {
                 let _mk4 = new MKUtils;
                 io.emit('LookMa', rewardData)  
                 _mk4.SayInChat(`Look @${redeemer.display_name} I'm a Dragon!!`)  
+                /// adding in sound from bunny that says "look ma i'm a dragon"
+
+                ///
             break;
             case 'Teamspeak':
                 let _mk5 = new MKUtils;
