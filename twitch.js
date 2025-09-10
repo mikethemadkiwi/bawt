@@ -68,17 +68,18 @@ let tDate = Date.now();
 class PlayerObj {
     constructor(tuser) {
         this.id = tuser.id;
+        this.twitchid = tuser.id;
         this.profile = tuser.profile_image_url;
         this.name = tuser.display_name;
         this.loc = 0;
-        this.xp = 0;
+        this.xp = 0.0;
         this.level = 0;
         this.att = 1;
         this.def = 1;
         this.agi = 1;
         this.arm = 0;
         this.wea = 0;
-        this.currency = 0;
+        this.currency = 0.0;
     }
 }
 
@@ -637,8 +638,9 @@ class MKUtils {
     ResetGamePlayers(){
         return new Promise((resolve, reject)=> {
             // tGamePlayer
+            let participants = [];
             tGamePlayer.forEach(gPlayer => {
-                console.log('endround', gPlayer.name)
+                // console.log('endround', gPlayer.name)
                 if (gPlayer.bubble != 0){
                     switch(gPlayer.bubble){
                         case(0): // home
@@ -648,6 +650,8 @@ class MKUtils {
                             switch(gPlayer.task){
                                 case(0): // idle / wander
                                     gPlayer.attack = (gPlayer.attack + 1);
+                                    let pstr1 = `${gPlayer.name} Gained 1 Attack! Now: ${gPlayer.attack}`
+                                    io.emit('round1rewards', {str:pstr1, gPlayer:gPlayer});
                                 break;
                                 case(1): // work
 
@@ -660,6 +664,8 @@ class MKUtils {
                             switch(gPlayer.task){
                                 case(0): // idle / wander
                                     gPlayer.agility = (gPlayer.agility + 1);
+                                    let pstr1 = `${gPlayer.name} Gained 1 Agility! Now: ${gPlayer.agility}`
+                                    io.emit('round1rewards', {str:pstr1, gPlayer:gPlayer});
                                 break;
                                 case(1): // work
 
@@ -672,6 +678,8 @@ class MKUtils {
                             switch(gPlayer.task){
                                 case(0): // idle / wander
                                     gPlayer.defense = (gPlayer.defense + 1);
+                                    let pstr1 = `${gPlayer.name} Gained 1 Defense! Now: ${gPlayer.defense}`
+                                    io.emit('round1rewards', {str:pstr1, gPlayer:gPlayer});
                                 break;
                                 case(1): // work
 
@@ -835,11 +843,9 @@ let startNow = setTimeout(async () => {
                             let adsStr = `Ads should be over. (${ac[2][0].length}seconds). Welcome Back!`;
                             await _mk.SayInChat(adsStr);
                             await _mk.ResetGamePlayers();
-                            //
-                            await _mk.BeginBossBattle();
-                            //
                             io.emit('showfield', {show:false})
                         }, adtimer);
+                        //
                     }
                     if (ac[0] == 'NextRun'){
                         if (ac[2] < 5){
@@ -927,11 +933,14 @@ let startNow = setTimeout(async () => {
         let rewardData = {redeemer: redeemer, reward: reward, user: tUser}
         switch(reward.title){
             case 'kiwisdebugbutton':
-                if (redeemer.login == 'mikethemadkiwi'){
+                if (redeemer.login == 'mikethemadkiwi'){                    
+                    // let isin = tGamePlayer.map(function(obj) { return obj.twitchid; }).indexOf(redeemer.id) 
+                    // io.emit('Notification', {str:'Travelling to Mines', gPlayer:tGamePlayer[isin]});
                     io.emit('showfield', {show:true})
                     setTimeout(async () => {
                         let deb = new MKUtils;
                         await deb.ResetGamePlayers();
+                        await deb.BeginBossBattle();
                         io.emit('showfield', {show:false})
                     }, 90000);
                 }
@@ -975,6 +984,7 @@ let startNow = setTimeout(async () => {
                 // save player to db
                 let minesdb = new DBObject;
                 let saveplayer = minesdb.StorePlayerData(tGamePlayer[isin])
+                io.emit('Notification', {str:'Travelling to Mines', gPlayer:tGamePlayer[isin]});
                 // console.log('Saved Player', tGamePlayer[isin])
                 io.emit('newplayertarget', tGamePlayer[isin]);
             break;
@@ -999,6 +1009,7 @@ let startNow = setTimeout(async () => {
                 }
                 let ttdb = new DBObject;
                 let saveplayertt = ttdb.StorePlayerData(tGamePlayer[isintt])
+                io.emit('Notification', {str:'Travelling to Training', gPlayer:tGamePlayer[isintt]});
                 io.emit('newplayertarget', tGamePlayer[isintt]);
             break;
             case 'Travel-Fort':
@@ -1023,6 +1034,7 @@ let startNow = setTimeout(async () => {
                 // save player to db
                 let tfdb = new DBObject;
                 let saveplayerfort = tfdb.StorePlayerData(tGamePlayer[isintf])
+                io.emit('Notification', {str:'Travelling to Fort', gPlayer:tGamePlayer[isintf]});
                 io.emit('newplayertarget', tGamePlayer[isintf]);
                 
             break;
@@ -1034,15 +1046,17 @@ let startNow = setTimeout(async () => {
                     let newPlayer = await AddGamePlayer(piuser[0]);
                     yesindbpi = await CheckPlayerExists(piuser[0])
                 }
-                let isinpi = tGamePlayer.map(function(obj) { return obj.twitchid; }).indexOf(redeemer.id)
+                let isinpi = tGamePlayer.map(function(obj) { return obj.twitchid; }).indexOf(redeemer.id)                
                 if(isinpi == -1) {
                     tGamePlayer.push(yesindbpi)
                     io.emit('twitchgameusers', yesindbpi)
-                    mkplayerinfo.SayInChat(`Stats for ${redeemer.display_name}: [Att:${yesindbpi.attack} Agi:${yesindbpi.agility} Def:${yesindbpi.defense}] Wearing: ${yesindbpi.armour} Weilding: ${yesindbpi.weapon} Currency:${yesindbpi.currency}  XP:${yesindbpi.xp} miketh101Heart`)
-                    //
-                    //tell stats                    
+                    let pcurr = yesindbpi.currency.toFixed(2)
+                    let pxp = yesindbpi.xp.toFixed(2)
+                    mkplayerinfo.SayInChat(`Stats for ${redeemer.display_name}: [Att:${yesindbpi.attack} Agi:${yesindbpi.agility} Def:${yesindbpi.defense}] Wearing: ${yesindbpi.armour} Weilding: ${yesindbpi.weapon} Currency:${pcurr}  XP:${pxp} miketh101Heart`)                 
                 }else{
-                    mkplayerinfo.SayInChat(`Stats for ${redeemer.display_name}: [Att:${tGamePlayer[isinpi].attack} Agi:${tGamePlayer[isinpi].agility} Def:${tGamePlayer[isinpi].defense}] Wearing: ${tGamePlayer[isinpi].armour} Weilding: ${tGamePlayer[isinpi].weapon} Currency:${tGamePlayer[isinpi].currency}  XP:${tGamePlayer[isinpi].xp}  miketh101Heart`) 
+                    let pcurr = tGamePlayer[isinpi].currency.toFixed(2)
+                    let pxp = tGamePlayer[isinpi].xp.toFixed(2)
+                    mkplayerinfo.SayInChat(`Stats for ${redeemer.display_name}: [Att:${tGamePlayer[isinpi].attack} Agi:${tGamePlayer[isinpi].agility} Def:${tGamePlayer[isinpi].defense}] Wearing: ${tGamePlayer[isinpi].armour} Weilding: ${tGamePlayer[isinpi].weapon} Currency:${pcurr}  XP:${pxp}  miketh101Heart`) 
                 }
             break;
             case 'TwitchAge':
@@ -1095,6 +1109,10 @@ let startNow = setTimeout(async () => {
             break;
             case 'DumbAnswer':
                 io.emit('dumbanswer', rewardData)
+            break;
+            case 'RoleplayCity':                
+                let _mk75 = new MKUtils;
+                _mk75.SayInChat(`|| mikethemadkiwi is currently playing on "THE CREW RP" You can connect by joining the discord Here: https://discord.gg/thecrewrp ||`)
             break;
             case 'Honk':
                 let _mk6 = new MKUtils;

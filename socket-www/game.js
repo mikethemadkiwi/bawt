@@ -89,6 +89,8 @@ const PlayFeilds = [];
 const Players = [];
 const Locations = [];
 const BattleQueue = [];
+const NotificationQueue = [];
+const Notifications = [];
 
 //
 class Playfeild {
@@ -216,7 +218,39 @@ class Player {
         }
     }
 }
-
+class NotificationObject {
+    constructor(reward) {
+        this.reward = reward;
+        this.actposx = (canvas.width/2); 
+        this.actposy = (canvas.height); 
+        this.img = new Image;
+        this.width = 500;
+        this.height = 22;
+        this.img.src = reward.gPlayer.profile;
+        this.UpdateMe = function() { 
+            let cutoff = -(this.height/2)
+            if(this.actposy<cutoff){
+                Notifications.splice(0, 1)              
+            }else{
+                this.actposx = (canvas.width/2);
+                this.actposy = (this.actposy-0.5)
+            }
+        }
+        this.RenderMe = function() {
+            let offx = (this.width/2)
+            let offy = (this.height/2)         
+            ctx.fillStyle = "white";
+            ctx.fillRect(this.actposx-offx,this.actposy-offy,this.width,this.height);
+            ctx.font = '20px Lucida Console';
+            ctx.fillStyle = '#000000';
+            ctx.fillText(this.reward.str, (this.actposx-offx)+27, (this.actposy+7));
+            ctx.font = '20px Lucida Console';
+            ctx.fillStyle = '#bada55';
+            ctx.fillText(this.reward.str, ((this.actposx-offx)+28), ((this.actposy+7)+1));
+            ctx.drawImage(this.img, ((this.actposx-offx)-25), (this.actposy-25), 50, 50);
+        }
+    }
+}
 
 
 //
@@ -253,6 +287,10 @@ update = setInterval(function () {
     Players.forEach(bsObj => {
         bsObj.UpdateMe();
     })
+    //
+    Notifications.forEach(ntObj => {
+        ntObj.UpdateMe();
+    })
     viewer.tick.tickcurrent++;
     viewer.tick.ticktotal++;
 }, tps);
@@ -272,21 +310,30 @@ render = setInterval(function () {
         Players.forEach(bsObj => {
             bsObj.RenderMe();
         });
-        ////
-        if (debugshow == true) {
-            ctx.font = '12px Lucida Console';
-            ctx.fillStyle = '#000000';
-            ctx.fillText('twitch game', 50, 22);
-            ctx.fillText('TPS| av:' + viewer.tick.tickpersec + ' current:' + viewer.tick.tickcurrent + ' total:' + viewer.tick.ticktotal, 50, 40);
-            ctx.fillText('Res|' + viewer.window.w + 'x' + viewer.window.h + ' (Midpoint:' + viewer.window.hw + 'x' + viewer.window.hh + ')| FPS| av:' + viewer.frame.framepersec + ' current: ' + viewer.frame.framecurrent + ' total: ' + viewer.frame.frametotal + ' | ', 50, 58);
-        }
+    }
+    //
+    Notifications.forEach(ntObj => {
+        ntObj.RenderMe();
+    })
+    ////
+    if (debugshow == true) {
+        ctx.font = '12px Lucida Console';
+        ctx.fillStyle = '#000000';
+        ctx.fillText('twitch game', 50, 22);
+        ctx.fillText('TPS| av:' + viewer.tick.tickpersec + ' current:' + viewer.tick.tickcurrent + ' total:' + viewer.tick.ticktotal, 50, 40);
+        ctx.fillText('Res|' + viewer.window.w + 'x' + viewer.window.h + ' (Midpoint:' + viewer.window.hw + 'x' + viewer.window.hh + ')| FPS| av:' + viewer.frame.framepersec + ' current: ' + viewer.frame.framecurrent + ' total: ' + viewer.frame.frametotal + ' | ', 50, 58);
     }
    viewer.frame.framecurrent++;
    viewer.frame.frametotal++;
 }, tarFps);
 
 persec = setInterval(function () {
-    
+    //
+    if (NotificationQueue[0]!=null){
+        Notifications.push(new NotificationObject(NotificationQueue[0]))
+        NotificationQueue.splice(0,1)
+    }
+    //
     viewer.frame.framepersec = viewer.frame.framecurrent;
     viewer.frame.framecurrent = 0;
     viewer.tick.tickpersec = viewer.tick.tickcurrent;
@@ -295,6 +342,14 @@ persec = setInterval(function () {
 
 socket.on('showfield', async function(msgData) { 
     gamefieldshow = msgData.show;
+});
+socket.on('round1rewards', async function(msgData) {
+    NotificationQueue.push(msgData)
+    console.log(msgData)
+});
+socket.on('Notification', async function(msgData) {
+    NotificationQueue.push(msgData)
+    console.log(msgData)
 });
 socket.on('Ads', async function(msgData) { 
     console.log(`Ads`, msgData)
