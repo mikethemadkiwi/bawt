@@ -1,1 +1,5 @@
-node_modules/
+twitchauth/node_modules/
+kiwisbot/node_modules/
+overlays/node_modules/
+old_tmp/
+configs/

@@ -1,11 +1,12 @@
-# Madkiwi's Auth Bawt
-### Easy Local Twitch OAUTH Generator Module  
-
-This is mostly a library for using with twitch oauth2  
-if provide the details, it acts as a token dispensary for your code.  
-1. go to your install folder  
-2. npm install ( cos it has dependancies. )  
-3. require and use! Simple!  
+# Madkiwi's Twitch Bawt
+### Easy Local Twitch bot with Overlays.  
   
-example is in the folder.  
-Provided completely as-is. this is messy code. feel free to steal chunks of it. i did.
+1. Confirm 'twitch' database setup using sql provided.  
+2. edit the example config files to match twitch app and database details.  
+3. rename `exampleconfig` folder to `config`  
+4. go into each service folder  
+5. npm install ( cos dey all has different dependancies. )  
+6. run using `node index.js` ( each service uses this filename ) 
+  
+Services best run using "nodemon" in a screen session or other persistance service.  
+Run twitchauth service FIRST as ALL services run thru it's socket.  

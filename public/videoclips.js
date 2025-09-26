@@ -1,1 +1,0 @@
-const socket = io(); // Socket.io

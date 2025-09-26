@@ -1,0 +1,42 @@
+body {
+  --dot-bg: black;
+  --dot-color: white;
+  --dot-size: 1px;
+  --dot-space: 22px;
+	background:
+		linear-gradient(90deg, var(--dot-bg) calc(var(--dot-space) - var(--dot-size)), transparent 1%) center / var(--dot-space) var(--dot-space),
+		linear-gradient(var(--dot-bg) calc(var(--dot-space) - var(--dot-size)), transparent 1%) center / var(--dot-space) var(--dot-space),
+		var(--dot-color);
+    padding:0px;
+    margin:0px;
+}
+/* unvisited link */
+a:link {
+    color: #1d1b1b;
+  }
+  
+  /* visited link */
+  a:visited {
+    color: #1d1b1b;
+  }
+  
+  /* mouse over link */
+  a:hover {
+    color: #d5dcc0;
+  }
+  
+  /* selected link */
+  a:active {
+    color: #1d1b1b;
+  }
+  
+  #gameContainer{
+    position:absolute;
+    top:0px;
+    left:0px;
+    bottom:0px;
+    right:0px;
+    padding:0px;
+    margin:0px;
+    background-color: rgba(0,0,0,0.65);
+}

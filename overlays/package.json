@@ -1,0 +1,24 @@
+{
+  "name": "twitchoverlays",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "mikethemadkiwi",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "colors": "^1.4.0",
+    "express": "^5.1.0",
+    "express-session": "^1.18.2",
+    "fetch": "^1.1.0",
+    "got": "^11.8.6",
+    "mysql": "^2.18.1",
+    "node-fetch": "^3.3.2",
+    "pug": "^3.0.3",
+    "crypto": "^1.0.1",
+    "socket.io": "^4.8.1",
+    "socket.io-client": "^4.8.1"
+  }
+}

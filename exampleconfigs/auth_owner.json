@@ -1,0 +1,7 @@
+{
+  "username": "mikethemadkiwi",
+  "client_id": "",
+  "client_secret": "",
+  "sessionSecret": "randomwordfestival",
+  "redirect_uri": "http://localhost:8081/twitchauth/"
+}

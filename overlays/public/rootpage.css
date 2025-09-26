@@ -1,0 +1,27 @@
+body {
+    font-family: 'Acme', sans-serif;
+    font-size: 12px;
+    padding:0px;
+    margin:0px;
+    background-color: #bada55;
+    background: url('https://mad.kiwi/purplemonkeydishwasher/media/img/translucent_kiwi_fruit_2560p_by_syntheticidea-d31uc3l.jpg') no-repeat top left fixed;
+}  
+/* unvisited link */
+a:link {
+    color: #1d1b1b;
+  }
+  
+  /* visited link */
+  a:visited {
+    color: #1d1b1b;
+  }
+  
+  /* mouse over link */
+  a:hover {
+    color: #d5dcc0;
+  }
+  
+  /* selected link */
+  a:active {
+    color: #1d1b1b;
+  }
