@@ -37,8 +37,17 @@ async function ChannelPointCustomRedemption(rewardData){
         case 'RoleplayCity':
             await Kiwisbot.SayInChat(Creds.botauth.client_id, Creds.bottokens.access_token, OwnerBot.owner.id, OwnerBot.bot.id, `|| mikethemadkiwi is currently playing on "THE CREW RP" You can connect by joining the discord Here: https://discord.gg/thecrewrp ||`)
         break;
+        case 'Loud':
+            await Kiwisbot.SayInChat(Creds.botauth.client_id, Creds.bottokens.access_token, OwnerBot.owner.id, OwnerBot.bot.id, `Playing a Loud Noise for @${rewardData.redeemer.display_name}`)
+        break;
         case 'Honk':
             await Kiwisbot.SayInChat(Creds.botauth.client_id, Creds.bottokens.access_token, OwnerBot.owner.id, OwnerBot.bot.id, `Honking for @${rewardData.redeemer.display_name}`)
+        break;
+        case 'YouWereKicked':
+            await Kiwisbot.SayInChat(Creds.botauth.client_id, Creds.bottokens.access_token, OwnerBot.owner.id, OwnerBot.bot.id, `TS Kicking for @${rewardData.redeemer.display_name}`)
+        break;
+        case 'Gong':
+            await Kiwisbot.SayInChat(Creds.botauth.client_id, Creds.bottokens.access_token, OwnerBot.owner.id, OwnerBot.bot.id, `Gonging for @${rewardData.redeemer.display_name}`)
         break;
         case 'BunnySays':
             await Kiwisbot.SayInChat(Creds.botauth.client_id, Creds.bottokens.access_token, OwnerBot.owner.id, OwnerBot.bot.id, `Playing BunnySays for @${rewardData.redeemer.display_name}`)
@@ -94,6 +103,7 @@ async function ChannelPointAutoRedemption(payload){
 let startNow = setTimeout(async () => {
     console.log(colors.green('Loading Credentials'))
     Creds = await Kiwisbot.initData(dbdeets);
+    // console.log(dbdeets)
     OwnerBot.owner = await Kiwisbot.fetchUserByName(Creds.auth.client_id, Creds.tokens.access_token, Creds.auth.username)
     OwnerBot.bot = await Kiwisbot.fetchUserByName(Creds.auth.client_id, Creds.tokens.access_token, Creds.botauth.username)
     OwnerChannel = await Kiwisbot.InitTwitchStream(Creds.auth.client_id, Creds.tokens.access_token, OwnerBot.owner.id)
@@ -175,7 +185,7 @@ let startNow = setTimeout(async () => {
     });
     eventSub.on('channel.bits.use', function({ payload }){
         console.log('channel.bits.use',payload)
-        socket.emit('Twitch', ['channel.chat.notification', payload])
+        socket.emit('Twitch', ['channel.bits.use', payload])
     });
     eventSub.on('channel.chat.message', function({ payload }){
         socket.emit('Twitch', ['channel.chat.message', payload])
@@ -195,7 +205,8 @@ let startNow = setTimeout(async () => {
         }
         let tUser = await Kiwisbot.fetchUserByName(Creds.auth.client_id, Creds.tokens.access_token, redeemer.login)
         let rewardData = {redeemer: redeemer, reward: reward, user: tUser}
-        socket.emit('Twitch', ['channel.channel_points_custom_reward_redemption.add', rewardData])
+        socket.emit('Twitch', ['channel.channel_points_custom_reward_redemption.add', rewardData])    
+        console.log('channel.channel_points_custom_reward_redemption.add', payload.event.reward.type)
         ChannelPointCustomRedemption(rewardData)
     });
     eventSub.on('channel.channel_points_automatic_reward_redemption.add', function({ payload }){
@@ -238,7 +249,6 @@ let startNow = setTimeout(async () => {
                     console.log(colors.cyan('[Ad Incoming]'), ac)
                 }              
             }
-
         }else{
             // console.log('ads', OwnerChannel, OwnerAds)
             if (OwnerAds.preroll_free_time <= 1080){

@@ -77,6 +77,10 @@ class weboverlays extends EventEmitter {
                     console.log("Identified to BackBone as : WebOverlays")
                     this.backbone.emit("Identifier", "WebOverlays");
                 });
+                this.backbone.on("GameEngine", (gameObj) => {
+                    console.log('GameEngine', gameObj[0])
+                    this.ioServer.emit('GameEngine', gameObj)
+                });
                 this.backbone.on("Twitch", (twichObj) => {
                     console.log('twitch',twichObj[0])
                     // preprocess random folder calls.
@@ -90,13 +94,24 @@ class weboverlays extends EventEmitter {
                                 console.log('BunnySays', fileSTR)
                                 this.ioServer.emit('BunnySays', fileSTR)
                             break;
-                            case 'Honk':
+                            case 'Loud':
                                 let filesh = fs.readdirSync('public/sounds/honk/');
                                 let rFileh = Math.floor(Math.random() * filesh.length);
                                 let fileSTRh = `${filesh[rFileh]}`;
-                                // twichObj[1].honk = fileSTRh
-                                console.log('Honk', fileSTRh)
-                                this.ioServer.emit('Honk', fileSTRh)
+                                console.log('Loud', fileSTRh)
+                                this.ioServer.emit('Loud', fileSTRh)
+                            break;
+                            case 'Honk':
+                                console.log('Honk', 'honk.mp3')
+                                this.ioServer.emit('Honk', 'honk.mp3')
+                            break;
+                            case 'YouWereKicked':
+                                console.log('TSKicked', 'YouWhereKickedFromTheServer.mp3')
+                                this.ioServer.emit('TSKicked', 'YouWhereKickedFromTheServer.mp3')
+                            break;
+                            case 'Gong':
+                                console.log('Gong', 'gong.mp3')
+                                this.ioServer.emit('Gong', 'gong.mp3')
                             break;
                             default:
                                 this.ioServer.emit('Twitch', twichObj)

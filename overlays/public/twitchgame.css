@@ -1,14 +1,14 @@
 body {
-  --dot-bg: black;
+  /* --dot-bg: black;
   --dot-color: white;
   --dot-size: 1px;
-  --dot-space: 22px;
-	background:
+  --dot-space: 22px; */
+	/* background:
 		linear-gradient(90deg, var(--dot-bg) calc(var(--dot-space) - var(--dot-size)), transparent 1%) center / var(--dot-space) var(--dot-space),
 		linear-gradient(var(--dot-bg) calc(var(--dot-space) - var(--dot-size)), transparent 1%) center / var(--dot-space) var(--dot-space),
-		var(--dot-color);
+		var(--dot-color);*/
     padding:0px;
-    margin:0px;
+    margin:0px; 
 }
 /* unvisited link */
 a:link {
@@ -38,5 +38,29 @@ a:link {
     right:0px;
     padding:0px;
     margin:0px;
-    background-color: rgba(0,0,0,0.65);
-}
+    background-color: rgba(13, 41, 13, 0.6);
+  }
+
+  #topCanvas{
+    position:absolute;
+    top:0px;
+    left:0px;
+    right:0px;
+    height: 48px;
+    padding:0px;
+    margin:0px;
+    background-color: rgba(0, 0, 0, 0.85);
+    border-bottom: #d812ce thick solid;
+  }
+  
+  #bottomCanvas{
+    position:absolute;
+    bottom:0px;
+    left:0px;
+    right:0px;
+    height: 48px;
+    padding:0px;
+    margin:0px;
+    background-color: rgba(0, 0, 0, 0.85);
+    border-top: #d812ce thick solid;
+  }

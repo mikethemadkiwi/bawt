@@ -127,7 +127,7 @@ socket.on("BunnySays", async (bsFile) => {
     audio.autoplay = true;
     audio.controls = false;
     audio.muted = false;
-    audio.volume = 0.25;
+    audio.volume = 0.50;
     audio.addEventListener("ended", function(){
         console.log('audioended');
         document.getElementById('soundevent').innerHTML = null;
@@ -142,7 +142,52 @@ socket.on("Honk", async (hFile) => {
     audio.autoplay = true;
     audio.controls = false;
     audio.muted = false;
-    audio.volume = 0.25;
+    audio.volume = 0.50;
+    audio.addEventListener("ended", function(){
+        console.log('audioended');
+        document.getElementById('soundevent').innerHTML = null;
+    });
+    const box = document.getElementById('soundevent');
+    box.appendChild(audio);
+});
+socket.on("Gong", async (gFile) => {
+    let audSrc = `../sounds/honk/${gFile}`;
+    const audio = document.createElement('audio');
+    audio.src = audSrc;
+    audio.autoplay = true;
+    audio.controls = false;
+    audio.muted = false;
+    audio.volume = 0.50;
+    audio.addEventListener("ended", function(){
+        console.log('audioended');
+        document.getElementById('soundevent').innerHTML = null;
+    });
+    const box = document.getElementById('soundevent');
+    box.appendChild(audio);
+});
+socket.on("TSKicked", async (gFile) => {
+    let audSrc = `../sounds/honk/${gFile}`;
+    const audio = document.createElement('audio');
+    audio.src = audSrc;
+    audio.autoplay = true;
+    audio.controls = false;
+    audio.muted = false;
+    audio.volume = 0.50;
+    audio.addEventListener("ended", function(){
+        console.log('audioended');
+        document.getElementById('soundevent').innerHTML = null;
+    });
+    const box = document.getElementById('soundevent');
+    box.appendChild(audio);
+});
+socket.on("Loud", async (lFile) => {
+    let audSrc = `../sounds/honk/${lFile}`;
+    const audio = document.createElement('audio');
+    audio.src = audSrc;
+    audio.autoplay = true;
+    audio.controls = false;
+    audio.muted = false;
+    audio.volume = 0.50;
     audio.addEventListener("ended", function(){
         console.log('audioended');
         document.getElementById('soundevent').innerHTML = null;

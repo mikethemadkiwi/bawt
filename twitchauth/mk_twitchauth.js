@@ -480,6 +480,10 @@ class mkTwitchAuth extends EventEmitter {
                         console.log(colors.magenta('Twitch'), arg[0]);
                         socket.broadcast.emit("Twitch", arg);
                     });
+                    socket.on("GameEngine", (arg) => {
+                        console.log(colors.magenta('GameEngine'), arg[0]);
+                        socket.broadcast.emit("GameEngine", arg);
+                    });
                     socket.on("Web", (arg) => {
                         console.log(colors.magenta('Web'), arg);
                         socket.broadcast.emit("Web", arg);
