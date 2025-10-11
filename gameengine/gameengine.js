@@ -54,18 +54,13 @@ class kiwigameengine extends EventEmitter {
                 });
             })
         }
-        this.GenerateUniverse = () => {
+        this.GenerateUniverse = (universeObj) => {
             return new Promise((resolve, reject) => {
-                let universetmp = []
-                let home = {name: 'home', x:100, y:100, imgsrc:'', meta:{}}
-                universetmp.push(home)
-                let mines= {name: 'mines', x:100, y:-100, imgsrc:'', meta:{}}
-                universetmp.push(mines)
-                let training = {name: 'training', x:-100, y:100, imgsrc:'', meta:{}}
-                universetmp.push(training)
-                let fort = {name: 'fort', x:-100, y:-100, imgsrc:'', meta:{}}
-                universetmp.push(fort)
-                resolve(universetmp)
+                //
+                // console.log(universeObj)
+                
+                //
+                resolve(universeObj)
             })
         }
         this.fetchUserByName = (ownerId, ownerToken, twitchusername) => {

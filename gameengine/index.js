@@ -5,7 +5,7 @@ const colors = require('colors');
 const mysql = require('mysql');
 const io = require("socket.io-client")
 //
-const KiwiGE = new gEngine;
+let KiwiGE = new gEngine;
 let DBConn_Server = null;
 let Creds = null
 let OwnerBot = {
@@ -16,10 +16,26 @@ let OwnerChannel = null
 let OwnerAds = null
 let Chatters = null
 let updateTick = null
+let PlayerStorageObject = []
 ///
+let universeObj =  [
+    {name: 'home', type: 0, size: 50, x:150, y:150, imgsrc:'./img/townhall.png',  resources: [], meta:{}},
+    {name: 'mines', type: 0, size: 50, x:250, y:-250, imgsrc:'./img/mines.png',  resources: [{name:'Sulphur', amount: 0},{name:'Iron', amount: 0},{name:'Soil', amount: 0}], meta:{}},
+    {name: 'training', type: 0, size: 50, x:-250, y:250, imgsrc:'./img/arena.png',  resources: [{name:'Blood', amount: 0},{name:'Sweat', amount: 0},{name:'Tears', amount: 0}], meta:{}},
+    {name: 'fort', type: 0, size: 50, x:0, y:250, imgsrc:'./img/fort.png', resources: [{name:'ArrowHead', amount: 0},{name:'Coins', amount: 0},{name:'Documents', amount: 0}],  meta:{}},
+    {name: 'forest', type: 0, size: 50, x:-250, y:0, imgsrc:'./img/forest.png', resources: [{name:'Wood', amount: 0},{name:'Berries', amount: 0},{name:'FreshWater', amount: 0}],  meta:{}},
+    {name: 'farm', type: 0, size: 50, x:-250, y:-250, imgsrc:'./img/farm.png', resources: [{name:'Leather', amount: 0},{name:'Milk', amount: 0},{name:'Grain', amount: 0}],  meta:{}}
+]
+//
+IsInArray = function (array, ID){
+    return new Promise((resolve, reject) => {
+        let isin = array.map(function(obj) { return obj.twitchid; }).indexOf(ID)
+        resolve(isin)
+    })
+}
+//
 playerInfo = async function(redeemer){
-    let tUser = await KiwiGE.fetchUserByName(Creds.auth.client_id, Creds.tokens.access_token, redeemer.login)        
-    await IsDBPresent()
+    let tUser = await KiwiGE.fetchUserByName(Creds.auth.client_id, Creds.tokens.access_token, redeemer.login)     
     let tgresults = await execQuery(`SELECT * FROM twitchgame WHERE twitchid = ${tUser.id}`);
     if (tgresults[0]==null){
         await AddGamePlayer(tUser)
@@ -39,6 +55,30 @@ playerInfo = async function(redeemer){
         await KiwiGE.SayInChat(Creds.botauth.client_id, Creds.bottokens.access_token, OwnerBot.owner.id, OwnerBot.bot.id, `Stats for ${redeemer.display_name}: [Att:${KiwiGE.PlayerObjects[isinpi].attack} Agi:${KiwiGE.PlayerObjects[isinpi].agility} Def:${KiwiGE.PlayerObjects[isinpi].defense}] Wearing: ${KiwiGE.PlayerObjects[isinpi].armour} Weilding: ${KiwiGE.PlayerObjects[isinpi].weapon} Currency:${pcurr}  XP:${pxp}  miketh101Heart`) 
     }
 }
+//
+travelLocation = async function(redeemer, location){
+    let tUser = await KiwiGE.fetchUserByName(Creds.auth.client_id, Creds.tokens.access_token, redeemer.login) 
+    let tgresults = await execQuery(`SELECT * FROM twitchgame WHERE twitchid = ${tUser.id}`);
+    if (tgresults[0]==null){
+        await AddGamePlayer(tUser)
+        tgresults = await execQuery(`SELECT * FROM twitchgame WHERE twitchid = ${tUser.id}`);
+        console.log(tgresults[0])
+    }
+    let tPlayer = tgresults[0];
+    let isinpi = KiwiGE.PlayerObjects.map(function(obj) { return obj.twitchid; }).indexOf(redeemer.id)
+    if(isinpi == -1) {
+        KiwiGE.PlayerObjects.push(tPlayer)
+        isinpi = KiwiGE.PlayerObjects.map(function(obj) { return obj.twitchid; }).indexOf(redeemer.id) 
+    }
+    let findlocation = KiwiGE.UniverseObjects.map(function(obj) { return obj.name; }).indexOf(location)
+    KiwiGE.PlayerObjects[isinpi].task = 1; //travelling
+    KiwiGE.PlayerObjects[isinpi].tarposx = KiwiGE.UniverseObjects[findlocation].x;
+    KiwiGE.PlayerObjects[isinpi].tarposy = KiwiGE.UniverseObjects[findlocation].y;
+    console.log(`Travelling: ${redeemer.display_name} to ${location} {${KiwiGE.UniverseObjects[findlocation].x}:${KiwiGE.UniverseObjects[findlocation].y}}`)
+    let updateStr = `UPDATE twitchgame SET task = ${KiwiGE.PlayerObjects[isinpi].task}, tarposx = ${KiwiGE.PlayerObjects[isinpi].tarposx}, tarposy = ${KiwiGE.PlayerObjects[isinpi].tarposy} WHERE twitchid = ${tUser.id}`
+    let updateplayer = await execQuery(updateStr);
+}
+
 //
 IsDBPresent = function(){
     return new Promise((resolve, reject)=>{
@@ -89,30 +129,26 @@ function AddGamePlayer(tuser){
     })
 }
 //
-async function updateChatters(chatlist){
-    await IsDBPresent()
-    chatlist.forEach(async chatterObj => {
-        let tUser = await KiwiGE.fetchUserByName(Creds.auth.client_id, Creds.tokens.access_token, chatterObj.user_login)
-        let tgresults = await execQuery(`SELECT * FROM twitchgame WHERE twitchid = ${tUser.id}`);
-        if (tgresults[0]==null){
-            await AddGamePlayer(tUser)
-            tgresults = await execQuery(`SELECT * FROM twitchgame WHERE twitchid = ${tUser.id}`);
-            // console.log(tgresults[0].name)
-        }
-        let tPlayer = tgresults[0];
-        let isinpi = KiwiGE.PlayerObjects.map(function(obj) { return obj.twitchid; }).indexOf(chatterObj.user_id)
-        if(isinpi == -1) {
-            KiwiGE.PlayerObjects.push(tPlayer)
-        }
-    });
-    // removecheck from KiwiGE.PlayerObjects
-
-    socket.emit('GameEngine', ['player:update', KiwiGE.PlayerObjects])
-    // console.log('Players Updated.')
+function updateChatters(chatlist){
+    return new Promise((resolve, reject)=>{
+        chatlist.forEach(async chatterObj => {
+            let tUser = await KiwiGE.fetchUserByName(Creds.auth.client_id, Creds.tokens.access_token, chatterObj.user_login)
+            let tgresults = await execQuery(`SELECT * FROM twitchgame WHERE twitchid = ${tUser.id}`);
+            if (tgresults[0]==null){
+                await AddGamePlayer(tUser)
+                tgresults = await execQuery(`SELECT * FROM twitchgame WHERE twitchid = ${tUser.id}`);
+            }
+            let Uexists = await IsInArray(KiwiGE.PlayerObjects, tUser.id)
+            if (Uexists==-1){
+                KiwiGE.PlayerObjects.push(tgresults[0])
+            }
+            else{
+                KiwiGE.PlayerObjects[Uexists] = tgresults[0]
+            }
+        });
+        resolve(KiwiGE.PlayerObjects)
+    })
 }
-
-
-
 ///
 const socket = io("http://localhost:8081");
 socket.on("connect", () => {
@@ -122,22 +158,26 @@ socket.on("connect", () => {
 let startGameEngine = setTimeout(async () => {
     //
     Creds = await KiwiGE.initData(dbdeets);
+    await IsDBPresent()
     OwnerBot.owner = await KiwiGE.fetchUserByName(Creds.auth.client_id, Creds.tokens.access_token, Creds.auth.username)
     OwnerBot.bot = await KiwiGE.fetchUserByName(Creds.auth.client_id, Creds.tokens.access_token, Creds.botauth.username)
     OwnerChannel = await KiwiGE.fetchStreamById(Creds.auth.client_id, Creds.tokens.access_token, OwnerBot.owner.id)
     OwnerAds = await KiwiGE.fetchAdsSchedule(Creds.auth.client_id, Creds.tokens.access_token, OwnerBot.owner.id)
     // 
     Chatters = await KiwiGE.getChatters(Creds.auth.client_id, Creds.tokens.access_token, OwnerBot.owner.id)       
-    updateChatters(Chatters)
-    KiwiGE.UniverseObjects = await KiwiGE.GenerateUniverse();
+    KiwiGE.PlayerObjects = await updateChatters(Chatters)
+    socket.emit('GameEngine', ['player:update', KiwiGE.PlayerObjects])
+    //
+    KiwiGE.UniverseObjects = await KiwiGE.GenerateUniverse(universeObj);
     socket.emit('GameEngine', ['universe:update', KiwiGE.UniverseObjects])
     //
     let eventSub = new BCeventsub(true);
     eventSub.on('session_keepalive', () => {
         let lastKeepAlive = new Date();
     });
+    //
     eventSub.on('connected', (id) => {
-        socket.emit('GameEngine', ['eventsub', id])
+        // socket.emit('GameEngine', ['eventsub', id])
         console.log(colors.green(`Enabling GameEngine Event Listeners`));
         KiwiGE.SubscribeToTopic(id, 'user.update', '1', { user_id: OwnerBot.owner.id }, Creds.auth.client_id, Creds.tokens.access_token)
         KiwiGE.SubscribeToTopic(id, 'stream.online', '1', { broadcaster_user_id: OwnerBot.owner.id }, Creds.auth.client_id, Creds.tokens.access_token)
@@ -159,8 +199,8 @@ let startGameEngine = setTimeout(async () => {
     });
     // MAIN LISTENED EVENTS
     eventSub.on('channel.update', function({ payload }){
+        console.log('channel.update', payload)
         // socket.emit('GameEngine', ['channel.update', payload])
-        // KiwiGE.SayInChat(Creds.botauth.client_id, Creds.bottokens.access_token, OwnerBot.owner.id, OwnerBot.bot.id, `Updated: Category[ ${payload.event.category_name} ] Title[ ${payload.event.title} ]`)
     });
     eventSub.on('stream.online', function({ payload }){
         console.log('stream.online', payload)
@@ -177,24 +217,14 @@ let startGameEngine = setTimeout(async () => {
     eventSub.on('channel.follow', function({ payload }){
         // console.log('channel.follow', payload.event.user_name)
         // socket.emit('GameEngine', ['channel.follow', payload])
-        // KiwiGE.SayInChat(Creds.botauth.client_id, Creds.bottokens.access_token, OwnerBot.owner.id, OwnerBot.bot.id, `Thanks for the Follow: ${payload.event.user_name}! miketh101Heart Please do not chew on the furniture.  miketh101Heart`)
     });
     eventSub.on('channel.raid', async function({ payload }){
         // console.log('channel.raid',payload.event.from_broadcaster_user_name, payload.event.viewers)
         // socket.emit('GameEngine', ['channel.raid', payload])
-        // let shoutthresh = Number(payload.event.viewers)
-        // if (shoutthresh>5) {
-        //     KiwiGE.ShoutoutUser(Creds.auth.client_id, Creds.tokens.access_token, OwnerBot.owner.id, payload.event.from_broadcaster_user_id)
-        //     KiwiGE.SayInChat(Creds.botauth.client_id, Creds.bottokens.access_token, OwnerBot.owner.id, OwnerBot.bot.id, `Thanks for the Raid: ${payload.event.from_broadcaster_user_name}! miketh101Heart What did your <${payload.event.viewers}> Viewers do to deserve this?!`)
-        // }
-        // else {
-        //     KiwiGE.SayInChat(Creds.botauth.client_id, Creds.bottokens.access_token, OwnerBot.owner.id, OwnerBot.bot.id, `Thanks for the Raid: ${payload.event.from_broadcaster_user_name}! miketh101Heart What did your <${payload.event.viewers}> Viewers do to deserve this?!`)
-        // }        
     });
     eventSub.on('channel.chat.notification', function({ payload }){
         // console.log('channel.chat.notification',payload)
         // socket.emit('GameEngine', ['channel.chat.notification', payload])
-        // console.log(colors.cyan("[Notification]"), `${payload.event.notice_type} || ${payload.event.system_message} ||`)
     });
     eventSub.on('channel.bits.use', function({ payload }){
         // console.log('channel.bits.use',payload)
@@ -216,6 +246,24 @@ let startGameEngine = setTimeout(async () => {
             case '!playerinfo':                
                 playerInfo(redeemer)
             break;
+            case '!travelhome':
+               travelLocation(redeemer, 'home')
+            break;
+            case '!traveltraining':
+               travelLocation(redeemer, 'training')
+            break;
+            case '!travelfort':
+               travelLocation(redeemer, 'fort')
+            break;
+            case '!travelmines':
+               travelLocation(redeemer, 'mines')
+            break;
+            case '!travelforest':
+               travelLocation(redeemer, 'forest')
+            break;
+            case '!travelfarm':
+               travelLocation(redeemer, 'farm')
+            break;
             default:
         }
         /////
@@ -235,16 +283,22 @@ let startGameEngine = setTimeout(async () => {
                playerInfo(redeemer)
             break;
             case 'Travel-Home':
-            //    playerInfo(redeemer)
+               travelLocation(redeemer, 'home')
             break;
             case 'Travel-Training':
-            //    playerInfo(redeemer)
+               travelLocation(redeemer, 'training')
             break;
             case 'Travel-Fort':
-            //    playerInfo(redeemer)
+               travelLocation(redeemer, 'fort')
             break;
             case 'Travel-Mines':
-            //    playerInfo(redeemer)
+               travelLocation(redeemer, 'mines')
+            break;
+            case 'Travel-Forest':
+               travelLocation(redeemer, 'forest')
+            break;
+            case 'Travel-Farm':
+               travelLocation(redeemer, 'farm')
             break;
             default:
         }
@@ -255,8 +309,10 @@ let startGameEngine = setTimeout(async () => {
         // ChannelPointAutoRedemption(payload)
     });
     updateTick = setInterval(async () => {
-        Chatters = await KiwiGE.getChatters(Creds.auth.client_id, Creds.tokens.access_token, OwnerBot.owner.id)        
-        updateChatters(Chatters)
+        await IsDBPresent()
+        Chatters = await KiwiGE.getChatters(Creds.auth.client_id, Creds.tokens.access_token, OwnerBot.owner.id)    
+        KiwiGE.PlayerObjects = await updateChatters(Chatters)
+        socket.emit('GameEngine', ['player:update', KiwiGE.PlayerObjects])
         socket.emit('GameEngine', ['universe:update', KiwiGE.UniverseObjects])
-    }, 30000);
+    }, 1000);
 }, 1000);
