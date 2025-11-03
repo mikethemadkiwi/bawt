@@ -63,6 +63,12 @@ class weboverlays extends EventEmitter {
         }).post((req, res) => {
             res.redirect('/twitchgame/');
         });
+        this.app.route('/webhooks/').get((req, res) => {
+            console.log(res)
+            res.render('webhooks');
+        }).post((req, res) => {
+            res.redirect('/webhooks/');
+        });
         this.LoadAuthServer = (port)=>{
             return new Promise((resolve, reject)=>{
                 this.port = port;
@@ -70,7 +76,6 @@ class weboverlays extends EventEmitter {
                 this.ioServer = new Server(this.server);
                 this.ioServer.on('connection', (socket) => {
                     socket.name = socket.id;
-
                 });
                 this.backbone = ioClient("http://localhost:8081");
                 this.backbone.on("connect", () => {

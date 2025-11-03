@@ -17,6 +17,7 @@ class mkTwitchAuth extends EventEmitter {
         super();
         this.Auth = options.auth;
         this.KbotAuth = options.botauth;
+        this.KickAuth = options.kickauth;
         this.port = null;
         this.BotToken = null;
         this.BotTokenTimer = null;
@@ -24,6 +25,9 @@ class mkTwitchAuth extends EventEmitter {
         this.ScopeToken = null;
         this.ScopeTokenTimer = null;
         this.scopetimerloop = 60000; // 1min
+        this.KickToken = null;
+        this.KickTokenTimer = null;
+        this.kicktimerloop = 60000; // 1min
         this.showtoken = false;
         this.showscopedtoken = false;
         this.app = express();
@@ -272,6 +276,31 @@ class mkTwitchAuth extends EventEmitter {
         })
         .post((req, res) => {
             res.redirect('/twitchbotauth/');
+        }); 
+        ///////       
+        this.app.route('/kickauth/').get((req, res) => {
+
+            
+            let { code, error, error_description, scope, state } = req.query;
+            if (code) {
+                state = decodeURIComponent(state);
+                console.log(state)
+            }
+            var auth_error = '';
+            if ( error ) {
+                auth_error = 'oAuth Error ' + error_description;
+            }
+            req.session.state = crypto.randomBytes(16).toString('base64');
+            res.render('kickgenerator', {
+                client_id: this.KickAuth.client_id,
+                redirect_uri: this.KickAuth.redirect_uri,
+                auth_error,
+                scopes: JSON.parse(fs.readFileSync(path.join(__dirname, '.', 'kickscopes.json'))),
+                state: req.session.state
+            });
+        })
+        .post((req, res) => {
+            res.redirect('/kickauth/');
         });
         this.ValidateToken = function(){
             return new Promise((resolve, reject)=>{

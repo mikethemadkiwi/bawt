@@ -1,0 +1,12 @@
+{
+    "default": {
+        "user:read":             "View user information in Kick including username, streamer ID, etc.",
+        "channel:read":                    "View channel information in Kick including channel description, category, etc.",
+        "channel:write":                    "Update livestream metadata for a channel based on the channel ID",
+        "chat:write":                "Send chat messages and allow chat bots to post in your chat",
+        "streamkey:read":                "Read a user's stream URL and stream key",
+        "events:subscribe":                "Subscribe to all channel events on Kick e.g. chat messages, follows, subscriptions",
+        "moderation:ban":                "Execute moderation actions for moderators",
+        "kicks:read":                "View KICKs related information in Kick e.g leaderboards, etc."
+    }
+}

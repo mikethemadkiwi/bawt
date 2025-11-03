@@ -83,6 +83,32 @@ class mkDbObj extends EventEmitter {
                     resolve(results)
                 });
             })
+        }             
+        this.StoreKickAuth = function(auth){
+            return new Promise((resolve, reject)=>{
+                let prepData = JSON.stringify(auth)
+                let qStr = `UPDATE kick SET Auth='${prepData}' WHERE id='1'`;
+                this.currConn.query(qStr, function (error, results, fields) {
+                    if (error) {
+                        reject(error)
+                        return;
+                    };
+                    resolve(results)
+                });
+            })
+        }       
+        this.StoreKickClient = function(client){
+            return new Promise((resolve, reject)=>{
+                let prepData = JSON.stringify(client)
+                let qStr = `UPDATE kick SET Oauth_owner='${prepData}' WHERE id='1'`;
+                this.currConn.query(qStr, function (error, results, fields) {
+                    if (error) {
+                        reject(error)
+                        return;
+                    };
+                    resolve(results)
+                });
+            })
         }
         this.CurrentKey = function(){        
             return new Promise((resolve, reject)=>{
@@ -100,6 +126,19 @@ class mkDbObj extends EventEmitter {
         this.CurrentBotKey = function(){        
             return new Promise((resolve, reject)=>{
                 let qStr = `SELECT * from twitch`
+                this.currConn.query(qStr, function (error, results, fields) {
+                    if (error) {
+                        reject(error)
+                        return;
+                    };
+                    let botauth = JSON.parse(results[0].BotAuth)
+                    resolve(botauth)
+                });
+            })
+        }
+        this.CurrentKickKey = function(){        
+            return new Promise((resolve, reject)=>{
+                let qStr = `SELECT * from kick`
                 this.currConn.query(qStr, function (error, results, fields) {
                     if (error) {
                         reject(error)
