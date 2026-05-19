@@ -4,6 +4,13 @@ const gEngine = require('./gameengine.js');
 const colors = require('colors');
 const mysql = require('mysql');
 const io = require("socket.io-client")
+
+const bodyparser = require("body-parser");
+const express    = require("express");
+const logger     = require("./middleware/logger");
+const weight     = require("./routes/weight");
+const index      = require("./routes/index");
+
 //
 let KiwiGE = new gEngine;
 let DBConn_Server = null;
@@ -351,3 +358,26 @@ let startGameEngine = setTimeout(async () => {
         socket.emit('GameEngine', ['universe:update', KiwiGE.UniverseObjects])
     }, 1000);
 }, 1000);
+
+
+//// API ENDPOINTS FOR FRONTEND TO INTERACT WITH GAME ENGINE
+
+// create application
+const app = express();
+// app settings
+app.set("json spaces", 4);
+app.set("views", "./views");
+app.set("view engine", "pug");
+// middleware
+app.use(bodyparser.json());
+app.use(bodyparser.urlencoded( {extended: true} ));
+app.use(logger.log);
+// index routes
+app.use("/", index);
+// weight routes
+app.use("/api/weight", weight);
+// start application
+const port = 3000;
+app.listen(port, function() {
+    console.log("Server listening on port %s.", port);
+});
