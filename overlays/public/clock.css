@@ -1,0 +1,215 @@
+@import url("https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap");
+
+:root {
+  --accent-color: #bada55;
+  --background: #eee;
+  --color: #333;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #333;
+    --color: #fff;
+  }
+}
+
+body {
+  margin: 0;
+  font-family: "Space Mono", monospace;
+  background: var(--background);
+  color: var(--color);
+}
+
+.wrapper {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+.clock {
+  display: grid;
+  grid-template-columns: auto auto auto auto auto auto auto auto;
+  gap: 0.3rem;
+  align-items: flex-start;
+  height: 50px;
+  border-radius: 0.25rem;
+  padding: 0 0.3rem;
+}
+
+[data-format="12"] .clock {
+  grid-template-columns: auto auto auto auto auto auto auto auto auto auto;
+}
+
+.col {
+  display: flex;
+  flex-direction: column;
+  border: solid 1px #bada55;
+  border-radius: 0.25rem;
+  transition: transform 0.5s ease;
+}
+
+.col > span {
+  width: 40px;
+  height: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: all 1s ease;
+}
+
+.col span span {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #77d85422;
+  color: #0008;
+  position: relative;
+}
+
+.col > span.active {
+  background: var(--accent-color);
+  color: var(--background);
+}
+
+.spacer {
+  width: 0.1rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 50px;
+}
+
+[data-format="24"] .format-spacer {
+  display: none;
+}
+
+[data-format="24"] .format {
+  display: none;
+}
+
+[data-format="12"] .digit:first-child > span:last-child {
+  display: none;
+}
+
+.actions {
+  position: absolute;
+  padding: 0.5rem;
+}
+
+.actions button,
+.actions select {
+  background: var(--accent-color);
+  border: solid 1px var(--accent-color);
+  border-radius: 0.25rem;
+  padding: 0.3rem 0.5rem;
+  cursor: pointer;
+  transition: all 0.5s ease;
+}
+
+/* CARD THEME */
+
+[data-theme="cards"] {
+  .actions button,
+  .actions select {
+    background: #bada55;
+    border-color: #bada55;
+    color: #fff;
+  }
+
+  .clock .col {
+    border: none;
+  }
+
+  .clock .col span {
+    background: none;
+  }
+
+  .clock .col span span {
+    height: 90%;
+    border: solid 1px #111;
+    border-radius: 0.25rem;
+    transform: rotatey(180deg);
+    color: transparent;
+    background-color: #e5e5f7;
+    opacity: 0.7;
+    background-image: linear-gradient(135deg, #444cf7 25%, transparent 25%),
+      linear-gradient(225deg, #444cf7 25%, transparent 25%),
+      linear-gradient(45deg, #444cf7 25%, transparent 25%),
+      linear-gradient(315deg, #444cf7 25%, #e5e5f7 25%);
+    background-position: 10px 0, 10px 0, 0 0, 0 0;
+    background-size: 5px 5px;
+    background-repeat: repeat;
+  }
+
+  .clock .col span.active span {
+    background: #fff;
+    border-radius: 0.25rem;
+    color: #333;
+    transform: rotatey(0);
+    transition: transform 0.2s ease;
+    opacity: 1;
+  }
+
+  .clock span.active span:before,
+  .clock span.active span:after {
+    font-size: 0.8rem;
+    position: absolute;
+  }
+
+  .clock span.active span:before {
+    left: 3px;
+    top: -3px;
+  }
+
+  .clock span.active span:after {
+    right: 3px;
+    bottom: -3px;
+    transform: rotate(180deg);
+  }
+
+  .clock .col:nth-child(1) span.active span:before,
+  .clock .col:nth-child(7) span.active span:before {
+    content: "♥";
+    color: tomato;
+  }
+
+  .clock .col:nth-child(1) span.active span:after,
+  .clock .col:nth-child(7) span.active span:after {
+    content: "♥";
+    color: tomato;
+  }
+
+  .clock .col:nth-child(2) span.active span:before,
+  .clock .col:nth-child(8) span.active span:before {
+    content: "♠";
+  }
+
+  .clock .col:nth-child(2) span.active span:after,
+  .clock .col:nth-child(8) span.active span:after {
+    content: "♠";
+  }
+
+  .clock .col:nth-child(4) span.active span:before,
+  .clock .col:nth-child(10) span.active span:before {
+    content: "♦";
+    color: tomato;
+  }
+
+  .clock .col:nth-child(4) span.active span:after,
+  .clock .col:nth-child(10) span.active span:after {
+    content: "♦";
+    color: tomato;
+  }
+
+  .clock .col:nth-child(5) span.active span:before {
+    content: "♣";
+  }
+
+  .clock .col:nth-child(5) span.active span:after {
+    content: "♣";
+  }
+}

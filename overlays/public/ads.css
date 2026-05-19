@@ -1,0 +1,105 @@
+body {
+font-family: 'Acme', sans-serif;
+font-size: 12px;
+padding:0px;
+margin:0px;
+
+}  
+#mainContainer {
+position:absolute;
+top:0px;
+left:0px;
+bottom:0px;
+right:0px;
+padding:0px;
+margin:0px;
+    /* background-color: #222; */
+}
+#canvasBack {
+    position:absolute;
+    top:0px;
+    left:0px;
+    right:0px;
+    bottom:0px;
+    display: none;
+    /* background-color: #222; */
+    opacity: 0.85;
+    z-index: 5;
+}
+#mainCanvas {
+    position:absolute;
+    top:0px;
+    left:0px;
+    display: none;
+    z-index: 10;
+}
+#top{
+    position:relative;
+    top:0px;
+}
+#canvas {
+    position: absolute;
+    top: 0px;
+    left:0px;
+    width: 100px;
+    height: 100px;
+    /* transform: translateX('-50%'); */
+    padding: 0px;
+    margin: 0px;
+    transition: all 0.5s;
+    z-index: 25;
+
+}
+#canvas:hover {
+    transition: all 0.5s;
+}  
+#fruit {
+    width: 100%;
+    height: auto;
+    transition: all 0.5s;
+    z-index: 10;
+
+}  
+#draper {
+    position: absolute;
+    bottom: 0%;
+    right: -5px;
+    height: 100%;
+    z-index: 15;
+    display: none;
+}
+.tooltip {
+position: relative;
+display: inline-block;
+border-bottom: 1px dotted black;
+}  
+.tooltip .tooltiptext {
+visibility: hidden;
+width: 100px;
+background-color: #555;
+color: #fff;
+text-align: center;
+border-radius: 6px;
+padding: 5px 0;
+position: absolute;
+z-index: 1;
+bottom: 125%;
+left: 30%;
+margin-left: -60px;
+opacity: 0;
+transition: opacity 0.3s;
+}  
+.tooltip .tooltiptext::after {
+content: "";
+position: absolute;
+top: 100%;
+left: 50%;
+margin-left: -5px;
+border-width: 5px;
+border-style: solid;
+border-color: #555 transparent transparent transparent;
+}  
+.tooltip:hover .tooltiptext {
+visibility: visible;
+opacity: 1;
+}

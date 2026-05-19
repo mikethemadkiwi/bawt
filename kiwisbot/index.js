@@ -206,7 +206,7 @@ let startNow = setTimeout(async () => {
         let tUser = await Kiwisbot.fetchUserByName(Creds.auth.client_id, Creds.tokens.access_token, redeemer.login)
         let rewardData = {redeemer: redeemer, reward: reward, user: tUser}
         socket.emit('Twitch', ['channel.channel_points_custom_reward_redemption.add', rewardData])    
-        console.log('channel.channel_points_custom_reward_redemption.add', payload.event.reward.type)
+        console.log('channel.channel_points_custom_reward_redemption.add', payload.event.reward.type, payload.event.user_name)
         ChannelPointCustomRedemption(rewardData)
     });
     eventSub.on('channel.channel_points_automatic_reward_redemption.add', function({ payload }){

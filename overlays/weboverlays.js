@@ -11,6 +11,15 @@ const { Server } = require("socket.io");
 const ioClient = require("socket.io-client")
 const { EventEmitter } = require("events");
 const colors = require('colors');
+const mysql = require('mysql');
+//
+const products = {
+    world: { id: 1, name: "Home"},
+    players: {
+        1: { name: "bob", color: "blue"},
+        2: { name: "sue", color: "red"}
+    }
+};
 //
 class weboverlays extends EventEmitter {
     constructor(options){
@@ -69,6 +78,36 @@ class weboverlays extends EventEmitter {
         }).post((req, res) => {
             res.redirect('/webhooks/');
         });
+        this.app.route('/clock/').get((req, res) => {
+            res.render('clock');
+        }).post((req, res) => {
+            res.redirect('/clock/');
+        });
+        this.app.route('/weather/').get((req, res) => {
+            res.render('weather');
+        }).post((req, res) => {
+            res.redirect('/weather/');
+        });
+        this.app.route('/joint/').get((req, res) => {
+            res.render('joint');
+        }).post((req, res) => {
+            res.redirect('/joint/');
+        });
+        this.app.route('/weed/').get((req, res) => {
+            res.render('weed');
+        }).post((req, res) => {
+            res.redirect('/weed/');
+        });
+        this.app.route('/ads/').get((req, res) => {
+            res.render('ads');
+        }).post((req, res) => {
+            res.redirect('/ads/');
+        });
+        //
+        this.app.get('/api/', (req, res) => {
+            res.json(products);
+        });
+
         this.LoadAuthServer = (port)=>{
             return new Promise((resolve, reject)=>{
                 this.port = port;

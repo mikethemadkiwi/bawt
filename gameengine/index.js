@@ -33,6 +33,19 @@ IsInArray = function (array, ID){
         resolve(isin)
     })
 }
+function getUtcTimestamp(date) {
+  const pad = (num) => num.toString().padStart(2, '0');
+
+  const year = date.getUTCFullYear();
+  const month = pad(date.getUTCMonth() + 1); // getUTCMonth() is 0-based
+  const day = pad(date.getUTCDate());
+  
+  const hours = pad(date.getUTCHours());
+  const minutes = pad(date.getUTCMinutes());
+  const seconds = pad(date.getUTCSeconds());
+
+  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+}
 //
 playerInfo = async function(redeemer){
     let tUser = await KiwiGE.fetchUserByName(Creds.auth.client_id, Creds.tokens.access_token, redeemer.login)     
@@ -72,8 +85,10 @@ travelLocation = async function(redeemer, location){
     }
     let findlocation = KiwiGE.UniverseObjects.map(function(obj) { return obj.name; }).indexOf(location)
     KiwiGE.PlayerObjects[isinpi].task = 1; //travelling
+    // KiwiGE.PlayerObjects[isinpi].taskStart = Date.now();// set to milliseconds wirth of travel time this will take.
     KiwiGE.PlayerObjects[isinpi].tarposx = KiwiGE.UniverseObjects[findlocation].x;
     KiwiGE.PlayerObjects[isinpi].tarposy = KiwiGE.UniverseObjects[findlocation].y;
+    //calca the lerp time to that the item reactivates task = 2 when it should be at target location
     console.log(`Travelling: ${redeemer.display_name} to ${location} {${KiwiGE.UniverseObjects[findlocation].x}:${KiwiGE.UniverseObjects[findlocation].y}}`)
     let updateStr = `UPDATE twitchgame SET task = ${KiwiGE.PlayerObjects[isinpi].task}, tarposx = ${KiwiGE.PlayerObjects[isinpi].tarposx}, tarposy = ${KiwiGE.PlayerObjects[isinpi].tarposy} WHERE twitchid = ${tUser.id}`
     let updateplayer = await execQuery(updateStr);
@@ -147,6 +162,18 @@ function updateChatters(chatlist){
             }
         });
         resolve(KiwiGE.PlayerObjects)
+    })
+}
+///
+function updateLocationResources(locationObj){    
+    return new Promise((resolve, reject)=>{
+        locationObj.resources.forEach(async resourceType => {
+            resourceType.amount++;
+            // eventually turn this into some kinda of channel contriolled multiplier.
+            // but for now... +1            
+            resourceType.amount++;
+        })
+        resolve(true)
     })
 }
 ///
@@ -312,6 +339,14 @@ let startGameEngine = setTimeout(async () => {
         await IsDBPresent()
         Chatters = await KiwiGE.getChatters(Creds.auth.client_id, Creds.tokens.access_token, OwnerBot.owner.id)    
         KiwiGE.PlayerObjects = await updateChatters(Chatters)
+        /// Update Location Material Values
+        KiwiGE.UniverseObjects.forEach(async uniObj => {
+          await updateLocationResources(uniObj)
+        })
+        KiwiGE.PlayerObjects.forEach(async player => {
+            // console.log(player)
+        })
+        ///
         socket.emit('GameEngine', ['player:update', KiwiGE.PlayerObjects])
         socket.emit('GameEngine', ['universe:update', KiwiGE.UniverseObjects])
     }, 1000);

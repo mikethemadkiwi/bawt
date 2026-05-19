@@ -1,0 +1,458 @@
+body {
+    background:#111;
+    font-family: 'Roboto', sans-serif;
+}
+
+#blunt_container{
+    /* display: none; */
+	width:350px;height:50px;
+    margin: auto;
+    position: absolute;
+    top: 0; left: 0; bottom: 0; right: 0;
+    -webkit-transform: translateY(0);
+            transform: translateY(0);
+    -webkit-animation: feelingit 5s infinite;
+            animation: feelingit 5s infinite;
+}
+@-webkit-keyframes feelingit {
+	50% { -webkit-transform: translateY(-20px); transform: translateY(-20px); }
+	100% { -webkit-transform: translateY(0); transform: translateY(0); }
+}
+@keyframes feelingit {
+	50% { -webkit-transform: translateY(-20px); transform: translateY(-20px); }
+	100% { -webkit-transform: translateY(0); transform: translateY(0); }
+}
+
+
+@-webkit-keyframes smoke1 {
+  0% {
+    -webkit-transform: scale(0.2);
+            transform: scale(0.2);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  100% {
+    -webkit-transform: scale(3) translate(6px, -36px);
+            transform: scale(3) translate(6px, -36px);
+    opacity: 0;
+  }
+}
+
+@keyframes smoke1 {
+  0% {
+    -webkit-transform: scale(0.2);
+            transform: scale(0.2);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  100% {
+    -webkit-transform: scale(3) translate(6px, -36px);
+            transform: scale(3) translate(6px, -36px);
+    opacity: 0;
+  }
+}
+@-webkit-keyframes smoke2 {
+  0% {
+    -webkit-transform: scale(0.2);
+            transform: scale(0.2);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  100% {
+    -webkit-transform: scale(3) translate(-8px, -50px);
+            transform: scale(3) translate(-8px, -50px);
+    opacity: 0;
+  }
+}
+@keyframes smoke2 {
+  0% {
+    -webkit-transform: scale(0.2);
+            transform: scale(0.2);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  100% {
+    -webkit-transform: scale(3) translate(-8px, -50px);
+            transform: scale(3) translate(-8px, -50px);
+    opacity: 0;
+  }
+}
+@-webkit-keyframes smoke3 {
+  0% {
+    -webkit-transform: scale(0.2);
+            transform: scale(0.2);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  100% {
+    -webkit-transform: scale(3) translate(-1px, -41px);
+            transform: scale(3) translate(-1px, -41px);
+    opacity: 0;
+  }
+}
+@keyframes smoke3 {
+  0% {
+    -webkit-transform: scale(0.2);
+            transform: scale(0.2);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  100% {
+    -webkit-transform: scale(3) translate(-1px, -41px);
+            transform: scale(3) translate(-1px, -41px);
+    opacity: 0;
+  }
+}
+@-webkit-keyframes smoke4 {
+  0% {
+    -webkit-transform: scale(0.2);
+            transform: scale(0.2);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  100% {
+    -webkit-transform: scale(3) translate(0px, -41px);
+            transform: scale(3) translate(0px, -41px);
+    opacity: 0;
+  }
+}
+@keyframes smoke4 {
+  0% {
+    -webkit-transform: scale(0.2);
+            transform: scale(0.2);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  100% {
+    -webkit-transform: scale(3) translate(0px, -41px);
+            transform: scale(3) translate(0px, -41px);
+    opacity: 0;
+  }
+}
+@-webkit-keyframes smoke5 {
+  0% {
+    -webkit-transform: scale(0.2);
+            transform: scale(0.2);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  100% {
+    -webkit-transform: scale(3) translate(-4px, -42px);
+            transform: scale(3) translate(-4px, -42px);
+    opacity: 0;
+  }
+}
+@keyframes smoke5 {
+  0% {
+    -webkit-transform: scale(0.2);
+            transform: scale(0.2);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  100% {
+    -webkit-transform: scale(3) translate(-4px, -42px);
+            transform: scale(3) translate(-4px, -42px);
+    opacity: 0;
+  }
+}
+.smoke-group {
+  width: 100px;
+  height: 300px;
+	margin-top:-290px;
+	margin-left:290px;
+  position: absolute;
+}
+.explainer {
+    position: relative;
+    display: inline-block
+}
+h1 {
+  margin-bottom: 1.375em;
+  color: #bada55;
+  font-weight: 70;
+  font-size: 2em;
+  text-transform: uppercase;
+  text-align: center;
+  text-shadow:
+    -2px -2px 0 #000,
+    2px -2px 0 #000,
+    -2px 2px 0 #000,
+    2px 2px 0 #000,
+    -3px 0px 0 #000,
+    3px 0px 0 #000,
+    0px -3px 0 #000,
+    0px 3px 0 #000;
+}
+
+.smoke {
+  position: absolute;
+  bottom: 0;
+  left: calc(50% - 15px / 2);
+  width: 15px;
+  height: 15px;
+  background-color: grey;
+  border-radius: 7.5px;
+  -webkit-filter: blur(6px);
+          filter: blur(6px);
+  opacity: 0;
+}
+.smoke:nth-child(1) {
+  -webkit-animation-name: smoke3;
+          animation-name: smoke3;
+  -webkit-animation-duration: 2s;
+          animation-duration: 2s;
+  -webkit-animation-timing-function: ease-out;
+          animation-timing-function: ease-out;
+  -webkit-animation-delay: 0.4s;
+          animation-delay: 0.4s;
+  -webkit-animation-iteration-count: infinite;
+          animation-iteration-count: infinite;
+}
+.smoke:nth-child(2) {
+  -webkit-animation-name: smoke2;
+          animation-name: smoke2;
+  -webkit-animation-duration: 3s;
+          animation-duration: 3s;
+  -webkit-animation-timing-function: ease-out;
+          animation-timing-function: ease-out;
+  -webkit-animation-delay: 0.8s;
+          animation-delay: 0.8s;
+  -webkit-animation-iteration-count: infinite;
+          animation-iteration-count: infinite;
+}
+.smoke:nth-child(3) {
+  -webkit-animation-name: smoke4;
+          animation-name: smoke4;
+  -webkit-animation-duration: 5s;
+          animation-duration: 5s;
+  -webkit-animation-timing-function: ease-out;
+          animation-timing-function: ease-out;
+  -webkit-animation-delay: 1.2s;
+          animation-delay: 1.2s;
+  -webkit-animation-iteration-count: infinite;
+          animation-iteration-count: infinite;
+}
+.smoke:nth-child(4) {
+  -webkit-animation-name: smoke2;
+          animation-name: smoke2;
+  -webkit-animation-duration: 5s;
+          animation-duration: 5s;
+  -webkit-animation-timing-function: ease-out;
+          animation-timing-function: ease-out;
+  -webkit-animation-delay: 1.6s;
+          animation-delay: 1.6s;
+  -webkit-animation-iteration-count: infinite;
+          animation-iteration-count: infinite;
+}
+.smoke:nth-child(5) {
+  -webkit-animation-name: smoke3;
+          animation-name: smoke3;
+  -webkit-animation-duration: 2s;
+          animation-duration: 2s;
+  -webkit-animation-timing-function: ease-out;
+          animation-timing-function: ease-out;
+  -webkit-animation-delay: 2s;
+          animation-delay: 2s;
+  -webkit-animation-iteration-count: infinite;
+          animation-iteration-count: infinite;
+}
+.smoke:nth-child(6) {
+  -webkit-animation-name: smoke3;
+          animation-name: smoke3;
+  -webkit-animation-duration: 4s;
+          animation-duration: 4s;
+  -webkit-animation-timing-function: ease-out;
+          animation-timing-function: ease-out;
+  -webkit-animation-delay: 2.4s;
+          animation-delay: 2.4s;
+  -webkit-animation-iteration-count: infinite;
+          animation-iteration-count: infinite;
+}
+.smoke:nth-child(7) {
+  -webkit-animation-name: smoke1;
+          animation-name: smoke1;
+  -webkit-animation-duration: 2s;
+          animation-duration: 2s;
+  -webkit-animation-timing-function: ease-out;
+          animation-timing-function: ease-out;
+  -webkit-animation-delay: 2.8s;
+          animation-delay: 2.8s;
+  -webkit-animation-iteration-count: infinite;
+          animation-iteration-count: infinite;
+}
+.smoke:nth-child(8) {
+  -webkit-animation-name: smoke1;
+          animation-name: smoke1;
+  -webkit-animation-duration: 5s;
+          animation-duration: 5s;
+  -webkit-animation-timing-function: ease-out;
+          animation-timing-function: ease-out;
+  -webkit-animation-delay: 3.2s;
+          animation-delay: 3.2s;
+  -webkit-animation-iteration-count: infinite;
+          animation-iteration-count: infinite;
+}
+.smoke:nth-child(9) {
+  -webkit-animation-name: smoke5;
+          animation-name: smoke5;
+  -webkit-animation-duration: 5s;
+          animation-duration: 5s;
+  -webkit-animation-timing-function: ease-out;
+          animation-timing-function: ease-out;
+  -webkit-animation-delay: 3.6s;
+          animation-delay: 3.6s;
+  -webkit-animation-iteration-count: infinite;
+          animation-iteration-count: infinite;
+}
+.smoke:nth-child(10) {
+  -webkit-animation-name: smoke4;
+          animation-name: smoke4;
+  -webkit-animation-duration: 2s;
+          animation-duration: 2s;
+  -webkit-animation-timing-function: ease-out;
+          animation-timing-function: ease-out;
+  -webkit-animation-delay: 4s;
+          animation-delay: 4s;
+  -webkit-animation-iteration-count: infinite;
+          animation-iteration-count: infinite;
+}
+.smoke:nth-child(11) {
+  -webkit-animation-name: smoke5;
+          animation-name: smoke5;
+  -webkit-animation-duration: 3s;
+          animation-duration: 3s;
+  -webkit-animation-timing-function: ease-out;
+          animation-timing-function: ease-out;
+  -webkit-animation-delay: 4.4s;
+          animation-delay: 4.4s;
+  -webkit-animation-iteration-count: infinite;
+          animation-iteration-count: infinite;
+}
+.smoke:nth-child(12) {
+  -webkit-animation-name: smoke4;
+          animation-name: smoke4;
+  -webkit-animation-duration: 2s;
+          animation-duration: 2s;
+  -webkit-animation-timing-function: ease-out;
+          animation-timing-function: ease-out;
+  -webkit-animation-delay: 4.8s;
+          animation-delay: 4.8s;
+  -webkit-animation-iteration-count: infinite;
+          animation-iteration-count: infinite;
+}
+.smoke:nth-child(13) {
+  -webkit-animation-name: smoke5;
+          animation-name: smoke5;
+  -webkit-animation-duration: 4s;
+          animation-duration: 4s;
+  -webkit-animation-timing-function: ease-out;
+          animation-timing-function: ease-out;
+  -webkit-animation-delay: 5.2s;
+          animation-delay: 5.2s;
+  -webkit-animation-iteration-count: infinite;
+          animation-iteration-count: infinite;
+}
+.smoke:nth-child(14) {
+  -webkit-animation-name: smoke2;
+          animation-name: smoke2;
+  -webkit-animation-duration: 4s;
+          animation-duration: 4s;
+  -webkit-animation-timing-function: ease-out;
+          animation-timing-function: ease-out;
+  -webkit-animation-delay: 5.6s;
+          animation-delay: 5.6s;
+  -webkit-animation-iteration-count: infinite;
+          animation-iteration-count: infinite;
+}
+.smoke:nth-child(15) {
+  -webkit-animation-name: smoke5;
+          animation-name: smoke5;
+  -webkit-animation-duration: 4s;
+          animation-duration: 4s;
+  -webkit-animation-timing-function: ease-out;
+          animation-timing-function: ease-out;
+  -webkit-animation-delay: 6s;
+          animation-delay: 6s;
+  -webkit-animation-iteration-count: infinite;
+          animation-iteration-count: infinite;
+}
+.smoke:nth-child(16) {
+  -webkit-animation-name: smoke3;
+          animation-name: smoke3;
+  -webkit-animation-duration: 3s;
+          animation-duration: 3s;
+  -webkit-animation-timing-function: ease-out;
+          animation-timing-function: ease-out;
+  -webkit-animation-delay: 6.4s;
+          animation-delay: 6.4s;
+  -webkit-animation-iteration-count: infinite;
+          animation-iteration-count: infinite;
+}
+.smoke:nth-child(17) {
+  -webkit-animation-name: smoke5;
+          animation-name: smoke5;
+  -webkit-animation-duration: 4s;
+          animation-duration: 4s;
+  -webkit-animation-timing-function: ease-out;
+          animation-timing-function: ease-out;
+  -webkit-animation-delay: 6.8s;
+          animation-delay: 6.8s;
+  -webkit-animation-iteration-count: infinite;
+          animation-iteration-count: infinite;
+}
+.smoke:nth-child(18) {
+  -webkit-animation-name: smoke1;
+          animation-name: smoke1;
+  -webkit-animation-duration: 4s;
+          animation-duration: 4s;
+  -webkit-animation-timing-function: ease-out;
+          animation-timing-function: ease-out;
+  -webkit-animation-delay: 7.2s;
+          animation-delay: 7.2s;
+  -webkit-animation-iteration-count: infinite;
+          animation-iteration-count: infinite;
+}
+.smoke:nth-child(19) {
+  -webkit-animation-name: smoke1;
+          animation-name: smoke1;
+  -webkit-animation-duration: 2s;
+          animation-duration: 2s;
+  -webkit-animation-timing-function: ease-out;
+          animation-timing-function: ease-out;
+  -webkit-animation-delay: 7.6s;
+          animation-delay: 7.6s;
+  -webkit-animation-iteration-count: infinite;
+          animation-iteration-count: infinite;
+}
+.smoke:nth-child(20) {
+  -webkit-animation-name: smoke4;
+          animation-name: smoke4;
+  -webkit-animation-duration: 3s;
+          animation-duration: 3s;
+  -webkit-animation-timing-function: ease-out;
+          animation-timing-function: ease-out;
+  -webkit-animation-delay: 8s;
+          animation-delay: 8s;
+  -webkit-animation-iteration-count: infinite;
+          animation-iteration-count: infinite;
+}
