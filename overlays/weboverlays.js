@@ -13,14 +13,6 @@ const { EventEmitter } = require("events");
 const colors = require('colors');
 const mysql = require('mysql');
 //
-const products = {
-    world: { id: 1, name: "Home"},
-    players: {
-        1: { name: "bob", color: "blue"},
-        2: { name: "sue", color: "red"}
-    }
-};
-//
 class weboverlays extends EventEmitter {
     constructor(options){
         super();
@@ -102,10 +94,6 @@ class weboverlays extends EventEmitter {
             res.render('ads');
         }).post((req, res) => {
             res.redirect('/ads/');
-        });
-        //
-        this.app.get('/api/', (req, res) => {
-            res.json(products);
         });
 
         this.LoadAuthServer = (port)=>{
