@@ -4,13 +4,13 @@ const gEngine = require('./gameengine.js');
 const colors = require('colors');
 const mysql = require('mysql');
 const io = require("socket.io-client")
-
+const fs = require("fs");
+//
 const bodyparser = require("body-parser");
 const express    = require("express");
 const logger     = require("./middleware/logger");
-const weight     = require("./routes/weight");
+const godotgame  = require("./routes/godotgame");
 const index      = require("./routes/index");
-
 //
 let KiwiGE = new gEngine;
 let DBConn_Server = null;
@@ -198,8 +198,9 @@ let startGameEngine = setTimeout(async () => {
     OwnerChannel = await KiwiGE.fetchStreamById(Creds.auth.client_id, Creds.tokens.access_token, OwnerBot.owner.id)
     OwnerAds = await KiwiGE.fetchAdsSchedule(Creds.auth.client_id, Creds.tokens.access_token, OwnerBot.owner.id)
     // 
-    Chatters = await KiwiGE.getChatters(Creds.auth.client_id, Creds.tokens.access_token, OwnerBot.owner.id)       
-    KiwiGE.PlayerObjects = await updateChatters(Chatters)
+    Chatters = await KiwiGE.getChatters(Creds.auth.client_id, Creds.tokens.access_token, OwnerBot.owner.id)  
+    KiwiGE.PlayerObjects = await updateChatters(Chatters)    
+    fs.writeFile("./models/godotgame.json", JSON.stringify(KiwiGE.PlayerObjects, null, 4), function(){});    
     socket.emit('GameEngine', ['player:update', KiwiGE.PlayerObjects])
     //
     KiwiGE.UniverseObjects = await KiwiGE.GenerateUniverse(universeObj);
@@ -346,6 +347,7 @@ let startGameEngine = setTimeout(async () => {
         await IsDBPresent()
         Chatters = await KiwiGE.getChatters(Creds.auth.client_id, Creds.tokens.access_token, OwnerBot.owner.id)    
         KiwiGE.PlayerObjects = await updateChatters(Chatters)
+        fs.writeFile("./models/godotgame.json", JSON.stringify(KiwiGE.PlayerObjects, null, 4), function(){});    
         /// Update Location Material Values
         KiwiGE.UniverseObjects.forEach(async uniObj => {
           await updateLocationResources(uniObj)
@@ -374,8 +376,8 @@ app.use(bodyparser.urlencoded( {extended: true} ));
 app.use(logger.log);
 // index routes
 app.use("/", index);
-// weight routes
-app.use("/api/weight", weight);
+// godotgame routes
+app.use("/api/godotgame", godotgame);
 // start application
 const port = 3000;
 app.listen(port, function() {

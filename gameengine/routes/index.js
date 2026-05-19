@@ -21,10 +21,10 @@ router.get("/", function(request, response) {
         else {
 
             // convert to json
-            let weights = JSON.parse(data);
+            let godotgame = JSON.parse(data);
 
             // send response
-            response.render("index", {weights: weights});
+            response.render("index", {godotgame: godotgame});
         }
     });
 });
